@@ -1,0 +1,22 @@
+{
+  "name": "rx-js-light-debug-vite",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "sideEffects": false,
+  "devDependencies": {
+    "sass": "^1.49.9",
+    "typescript": "^4.6.2",
+    "vite": "^2.8.6"
+  },
+  "dependencies": {
+    "@lifaon/rx-dom": "2.1.0",
+    "@lifaon/rx-dom-aot-plugin": "2.1.0",
+    "@lifaon/rx-js-light": "2.3.0",
+    "tslib": "^2.3.1"
+  }
+}
