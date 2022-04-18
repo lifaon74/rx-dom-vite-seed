@@ -1,4 +1,4 @@
-import { bootstrap } from '../../rx-dom/dist';
+import { bootstrap } from '@lirx/dom';
 import { AppHelloWorldComponent } from './hello-world.component';
 
 function main(): void {

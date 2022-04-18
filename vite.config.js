@@ -1,5 +1,4 @@
-import { aotPlugin } from '@lifaon/rx-dom-aot-plugin';
-// import { defineConfig } from 'vite'
+import { aotPlugin } from '@lirx/dom-aot-plugin';
 
 /**
  * @type {import('vite').UserConfig}
@@ -40,8 +39,8 @@ const config = {
   },
   optimizeDeps: {
     include: [
-      '@lifaon/rx-js-light',
-      '@lifaon/rx-dom',
+      '@lirx/core',
+      '@lirx/dom',
     ],
   },
 };
