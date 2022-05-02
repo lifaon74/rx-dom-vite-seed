@@ -3,9 +3,14 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "predev": "npm run clear:cache",
+    "prebuild": "npm run clear:cache",
     "dev": "vite",
     "build": "vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "clear:cache": "npm run clear:cache:vite && npm run clear:cache:lirx-dom",
+    "clear:cache:vite": "node ./tools/clear-cache.js --vite",
+    "clear:cache:lirx-dom": "node ./tools/clear-cache.js --lirx-dom"
   },
   "sideEffects": false,
   "devDependencies": {
