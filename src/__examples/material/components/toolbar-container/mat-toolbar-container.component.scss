@@ -1,0 +1,29 @@
+@import 'mat-toolbar-container.variables';
+
+/** STYLE **/
+
+:host {
+  display: block;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background-color: $mat-toolbar-container-content-background-color;
+
+  & > * {
+    position: absolute;
+    inset: 0;
+  }
+
+  & > .toolbar {
+    height: $mat-toolbar-container-toolbar-height;
+
+    & > * {
+      height: 100%;
+    }
+  }
+
+  & > .content {
+    top: $mat-toolbar-container-toolbar-height;
+    overflow: auto;
+  }
+}

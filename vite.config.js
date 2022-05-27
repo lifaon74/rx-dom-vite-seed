@@ -1,4 +1,3 @@
-import { aotPlugin } from '@lirx/dom-aot-plugin';
 
 /**
  * @type {import('vite').UserConfig}
@@ -31,7 +30,6 @@ const config = {
     },
   },
   plugins: [
-    aotPlugin(),
   ],
   server: {
     // https: true,
@@ -40,7 +38,6 @@ const config = {
   optimizeDeps: {
     include: [
       '@lirx/core',
-      '@lirx/dom',
     ],
   },
 };

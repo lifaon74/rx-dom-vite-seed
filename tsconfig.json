@@ -29,6 +29,7 @@
     "exactOptionalPropertyTypes": false,
     "noImplicitOverride": true,
     "moduleResolution": "node",
+    "useDefineForClassFields": false,
     "stripInternal": false,
     "target": "esnext",
     "outDir": "./dist",
@@ -42,7 +43,7 @@
     "baseUrl": ".",
     "module": "esnext",
     "importHelpers": true,
-    "allowSyntheticDefaultImports": true,
+    "allowSyntheticDefaultImports": true
   },
   "formatCodeOptions": {
     "indentSize": 2,

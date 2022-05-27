@@ -1,0 +1,323 @@
+import { IMulticastReplayLastSource, let$$ } from '@lirx/core';
+
+export type IVirtualNodeOrNull = VirtualNode | null;
+
+export abstract class VirtualNode {
+
+  protected _$parentNode$: IMulticastReplayLastSource<IVirtualNodeOrNull>;
+  protected _previousNode: IVirtualNodeOrNull;
+  protected _nextNode: IVirtualNodeOrNull;
+  protected _firstChild: IVirtualNodeOrNull;
+  protected _lastChild: IVirtualNodeOrNull;
+
+  protected constructor() {
+    this._$parentNode$ = let$$<IVirtualNodeOrNull>(null);
+    this._previousNode = null;
+    this._nextNode = null;
+    this._firstChild = null;
+    this._lastChild = null;
+  }
+
+  get parentNode(): IVirtualNodeOrNull {
+    return this._$parentNode$.getValue();
+  }
+
+  get previousNode(): IVirtualNodeOrNull {
+    return this._nextNode;
+  }
+
+  get nextNode(): IVirtualNodeOrNull {
+    return this._nextNode;
+  }
+
+  get firstChild(): IVirtualNodeOrNull {
+    return this._firstChild;
+  }
+
+  get lastChild(): IVirtualNodeOrNull {
+    return this._lastChild;
+  }
+
+  contains(
+    childNode: VirtualNode,
+  ): boolean {
+    let node: IVirtualNodeOrNull = childNode;
+
+    do {
+      if (node === this) {
+        return true;
+      } else {
+        node = node.parentNode;
+      }
+    } while (node !== null);
+
+    return false;
+  }
+
+  attach(
+    parentNode: VirtualNode,
+    referenceNode: IVirtualNodeOrNull = null,
+  ): void {
+
+    if (this.contains(parentNode)) {
+      throw new Error(`current node already contains parentNode`);
+    }
+
+    if (referenceNode === null) {
+      if (
+        (this.parentNode === parentNode)
+        && (this.parentNode._lastChild === this) // current node is already the last child of parentNode, so we have nothing to do
+      ) {
+        return;
+      }
+    } else {
+      if (this._nextNode === referenceNode) { // current node is already before referenceNode, so we have nothing to do
+        return;
+      }
+
+      if (referenceNode.parentNode !== parentNode) {
+        throw new Error(`referenceNode must have parentNode as parent`);
+      }
+    }
+
+
+    // detach current node
+    if (this.parentNode !== null) {
+      if (this._previousNode === null) { // current node is first child
+        this.parentNode._firstChild = this._nextNode;
+      } else {
+        this._previousNode._nextNode = this._nextNode;
+      }
+
+      if (this._nextNode === null) { // current node is last child
+        this.parentNode._lastChild = this._previousNode;
+      } else {
+        this._nextNode._previousNode = this._previousNode;
+      }
+    }
+
+    this._nextNode = referenceNode;
+
+    if (referenceNode === null) {
+      this._previousNode = parentNode._lastChild;
+
+      if (parentNode._lastChild === null) { // empty list
+        parentNode._firstChild = this;
+        parentNode._lastChild = this;
+      } else {
+        parentNode._lastChild._nextNode = this;
+        parentNode._lastChild = this;
+      }
+    } else {
+      this._previousNode = referenceNode._previousNode;
+
+      if (referenceNode._previousNode === null) { // referenceNode is first child
+        parentNode._firstChild = this;
+      } else {
+        referenceNode._previousNode._nextNode = this;
+      }
+
+      referenceNode._previousNode = this;
+    }
+  }
+
+  // attach(
+  //   parentNode: VirtualNode,
+  //   referenceNode: IVirtualNodeOrNull = null,
+  // ): void {
+  //   if (this.contains(parentNode)) {
+  //     throw new Error(`current node already contains parentNode`);
+  //   } else {
+  //     if (referenceNode === null) {
+  //
+  //     } else { // has a reference node
+  //       if (referenceNode.parentNode === parentNode) { // referenceNode's parent is valid
+  //
+  //         if (this._nextNode === referenceNode) { // current node is before referenceNode, so we have nothing to do
+  //         } else {
+  //           if (this.parentNode === referenceNode.parentNode) { // re-allocation on the same parent node
+  //             if (this.parentNode !== null) {
+  //               if (this._previousNode === null) { // current node is first child
+  //                 this.parentNode._firstChild = this._nextNode;
+  //               } else {
+  //                 this._previousNode._nextNode = this._nextNode;
+  //               }
+  //
+  //               if (this._nextNode === null) { // current node is last child
+  //                 this.parentNode._lastChild = this._previousNode;
+  //               } else {
+  //                 this._nextNode._previousNode = this._previousNode;
+  //               }
+  //             }
+  //
+  //             if (referenceNode._previousNode === null) { // referenceNode is the first child
+  //               this.parentNode._firstChild = this;
+  //             } else {
+  //               referenceNode._previousNode._nextNode = this;
+  //             }
+  //
+  //             this._nextNode = referenceNode;
+  //             referenceNode._previousNode = this;
+  //
+  //
+  //             //   if (this._previousNode === null) { // current node is the first child
+  //             //     this.parentNode._firstChild = this._nextNode;
+  //             //   } else {
+  //             //     this._previousNode._nextNode = this._nextNode;
+  //             //
+  //             //     if (this._nextNode === null) { // current node is the last child
+  //             //       this.parentNode._lastChild = this._previousNode;
+  //             //     } else {
+  //             //       this._nextNode._previousNode = this._previousNode;
+  //             //     }
+  //             //
+  //             //     if (referenceNode._previousNode === null) { // referenceNode is the first child
+  //             //       this.parentNode._firstChild = this;
+  //             //     } else {
+  //             //       referenceNode._previousNode._nextNode = this;
+  //             //     }
+  //             //
+  //             //     this._nextNode = referenceNode;
+  //             //     referenceNode._previousNode = this;
+  //             //   }
+  //             // } else { // moving on a different parent node
+  //             //
+  //             //   if (this.parentNode !== null) {
+  //             //     if (this._previousNode === null) { // current node is first child
+  //             //       this.parentNode._firstChild = this._nextNode;
+  //             //     } else {
+  //             //       this._previousNode._nextNode = this._nextNode;
+  //             //     }
+  //             //
+  //             //     if (this._nextNode === null) { // current node is last child
+  //             //       this.parentNode._lastChild = this._previousNode;
+  //             //     } else {
+  //             //       this._nextNode._previousNode = this._previousNode;
+  //             //     }
+  //             //   }
+  //             //
+  //             // }
+  //           } else {
+  //           }
+  //         }
+  //       } else {
+  //         throw new Error(`referenceNode must have parentNode as parent`);
+  //       }
+  //     }
+  //   }
+  // }
+
+  detach(): void {
+    if (this.parentNode !== null) {
+      if (this._previousNode === null) { // current node is first child
+        this.parentNode._firstChild = this._nextNode;
+      } else {
+        this._previousNode._nextNode = this._nextNode;
+      }
+
+      if (this._nextNode === null) { // current node is last child
+        this.parentNode._lastChild = this._previousNode;
+      } else {
+        this._nextNode._previousNode = this._previousNode;
+      }
+
+      this._previousNode = null;
+      this._nextNode = null;
+      this._$parentNode$.emit(null);
+    }
+  }
+
+  * getChildren(): Generator<VirtualNode> {
+    let node: IVirtualNodeOrNull = this._firstChild;
+    while (node !== null) {
+      yield node;
+      node = node._nextNode;
+    }
+  }
+}
+
+
+
+
+/*-------------*/
+
+export class VirtualTextNode extends VirtualNode {
+  public value: string;
+
+  constructor(
+    value: string = '',
+  ) {
+    super();
+    this.value = value;
+  }
+}
+
+/*-------------*/
+
+export abstract class VirtualDOMNode<GNode extends Node> extends VirtualNode {
+  public readonly node: GNode;
+
+  protected constructor(
+    node: GNode,
+  ) {
+    super();
+    this.node = node;
+  }
+
+
+  override attach(
+    parentNode: VirtualNode,
+    referenceNode?: IVirtualNodeOrNull,
+  ): void {
+    super.attach(
+      parentNode,
+      referenceNode,
+    );
+    if (this.node.parentNode !== null) {
+      parentNode.insert(this.node);
+    }
+  }
+
+  override detach(): void {
+    super.detach();
+    if (this.node.parentNode !== null) {
+      this.node.parentNode.removeChild(this.node);
+    }
+  }
+}
+
+/*-------------*/
+
+export class DOMTextNode extends VirtualDOMNode<Text> {
+
+  constructor(
+    value?: string,
+  ) {
+    super(new Text(value));
+  }
+
+  get value(): string {
+    return this.node.data;
+  }
+
+  set value(
+    input: string,
+  ) {
+    this.node.data = input;
+  }
+}
+
+
+export function checkVirtualNodeConsistency(
+  node: VirtualNode,
+): void {
+  if (node.parentNode === null) {
+    if (node.previousNode !== null) {
+      throw new Error(`(node.parentNode === null) && (node.previousNode !== null)`);
+    }
+    if (node.nextNode !== null) {
+      throw new Error(`(node.parentNode === null) && (node.nextNode !== null)`);
+    }
+  }
+}
+

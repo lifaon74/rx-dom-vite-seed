@@ -1,0 +1,138 @@
+import { createMulticastReplayLastSource, IObservable, ISource } from '@lirx/core';
+import { VirtualNode } from '../../../../virtual-node.class';
+import { IVirtualReactiveDOMNodeTemplate } from '../../../types/virtual-reactive-dom-node-template.type';
+import { IVirtualDOMNodeOrNull } from '../../../virtual-dom-node.class';
+import { VirtualContainerNode } from '../../static/container/virtual-container-node.class';
+import { trackByIdentity } from './track-by/track-by-identity';
+
+/** TYPES **/
+
+export type IVirtualReactiveForLoopNodeTemplateArgument<GItem> = {
+  item: GItem;
+  index: IObservable<number>;
+};
+
+export type IVirtualReactiveForLoopNodeTemplate<GItem> = IVirtualReactiveDOMNodeTemplate<IVirtualReactiveForLoopNodeTemplateArgument<GItem>>;
+
+export interface IVirtualReactiveForLoopNodeOptionsTrackByFunction<GItem> {
+  (item: GItem): any;
+}
+
+/** CLASS **/
+
+export class VirtualReactiveForLoopNode<GItem> extends VirtualContainerNode {
+  constructor(
+    items$: IObservable<Iterable<GItem>>,
+    template: IVirtualReactiveForLoopNodeTemplate<GItem>,
+    trackBy: IVirtualReactiveForLoopNodeOptionsTrackByFunction<GItem> = trackByIdentity,
+  ) {
+    super();
+
+    let previousMap = new Map<any, VirtualReactiveForLoopChildNode<GItem>>();
+
+    this.onConnected$(items$)((items: Iterable<GItem>): void => {
+      const newMap = new Map<any, VirtualReactiveForLoopChildNode<GItem>>();
+
+      // iterates on items: creates or updates nodes
+      {
+        const iterator: Iterator<GItem> = items[Symbol.iterator]();
+        let index: number = 0;
+        let result: IteratorResult<GItem>;
+        while (!(result = iterator.next()).done) {
+          const item: GItem = result.value;
+          const id: any = trackBy(item);
+          let node: VirtualReactiveForLoopChildNode<GItem> | undefined = previousMap.get(item);
+
+          if (node === void 0) {
+            node = new VirtualReactiveForLoopChildNode<GItem>(
+              id,
+              item,
+              index,
+              template,
+            );
+          } else {
+            node.$index$.emit(index);
+          }
+
+          newMap.set(id, node);
+
+          index++;
+        }
+      }
+
+      console.log(newMap.size);
+      debugger;
+      // remove unused nodes
+      {
+        // fix children because we will mutate the tree
+        const children: VirtualReactiveForLoopChildNode<GItem>[] = Array.from(this.getChildren() as Generator<VirtualReactiveForLoopChildNode<GItem>>);
+
+        for (let i = 0, l = children.length; i < l; i++) {
+          const node: VirtualReactiveForLoopChildNode<GItem> = children[i];
+          if (!newMap.has(node)) {
+            node.detach();
+            console.log('detach', (node as any).getSelfDOMNodes()[0].data);
+          }
+        }
+      }
+
+      // reorganize nodes
+      {
+        // const getNextNode = (
+        //   node:VirtualDOMNode | null,
+        // ): VirtualDOMNode | null => {
+        //   return (node === null)
+        //     ? null
+        //     : node.nextNode as VirtualDOMNode;
+        // };
+
+        let referenceNode: IVirtualDOMNodeOrNull = (this._firstChild === null)
+          ? null
+          : this._firstChild.nextNode as IVirtualDOMNodeOrNull;
+
+        const iterator: Iterator<VirtualReactiveForLoopChildNode<GItem>> = newMap.values();
+        let result: IteratorResult<VirtualReactiveForLoopChildNode<GItem>>;
+        while (!(result = iterator.next()).done) {
+          const node: VirtualReactiveForLoopChildNode<GItem> = result.value;
+          if (node === referenceNode) {
+            referenceNode = referenceNode.nextNode as IVirtualDOMNodeOrNull;
+          } else {
+            node.attach(this, referenceNode);
+            console.log('attach', (node as any).getSelfDOMNodes()[0].data);
+          }
+        }
+      }
+
+      previousMap = newMap;
+    });
+  }
+}
+
+/*------------------------------*/
+
+export class VirtualReactiveForLoopChildNode<GItem> extends VirtualContainerNode {
+  public readonly id: any;
+  public readonly item: GItem;
+  public readonly $index$: ISource<number>;
+
+  constructor(
+    id: any,
+    item: GItem,
+    index: number,
+    template: IVirtualReactiveForLoopNodeTemplate<GItem>,
+  ) {
+    super();
+
+    this.id = id;
+    this.item = item;
+    this.$index$ = createMulticastReplayLastSource<number>(index);
+
+    template(this, {
+      item,
+      index: this.$index$.subscribe,
+    });
+  }
+}
+
+
+

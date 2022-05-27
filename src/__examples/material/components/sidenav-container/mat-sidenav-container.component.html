@@ -1,0 +1,28 @@
+<div class="content">
+  <rx-inject-slot
+    name="content"
+  ></rx-inject-slot>
+</div>
+
+<div
+  class="backdrop"
+  (click)="$.onClickBackdrop"
+></div>
+
+<div class="sidenav">
+<!--  <div-->
+<!--    class="drag"-->
+<!--    (click)="$.onClickDrag"-->
+<!--  ></div>-->
+  <div
+    class="content"
+    tabindex="0"
+    (keydown)="$.onKeyDownSidenav"
+  >
+    <rx-inject-slot
+      name="sidenav"
+    ></rx-inject-slot>
+  </div>
+</div>
+
+

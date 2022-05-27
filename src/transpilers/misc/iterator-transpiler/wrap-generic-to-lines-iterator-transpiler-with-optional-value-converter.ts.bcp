@@ -1,0 +1,51 @@
+import { ILinesOrNull } from '../lines/lines-or-null.type';
+import { IToLinesTranspiler } from '../types/to-lines.transpiler.type';
+
+export interface IOptionalValueConverter<GIn, GOut> {
+  (value: GIn): GOut | null;
+}
+
+export function wrapGenericToLinesIteratorTranspilerWithOptionalValueConverter<GIn, GOut, GArgument extends any[]>(
+  transpiler: IToLinesTranspiler<[GOut, ...GArgument]>,
+  converter: IOptionalValueConverter<GIn, GOut>,
+): IToLinesTranspiler<[GIn, ...GArgument]> {
+  return (
+    value: GIn,
+    ...args: GArgument
+  ): ILinesOrNull => {
+    const _value: GOut | null = converter(value);
+    return (_value === null)
+      ? null
+      : transpiler(_value, ...args);
+  };
+}
+
+
+
+export function wrapGenericToLinesIteratorTranspilerWithOptionalValueConverterWithMapping<// generics
+  GIn extends object,
+  GInKey extends keyof GIn,
+  GOutKey extends string,
+  GOutValue,
+  GArgument extends any[]
+  //
+  >(
+  transpiler: IToLinesTranspiler<[Omit<GIn, GInKey> & Record<GOutKey, GOutValue>, ...GArgument]>,
+  converter: IOptionalValueConverter<GIn[GInKey], GOutValue>,
+  inKey: GInKey,
+  outKey: GOutKey,
+): IToLinesTranspiler<[GIn, ...GArgument]> {
+  return (
+    value: GIn,
+    ...args: GArgument
+  ): ILinesOrNull => {
+    const _value: GOutValue | null = converter(value[inKey]);
+    return (_value === null)
+      ? null
+      : transpiler({
+        ...value,
+        [outKey]: _value,
+      } as Omit<GIn, GInKey> & Record<GOutKey, GOutValue>, ...args);
+  };
+}
+

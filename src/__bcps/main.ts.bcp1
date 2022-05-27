@@ -1,0 +1,129 @@
+export interface IHTMLElementConstructor<GElement extends HTMLElement> extends HTMLElement {
+  new(): GElement;
+}
+
+export type IGenericHTMLElementConstructor = IHTMLElementConstructor<HTMLElement>;
+
+/* ----- */
+
+export type IComponentSlots = Map<string, any>;
+
+export interface IComponentCreateFunction<GElement extends HTMLElement> {
+  (
+    slots: IComponentSlots,
+  ): GElement;
+}
+
+export interface IComponent<GElement extends HTMLElement> {
+  readonly name: string;
+  readonly create: IComponentCreateFunction<GElement>;
+}
+
+export type IGenericComponent = IComponent<HTMLElement>;
+
+/* ----- */
+
+/* ----- */
+
+export interface ICreateComponentOptionsCreateFunction<GData> {
+  (
+    slots: IComponentSlots,
+  ): GData;
+}
+
+export interface ICreateComponentOptions<GData> {
+  html: string;
+  childComponents: readonly IGenericComponent[];
+  styles: string[];
+  name: string;
+  extend?: IGenericHTMLElementConstructor;
+  create: ICreateComponentOptionsCreateFunction<GData>,
+}
+
+export function createComponent<GData, GElement extends HTMLElement>(
+  {}: ICreateComponentOptions<GData>,
+): IComponent {
+  const create = () => {
+
+  };
+}
+
+/* ----- */
+
+type IComponentProperty<GKey extends string, GValue> = [
+  key: GKey,
+  value: GValue,
+];
+
+type IGenericComponentProperty = IComponentProperty<string, any>;
+// type InferComponentPropertyGKey<GComponentProperty extends IGenericComponentProperty> =
+//   GComponentProperty extends [infer GKey, any]
+//   ? GKey
+//   : any
+//   ;
+
+type IGenericComponentPropertyTuple = readonly IGenericComponentProperty[];
+
+type InferGKeysFromGComponentPropertyTuple<GComponentPropertyTuple extends IGenericComponentPropertyTuple> = {
+  [GComponentPropertyTupleKey in keyof GComponentPropertyTuple]: GComponentPropertyTuple[GComponentPropertyTupleKey] extends IComponentProperty<infer GKey, any>
+    ? GKey
+    : never;
+}[number];
+
+type InferGValueFromGKeyAndGComponentPropertyTuple<GKey extends string, GComponentPropertyTuple extends IGenericComponentPropertyTuple> = {
+  [GComponentPropertyTupleKey in keyof GComponentPropertyTuple]: GComponentPropertyTuple[GComponentPropertyTupleKey] extends IComponentProperty<GKey, infer GValue>
+    ? GValue
+    : never;
+}[number];
+
+
+type AB = [
+  IComponentProperty<'A', 1>,
+  IComponentProperty<'B', boolean>,
+];
+//
+// const a: abc<'A', AB> = null as any;
+// const a: InferGKeysFromGComponentPropertyTuple<AB> = null as any;
+
+function createComponentClass<//
+  GComponentPropertyTuple extends IGenericComponentPropertyTuple,
+  GBaseClass extends new(...args: any[]) => HTMLElement
+  //
+  >(
+  baseClass: GBaseClass,
+) {
+  return class extends baseClass {
+    constructor(...args: any[]) {
+      super(...args);
+    }
+
+    set<GKey extends InferGKeysFromGComponentPropertyTuple<GComponentPropertyTuple>>(
+      key: GKey,
+      value: InferGValueFromGKeyAndGComponentPropertyTuple<GKey, GComponentPropertyTuple>,
+    ): void {
+
+    }
+  };
+}
+
+const _class = createComponentClass<AB, typeof HTMLElement>(HTMLElement);
+
+const inst = new _class();
+inst.set('A', 1);
+
+/* ----- */
+
+const MY_COMPONENT: IComponent<HTMLElement> = {
+  name: 'app-test-a',
+  create: () => {
+    const element = document.createElement('app-test-a');
+
+    // generate template
+
+    return element;
+  },
+};
+
+
+
+

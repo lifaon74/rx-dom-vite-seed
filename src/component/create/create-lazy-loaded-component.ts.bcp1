@@ -1,0 +1,80 @@
+import { IDefaultNotificationsUnion, IObservable } from '../../../../lirx/core/dist';
+import { InferTypedSourcesMapEntriesTupleKeys } from '../../misc/typed-sources-map/types/infer-typed-sources-map-entries-tuple-keys.infer';
+import { ITypedSourcesMapEntriesTuple } from '../../misc/typed-sources-map/types/typed-sources-map-entries-tuple.type';
+import { VirtualReactiveAsyncNode } from '../../virtual-node/dom/nodes/reactive/async/virtual-reactive-async-node.class';
+import {
+  createComponent,
+  ICreateComponentComponent,
+  ICreateComponentOptions,
+  ICreateComponentOptionsInitFunctionOptions,
+} from './create-component';
+
+export interface ICreateLazyLoadedComponentOptions<// generics
+  GElement extends HTMLElement,
+  GTypedSourcesTuple extends ITypedSourcesMapEntriesTuple,
+  //
+  > extends Pick<ICreateComponentOptions<GElement, GTypedSourcesTuple, object>, 'name' | 'sources'> {
+  component$: IObservable<IDefaultNotificationsUnion<ICreateComponentComponent<GElement, GTypedSourcesTuple>>>;
+}
+
+export function createAsyncLoadedComponent<// generics
+  GElement extends HTMLElement,
+  GTypedSourcesTuple extends ITypedSourcesMapEntriesTuple,
+  //
+  >(
+  {
+    name,
+    sources,
+    component$,
+  }: ICreateLazyLoadedComponentOptions<GElement, GTypedSourcesTuple>,
+) {
+  return createComponent<GElement, GTypedSourcesTuple, object>({
+    name,
+    // template: (
+    //   parentNode: VirtualDOMNode,
+    // ): void => {
+    //   new VirtualReactiveAsyncNode(
+    //
+    //   ).attach(parentNode);
+    // },
+    sources,
+    init: (
+      {
+        node,
+        sources: _sources,
+        slots,
+      }: ICreateComponentOptionsInitFunctionOptions<GElement, GTypedSourcesTuple>,
+    ): object => {
+
+      const asyncNode = new VirtualReactiveAsyncNode<ICreateComponentComponent<GElement, GTypedSourcesTuple>>(
+        component$,
+        null,
+        (
+          parentNode,
+          {
+            value,
+          },
+        ): void => {
+          const { name: _name, create } = value;
+
+          if (_name === name) {
+            create(slots);
+
+            for (let i = 0, l = sources.length; i < l; i++) {
+              const source: InferTypedSourcesMapEntriesTupleKeys<GTypedSourcesTuple> = sources[i] as InferTypedSourcesMapEntriesTupleKeys<GTypedSourcesTuple>;
+              _sources.get(source);
+            }
+          } else {
+            throw new Error(`Names mismatches`);
+          }
+        },
+      );
+      asyncNode.attach(node);
+
+
+
+      return {};
+    },
+  });
+}
+

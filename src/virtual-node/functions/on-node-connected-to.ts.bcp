@@ -1,0 +1,187 @@
+// export function nodeHasDirectRootParentObservable(
+//   node: VirtualNode,
+// ): IObservable<boolean> {
+//   return mapObservable(node.parentNode$, (parentNode: IVirtualNodeOrNull): boolean => {
+//     return (parentNode instanceof VirtualRootNode);
+//   });
+// }
+
+
+/*------------*/
+
+
+// export const DEFAULT_IS_ROOT_NODE_FUNCTION = (
+//   node: VirtualNode,
+// ): boolean => {
+//   return node instanceof VirtualRootNode;
+// };
+//
+// export interface IIsRootNodeFunction {
+//   (
+//     node: VirtualNode,
+//   ): boolean;
+// }
+//
+// export function onNodeConnectedTo(
+//   node: VirtualNode,
+//   isRootNode: IIsRootNodeFunction = DEFAULT_IS_ROOT_NODE_FUNCTION,
+// ): IObservable<boolean> {
+//   return (emit: IObserver<boolean>): IUnsubscribe => {
+//     if (isRootNode(node)) {
+//       emit(true);
+//       return noop;
+//     } else {
+//       let running: boolean = true;
+//       let _unsubscribeFunctions: IUnsubscribe[] = [];
+//
+//       const _emit: IObserver<boolean> = distinctObserver(emit);
+//
+//       const update = (
+//         referenceNode: VirtualNode,
+//       ): void => {
+//         let _node: VirtualNode = referenceNode;
+//
+//         while (true) {
+//           const index: number = _unsubscribeFunctions.length;
+//
+//           _unsubscribeFunctions.push(
+//             _node.parentNode$((): void => {
+//               // removes all unsubscribeFunctions for previous the parents of this node
+//               while (_unsubscribeFunctions.length > index) {
+//                 (_unsubscribeFunctions.pop() as IUnsubscribe)();
+//               }
+//               update(referenceNode);
+//             }),
+//           );
+//
+//           const _parentNode: VirtualNode | null = _node.parentNode;
+//
+//           if (_parentNode === null) {
+//             _emit(false);
+//             break;
+//           } else if (isRootNode(_parentNode)) {
+//             _emit(true);
+//             break;
+//           } else {
+//             _node = _parentNode;
+//           }
+//         }
+//       };
+//
+//       update(node);
+//
+//       return (): void => {
+//         if (running) {
+//           running = false;
+//           for (let i = 0, l = _unsubscribeFunctions.length; i < l; i++) {
+//             _unsubscribeFunctions[i]();
+//           }
+//         }
+//       };
+//     }
+//   };
+// }
+
+// export function onNodeConnectedToWithImmediate(
+//   node: Node,
+//   parentNode: Node = getDocument(),
+//   options?: IOnNodeConnectedToOptions,
+// ): IObservable<boolean> {
+//   const listener: IObservable<boolean> = onNodeConnectedTo(node, parentNode, options);
+//   return (emit: IObserver<boolean>): IUnsubscribe => {
+//     emit(parentNode.contains(node));
+//     return listener(emit);
+//   };
+// }
+//
+// /*---*/
+//
+// const ON_NODE_CONNECTED_TO_CACHE = new WeakMap<Node, WeakMap<Node, Map<string, IObservable<boolean>>>>();
+//
+// export function onNodeConnectedToCached(
+//   node: Node,
+//   parentNode: Node = getDocument(),
+//   options: IOnNodeConnectedToOptions = {},
+// ): IObservable<boolean> {
+//   let map1 = ON_NODE_CONNECTED_TO_CACHE.get(node);
+//   if (map1 === void 0) {
+//     map1 = new WeakMap<Node, Map<string, IObservable<boolean>>>();
+//     ON_NODE_CONNECTED_TO_CACHE.set(node, map1);
+//   }
+//
+//   let map2 = map1.get(parentNode);
+//   if (map2 === void 0) {
+//     map2 = new Map<string, IObservable<boolean>>();
+//     map1.set(parentNode, map2);
+//   }
+//
+//   const _options: string = JSON.stringify(options);
+//   let subscribe = map2.get(_options);
+//   if (subscribe === void 0) {
+//     subscribe = pipeObservable(onNodeConnectedTo(node, parentNode), [
+//       shareObservablePipe<boolean>(),
+//     ]);
+//     map2.set(_options, subscribe);
+//   }
+//
+//   return subscribe;
+// }
+//
+// export function onNodeConnectedToWithImmediateCached(
+//   node: Node,
+//   parentNode: Node = getDocument(),
+//   {
+//     traverseShadowDOM = true,
+//     ...options
+//   }: IOnNodeConnectedToOptions = {},
+// ): IObservable<boolean> {
+//   const listener: IObservable<boolean> = onNodeConnectedToCached(node, parentNode, {
+//     traverseShadowDOM,
+//     ...options,
+//   });
+//   return (emit: IObserver<boolean>): IUnsubscribe => {
+//     emit(
+//       traverseShadowDOM
+//         ? nodeContainsTraversingShadowDOM(parentNode, node)
+//         : nodeContains(parentNode, node),
+//     );
+//     return listener(emit);
+//   };
+// }
+
+// // TODO cache options too
+// const ON_NODE_CONNECTED_TO_CACHE = new WeakMap<Node, WeakMap<Node, IObservable<boolean>>>();
+//
+// export function onNodeConnectedToCached(
+//   node: Node,
+//   parentNode: Node = getDocument(),
+// ): IObservable<boolean> {
+//   let map1 = ON_NODE_CONNECTED_TO_CACHE.get(node);
+//   if (map1 === void 0) {
+//     map1 = new WeakMap<Node, IObservable<boolean>>();
+//     ON_NODE_CONNECTED_TO_CACHE.set(node, map1);
+//   }
+//
+//
+//   let subscribe = map1.get(parentNode);
+//   if (subscribe === void 0) {
+//     subscribe = pipeObservable(onNodeConnectedTo(node, parentNode), [
+//       shareObservablePipe<boolean>(),
+//     ]);
+//     map1.set(parentNode, subscribe);
+//   }
+//
+//   return subscribe;
+// }
+//
+//
+// export function onNodeConnectedToWithImmediateCached(
+//   node: Node,
+//   parentNode: Node = getDocument(),
+// ): IObservable<boolean> {
+//   const listener: IObservable<boolean> = onNodeConnectedToCached(node, parentNode);
+//   return (emit: IObserver<boolean>): IUnsubscribe => {
+//     emit(parentNode.contains(node));
+//     return listener(emit);
+//   };
+// }

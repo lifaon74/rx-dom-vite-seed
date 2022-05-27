@@ -1,0 +1,47 @@
+import {
+  createSinglyLinkedNodeExtended
+} from './linked-list/singly/singly-linked-node/implementations/extended/create-singly-linked-node-extended';
+import {
+  IGenericSinglyLinkedNodeCoreTraitCollection
+} from './linked-list/singly/singly-linked-node/traits/core/singly-linked-node.core.trait-collection.generic.type';
+import {
+  IGenericSinglyLinkedNodeExtendedTraitCollection
+} from './linked-list/singly/singly-linked-node/traits/extended/singly-linked-node.extended.trait-collection.generic.type';
+
+
+/** VIRTUAL NODE **/
+
+/* GET_PARENT */
+
+/* VIRTUAL NODE */
+
+// export interface IVirtualNode extends //
+//   IVirtualNodeAttachTrait<IVirtualNode>,
+//   IVirtualNodeDetachTrait,
+//   IVirtualNodeGetParentTrait<IVirtualNode>
+// //
+// {
+// }
+
+
+// const a = new HTMLElement();
+// a.remove()
+
+
+
+
+function debugSinglyLinkedNode(): void {
+  const n1 = createSinglyLinkedNodeExtended();
+  const n2 = createSinglyLinkedNodeExtended();
+  n1.setNext(n2);
+  console.log(n1.getNext());
+}
+
+
+function main(): void {
+  debugSinglyLinkedNode();
+
+}
+
+window.onload = main;
+

@@ -1,0 +1,28 @@
+import { empty, IObservable, IObserver, IUnsubscribe, mergeMapSingleObservable } from '@lirx/core';
+import { VirtualNode } from '../virtual-node.class';
+import { nodeHasRootParentObservable } from './node-has-root-parent-observable';
+
+/**
+ * @deprecated
+ */
+export function nodeHasRootParentHigherOrderObservable<GValue>(
+  node: VirtualNode,
+  observable: IObservable<GValue>,
+): IObservable<GValue> {
+  return mergeMapSingleObservable(nodeHasRootParentObservable(node), (connected: boolean): IObservable<GValue> => {
+    return connected
+      ? observable
+      : empty<GValue>();
+  });
+}
+
+/**
+ * @deprecated
+ */
+export function subscribeOnNodeConnected<GValue>(
+  node: VirtualNode,
+  observable: IObservable<GValue>,
+  observer: IObserver<GValue>,
+): IUnsubscribe {
+  return nodeHasRootParentHigherOrderObservable<GValue>(node, observable)(observer);
+}

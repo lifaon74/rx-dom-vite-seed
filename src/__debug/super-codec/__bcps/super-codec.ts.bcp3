@@ -1,0 +1,164 @@
+/*
+Encoder:
+
+- takes a value
+- returns a PULL source of Result { done: boolean: value: u8 }
+
+const encoder = encode({ toto })
+byte[0] = encoder.next().value;
+byte[1] = encoder.next().value;
+...
+
+
+Decoder:
+
+- push SINK of u8
+- provides a Result: { done: boolean: value: GValue }
+
+const decoder = decode()
+decoder.next(byte[0]);
+const value = encoder.next(byte[0]).value;
+...
+
+ */
+
+/*----------------*/
+
+interface ISuperIteratorResult<GOut> {
+  done: boolean;
+  value: GOut;
+}
+
+const SUPER_ITERATOR_RESULT_DONE: ISuperIteratorResult<any> = {
+  done: true,
+  value: void 0,
+};
+
+interface ISuperIteratorNext<GIn, GOut> {
+  (value: GIn): ISuperIteratorResult<GOut>;
+}
+
+const NEXT_DONE: ISuperIteratorNext<any, any> = () => SUPER_ITERATOR_RESULT_DONE;
+
+interface ISuperIterator<GIn, GOut> {
+  next: ISuperIteratorNext<GIn, GOut>;
+}
+
+// function i_until_done<GOut>(
+//   iterator: ISuperIterator<GIn, GOut>,
+// ): ISuperIterator<any, GOut> {
+//
+// }
+
+function i_single<GOut>(
+  value: GOut,
+): ISuperIterator<any, GOut> {
+  let done: boolean = false;
+  const next = (): ISuperIteratorResult<GOut> => {
+    if (done) {
+      return SUPER_ITERATOR_RESULT_DONE;
+    } else {
+      done = true;
+      return {
+        done: false,
+        value,
+      };
+    }
+  };
+
+  return {
+    next,
+  };
+}
+
+// abstract class SuperIterator {
+//   next(...args: [] | [TNext]): IteratorResult<T, TReturn>;
+//   return?(value?: TReturn): IteratorResult<T, TReturn>;
+//   throw?(e?: any): IteratorResult<T, TReturn>;
+// }
+
+/*----------------*/
+
+function it<T, TReturn, TNext>(
+  iteratorFactory: (
+    getValue: () => TNext,
+  ) => Iterator<T>,
+): Iterator<T, TReturn, TNext> {
+
+  let _next: ISuperIteratorNext<GIn, GOut>;
+
+  return {
+    next: (
+      value: TNext,
+      // ...args: [] | [TNext]
+    ): IteratorResult<T, TReturn> => {
+      iteratorFactory();
+    },
+  };
+}
+
+/*----------------*/
+
+function i_while<GIn, GOut, GContext>(
+  context: GContext,
+  condition: (context: GContext) => boolean,
+  body: (context: GContext) => ISuperIterator<GIn, GOut>,
+): ISuperIterator<GIn, GOut> {
+  let _next: ISuperIteratorNext<GIn, GOut>;
+
+  const _next0: ISuperIteratorNext<GIn, GOut> = (value: GIn): ISuperIteratorResult<GOut> => {
+    if (condition(context)) {
+      const iterator = body(context);
+      _next = (value: GIn): ISuperIteratorResult<GOut> => {
+        const result = iterator.next(value);
+        if (result.done) {
+          _next = _next0;
+          return _next(value);
+        } else {
+          return result;
+        }
+      };
+    } else {
+      _next = NEXT_DONE;
+    }
+    return _next(value);
+  };
+
+  _next = _next0;
+
+  return {
+    next: (value: GIn): ISuperIteratorResult<GOut> => {
+      return _next(value);
+    },
+  };
+}
+
+
+/*----------------*/
+
+function debugWhile(): void {
+  /*
+   let i = 0;
+  while (i < 5) {
+    yield i;
+    i++;
+  }
+   */
+  const it = i_while(
+    { i: 0 },
+    ({ i }) => (i < 5),
+    ({ i }) => i_single(i),
+  );
+
+  for (let i = 0; i < 5; i++) {
+    console.log(it.next(void 0));
+  }
+}
+
+/*----------------*/
+
+export function debugSuperCodec(): void {
+  // const a: Iterable
+  debugWhile();
+}
+

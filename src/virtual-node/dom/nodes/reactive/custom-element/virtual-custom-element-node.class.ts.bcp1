@@ -1,0 +1,83 @@
+import { ISource, readObservableValue } from '../../../../../../../lirx/core/dist';
+import { HTML_NAMESPACE_URI_CONSTANT } from '../../../../../misc/namespace-uri/html-namespace-uri.constant';
+import { IVirtualDOMNodeTemplate } from '../../../types/virtual-dom-node-template.type';
+import { VirtualReactiveElementNode } from '../element/virtual-reactive-element-node.class';
+
+export type IVirtualCustomElementNodeSlotTemplate = IVirtualDOMNodeTemplate<[]>; // IGenericVirtualReactiveDOMNodeTemplate
+
+export type IVirtualCustomElementNodeSlotsMap = ReadonlyMap<string | '*', IVirtualCustomElementNodeSlotTemplate>
+
+export interface IVirtualCustomElementNodeOptions<GInputs extends object> {
+  name: string;
+  parentName?: string;
+  slots: IVirtualCustomElementNodeSlotsMap;
+  inputs: GInputs; // Record<string, ISource<any>>
+}
+
+export type IGetInputReturn<GInputs extends object, GKey extends keyof GInputs> =
+  GInputs[GKey] extends ISource<infer GValue>
+    ? GValue
+    : never;
+
+export class VirtualCustomElementNode<GElementNode extends HTMLElement, GInputs extends object> extends VirtualReactiveElementNode<GElementNode> {
+
+  protected readonly _name: string;
+  protected readonly _parentName: string | undefined;
+  protected readonly _slots: IVirtualCustomElementNodeSlotsMap;
+  protected readonly _inputs: GInputs;
+
+  constructor(
+    {
+      name,
+      parentName,
+      slots,
+      inputs,
+    }: IVirtualCustomElementNodeOptions<GInputs>,
+  ) {
+    super(
+      HTML_NAMESPACE_URI_CONSTANT,
+      (parentName === void 0)
+        ? name
+        : parentName,
+    );
+    this._name = name;
+    this._parentName = parentName;
+    this._slots = slots;
+    this._inputs = inputs;
+
+    if (parentName !== void 0) {
+      this.setAttribute('is', name);
+    }
+  }
+
+  get name(): string {
+    return this._name;
+  }
+
+  get parentName(): string | undefined {
+    return this._parentName;
+  }
+
+  get slots(): IVirtualCustomElementNodeSlotsMap {
+    return this._slots;
+  }
+
+  /* INPUT */
+
+  getInput<GKey extends keyof GInputs>(
+    key: GKey,
+  ): IGetInputReturn<GInputs, GKey> {
+    return readObservableValue<IGetInputReturn<GInputs, GKey>>(this._inputs[key] as any, (): never => {
+      throw new Error(`Unable to read input: ${key}`);
+    });
+  }
+
+  setInput<GKey extends keyof GElementNode>(
+    key: GKey,
+    value: GElementNode[GKey],
+  ): void {
+    this._elementNode[key] = value;
+  }
+}
+
+

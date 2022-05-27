@@ -1,0 +1,50 @@
+<mat-sidenav-container
+  $[opened]="$.sidenavOpened$"
+  $[mode]="$.sidenavMode$"
+  $[has-backdrop]="$.sidenavHasBackdrop$"
+  $(user-close)="$.onUserCloseSidenav"
+>
+  <div
+    *slot="sidenav"
+    class="main-component-mat-sidenav-container-sidenav-slot"
+  >
+    <div class="header">
+      header
+    </div>
+
+    <div class="body">
+
+    </div>
+
+    <div class="footer">
+
+    </div>
+  </div>
+
+  <mat-toolbar-container
+    *slot="content"
+    class="main-component-mat-sidenav-container-content-slot"
+  >
+    <mat-toolbar
+      *slot="toolbar"
+      class="main-component-mat-toolbar-container-toolbar-slot"
+    >
+      <mat-button
+        *if="$.menuButtonVisible$"
+        (click)="$.onClickMenuButton"
+      >
+        menu
+        <!--        <mat-icon-menu></mat-icon-menu>-->
+      </mat-button>
+    </mat-toolbar>
+
+
+    <rx-slot name="content">
+      content
+      <!--        <mat-icons-demo></mat-icons-demo>-->
+    </rx-slot>
+  </mat-toolbar-container>
+
+</mat-sidenav-container>
+
+

@@ -1,0 +1,135 @@
+/*
+Encoder:
+
+- takes a value
+- returns a PULL source of Result { done: boolean: value: u8 }
+
+const encoder = encode({ toto })
+byte[0] = encoder.next().value;
+byte[1] = encoder.next().value;
+...
+
+
+Decoder:
+
+- push SINK of u8
+- provides a Result: { done: boolean: value: GValue }
+
+const decoder = decode()
+decoder.next(byte[0]);
+const value = encoder.next(byte[0]).value;
+...
+
+ */
+
+/*----------------*/
+
+interface ISuperIteratorResult<GOut> {
+  done: boolean;
+  value: GOut;
+}
+
+const DONE_SUPER_ITERATOR_RESULT: ISuperIteratorResult<any> = {
+  done: true,
+  value: void 0,
+};
+
+interface ISuperIterator<GIn, GOut> {
+  next(value: GIn): ISuperIteratorResult<GOut>;
+}
+
+// abstract class SuperIterator {
+//   next(...args: [] | [TNext]): IteratorResult<T, TReturn>;
+//   return?(value?: TReturn): IteratorResult<T, TReturn>;
+//   throw?(e?: any): IteratorResult<T, TReturn>;
+// }
+
+/*----------------*/
+
+function* test01() {
+  yield 5;
+}
+
+/*
+[() => 5]
+ */
+
+function* test02() {
+  let i = 5;
+  while (i < 5) {
+    yield i;
+    i++;
+  }
+  // for (let i = 0; i < 5; i++) {
+  //   yield i;
+  // }
+}
+
+/*
+[
+() => let i,
+() => if (i < 5) goto 2, else goto end,
+() => emit(i),
+() => i++, goto 1,
+]
+ */
+
+interface IStepResult<GOut> {
+  next: number;
+  value: GOut;
+}
+
+interface IStepData<GIn, GContext> {
+  value: GIn;
+  current: number;
+  context: GContext;
+}
+
+type IStep<GIn, GOut, GContext> = (
+  data: IStepData<GIn, GContext>,
+) => IStepResult<GOut>;
+
+function ictx<GIn, GOut, GContext>(
+  context: GContext,
+  steps: readonly IStep<GIn, GOut, GContext>[],
+): ISuperIterator<GIn, GOut> {
+  let current: number = 0;
+
+  const next = (value: GIn): ISuperIteratorResult<GOut> => {
+    if (current >= steps.length) {
+      return DONE_SUPER_ITERATOR_RESULT;
+    } else {
+      const result: IStepResult<GOut> = steps[current]({
+        current,
+        context,
+        value,
+      });
+      current = result.next;
+      return {
+        done: false,
+        value: result.value,
+      };
+    }
+  };
+
+  return {
+    next,
+  };
+}
+
+// function iif() {
+//
+// }
+//
+//
+// const steps = [
+//
+// ];
+
+/*----------------*/
+
+export function debugSuperCodec(): void {
+  // const a: Iterable
+
+}
+
