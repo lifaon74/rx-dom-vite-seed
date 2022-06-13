@@ -1,5 +1,4 @@
-import { bootstrap } from '../../../../../component/bootstrap';
-import { VirtualTextNode } from '../../../../../virtual-node/dom/nodes/static/text/virtual-text-node';
+import { bootstrap, VirtualTextNode } from '@lirx/dom';
 import { MatButtonComponent } from './mat-button.component';
 
 export function matButtonExample(): void {
@@ -7,5 +6,5 @@ export function matButtonExample(): void {
     ['*', (parentNode) => new VirtualTextNode('click me').attach(parentNode)],
   ]));
 
-  button.inputs.set('disabled', true);
+  // button.inputs.set('disabled', true);
 }

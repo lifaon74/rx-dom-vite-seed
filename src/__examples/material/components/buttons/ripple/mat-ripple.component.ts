@@ -1,10 +1,12 @@
 import { conditional$$, fromEventTarget, not$$ } from '@lirx/core';
-import { createComponent } from '../../../../../component/create/create-component';
-import { compileStyleAsComponentStyle } from '../../../../../component/style/compile-style-as-component-style';
-import { compileReactiveHTMLAsComponentTemplate } from '../../../../../component/template/compile-reactive-html-as-component-template';
-import { getElementCSSVariableValueOrDefault } from '../../../../../misc/dom/get-element-css-variable-value';
-import { querySelectorOrThrow } from '../../../../../misc/dom/query-selector-or-throw';
-import { VirtualCustomElementNode } from '../../../../../virtual-node/dom/nodes/reactive/custom-element/virtual-custom-element-node.class';
+import {
+  compileReactiveHTMLAsComponentTemplate,
+  compileStyleAsComponentStyle,
+  createComponent,
+  getElementCSSVariableValueOrDefault,
+  querySelectorOrThrow,
+  VirtualCustomElementNode,
+} from '@lirx/dom';
 import { createRippleFromElementAndPointerEvent } from './functions/create-ripple-from-element-and-pointer-event';
 
 // @ts-ignore

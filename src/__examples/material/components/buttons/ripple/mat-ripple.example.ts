@@ -1,4 +1,4 @@
-import { bootstrap } from '../../../../../component/bootstrap';
+import { bootstrap } from '@lirx/dom';
 import { MatRippleComponent } from './mat-ripple.component';
 
 export function matRippleExample(): void {

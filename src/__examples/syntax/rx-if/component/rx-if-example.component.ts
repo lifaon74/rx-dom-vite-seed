@@ -1,11 +1,5 @@
 import { interval, IObservable, map$$, merge, single } from '@lirx/core';
-import { compileReactiveHTMLAsComponentTemplate } from '../../../../component/template/compile-reactive-html-as-component-template';
-import { createComponent, IComponentTemplate } from '../../../../component/create/create-component';
-
-
-/** SOURCES **/
-
-type ISources = [];
+import { compileReactiveHTMLAsComponentTemplate, createComponent, IComponentTemplate } from '@lirx/dom';
 
 /** DATA **/
 
@@ -13,13 +7,19 @@ interface IData {
   readonly visible$: IObservable<boolean>;
 }
 
+interface IAppRxIfExampleComponentConfig {
+  data: IData;
+}
+
 /** TEMPLATE **/
 
 const template: IComponentTemplate<IData> = compileReactiveHTMLAsComponentTemplate({
   html: `
+    <div>A</div>
     <div *if="$.visible$">
       I'm visible
     </div>
+    <div>B</div>
   `,
 });
 
@@ -66,10 +66,9 @@ const template: IComponentTemplate<IData> = compileReactiveHTMLAsComponentTempla
 //   `,
 // });
 
-
 /** COMPONENT **/
 
-export const AppRxIfExampleComponent = createComponent<HTMLElement, ISources, IData>({
+export const AppRxIfExampleComponent = createComponent<IAppRxIfExampleComponentConfig>({
   name: 'app-rx-if-example',
   template,
   inputs: [],

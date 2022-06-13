@@ -1,10 +1,12 @@
 import { function$$, IObservable, IObserver } from '@lirx/core';
-import { createComponent } from '../../../../component/create/create-component';
-import { compileStyleAsComponentStyle } from '../../../../component/style/compile-style-as-component-style';
-import { compileReactiveHTMLAsComponentTemplate } from '../../../../component/template/compile-reactive-html-as-component-template';
-import { querySelectorOrThrow } from '../../../../misc/dom/query-selector-or-throw';
-import { VirtualCustomElementNode } from '../../../../virtual-node/dom/nodes/reactive/custom-element/virtual-custom-element-node.class';
-import { MatRippleComponent } from '../buttons/ripple/mat-ripple.component';
+import {
+  compileReactiveHTMLAsComponentTemplate,
+  compileStyleAsComponentStyle,
+  createComponent,
+  querySelectorOrThrow,
+  VirtualCustomElementNode,
+} from '@lirx/dom';
+
 
 // @ts-ignore
 import html from './mat-sidenav-container.component.html?raw';
@@ -58,12 +60,7 @@ interface IMatSidenavContainerComponentConfig {
 
 export const MatSidenavContainerComponent = createComponent<IMatSidenavContainerComponentConfig>({
   name: 'mat-sidenav-container',
-  template: compileReactiveHTMLAsComponentTemplate({
-    html,
-    customElements: [
-      MatRippleComponent,
-    ],
-  }),
+  template: compileReactiveHTMLAsComponentTemplate({ html }),
   styles: [compileStyleAsComponentStyle(style)],
   inputs: [
     ['mode', 'over'],

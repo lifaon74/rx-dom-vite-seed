@@ -1,0 +1,60 @@
+@import 'mat-icon-button.variables';
+
+
+
+/** STYLE **/
+
+:host {
+  display: inline-block;
+  appearance: none;
+  padding: 0;
+  cursor: pointer;
+  position: relative;
+
+  border: 0;
+  border-radius: 50%;
+  overflow: hidden;
+
+  color: $mat-icon-button-color;
+  --mat-icon-color: #{$mat-icon-button-color};
+  background-color: $mat-icon-button-background-color;
+  user-select: none;
+
+  & > mat-ripple {
+    & > .content {
+      display: inline-flex;
+      align-items: center;
+      gap: $mat-icon-button-padding;
+      padding: $mat-icon-button-padding;
+    }
+  }
+
+
+  &:not(:disabled) {
+    transition: color $mat-icon-button-transition-duration,
+    background-color $mat-icon-button-transition-duration,
+    border-color $mat-icon-button-transition-duration;
+
+    &:focus-visible {
+      color: $mat-icon-button-color-focus;
+      --mat-icon-color: #{$mat-icon-button-color-focus};
+      background-color: $mat-icon-button-background-color-focus;
+    }
+
+    @media (hover: hover) {
+      &:hover {
+        color: $mat-icon-button-color-hover;
+        --mat-icon-color: #{$mat-icon-button-color-hover};
+        background-color: $mat-icon-button-background-color-hover;
+      }
+    }
+  }
+
+  &:disabled {
+    transition: all 0ms;
+    cursor: default;
+    color: $mat-icon-button-color-disabled;
+    --mat-icon-color: #{$mat-icon-button-color-disabled};
+    background-color: $mat-icon-button-background-color-disabled;
+  }
+}

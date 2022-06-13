@@ -3,8 +3,8 @@ import { debugSuperCodec } from './__debug/super-codec/super-codec';
 import { examples } from './__examples/examples';
 
 function main(): void {
-  // debug();
-  debugSuperCodec();
+  debug();
+  // debugSuperCodec();
   // examples();
 }
 

@@ -1,21 +1,8 @@
-import {
-  distinct$$,
-  fromEventTarget,
-  IObservable,
-  IObserver,
-  let$$,
-  map$$,
-  merge,
-  not$$,
-  reference,
-  throttleTime$$,
-} from '@lirx/core';
-import { createComponent } from '../../../../component/create/create-component';
-import { compileStyleAsComponentStyle } from '../../../../component/style/compile-style-as-component-style';
-import { compileReactiveHTMLAsComponentTemplate } from '../../../../component/template/compile-reactive-html-as-component-template';
-import { VirtualCustomElementNode } from '../../../../virtual-node/dom/nodes/reactive/custom-element/virtual-custom-element-node.class';
+import { distinct$$, fromEventTarget, IObservable, IObserver, let$$, map$$, merge, not$$, reference, throttleTime$$ } from '@lirx/core';
+import { compileReactiveHTMLAsComponentTemplate, compileStyleAsComponentStyle, createComponent, VirtualCustomElementNode } from '@lirx/dom';
+import { IconMenuComponent } from '@lirx/mdi';
 import { MatButtonComponent } from '../../../material/components/buttons/button/mat-button.component';
-import { MatRippleComponent } from '../../../material/components/buttons/ripple/mat-ripple.component';
+import { MatIconButtonComponent } from '../../../material/components/buttons/icon/mat-icon-button.component';
 import {
   IMatSidenavComponentMode,
   IMatSidenavComponentUserCloseType,
@@ -55,10 +42,9 @@ export const AppMainComponent = createComponent<IAppMainComponentConfig>({
       MatSidenavContainerComponent,
       MatToolbarContainerComponent,
       MatToolbarComponent,
-      // MatIconMenuComponent,
       MatButtonComponent,
-      MatRippleComponent,
-      // MatIconsDemoComponent,
+      IconMenuComponent,
+      MatIconButtonComponent,
     ],
   }),
   styles: [compileStyleAsComponentStyle(style)],

@@ -1,16 +1,15 @@
 import { interval, IObservable, map$$, merge, single } from '@lirx/core';
-import { compileReactiveHTMLAsComponentTemplate } from '../../../../component/template/compile-reactive-html-as-component-template';
-import { createComponent, IComponentTemplate } from '../../../../component/create/create-component';
+import { compileReactiveHTMLAsComponentTemplate, createComponent, IComponentTemplate } from '@lirx/dom';
 import { AppRxInjectSlotExampleBComponent } from './rx-inject-slot-example-b.component';
-
-/** SOURCES **/
-
-type ISources = [];
 
 /** DATA **/
 
 interface IData {
   readonly date$: IObservable<string>;
+}
+
+interface IAppRxInjectSlotExampleAComponentConfig {
+  data: IData;
 }
 
 /** TEMPLATE **/
@@ -41,7 +40,7 @@ const template: IComponentTemplate<IData> = compileReactiveHTMLAsComponentTempla
 
 /** COMPONENT **/
 
-export const AppRxInjectSlotExampleAComponent = createComponent<HTMLElement, ISources, IData>({
+export const AppRxInjectSlotExampleAComponent = createComponent<IAppRxInjectSlotExampleAComponentConfig>({
   name: 'app-rx-inject-slot-example-a',
   template,
   inputs: [],

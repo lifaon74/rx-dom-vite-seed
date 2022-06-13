@@ -29,13 +29,19 @@
       *slot="toolbar"
       class="main-component-mat-toolbar-container-toolbar-slot"
     >
-      <mat-button
+<!--      <mat-button-->
+<!--        *if="$.menuButtonVisible$"-->
+<!--        (click)="$.onClickMenuButton"-->
+<!--      >-->
+<!--        menu-->
+<!--      </mat-button>-->
+
+      <mat-icon-button
         *if="$.menuButtonVisible$"
         (click)="$.onClickMenuButton"
       >
-        menu
-        <!--        <mat-icon-menu></mat-icon-menu>-->
-      </mat-button>
+        <icon-menu></icon-menu>
+      </mat-icon-button>
     </mat-toolbar>
 
 

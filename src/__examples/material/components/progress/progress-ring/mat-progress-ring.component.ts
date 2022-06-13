@@ -1,9 +1,11 @@
 import { function$$, IObservable, map$$ } from '@lirx/core';
-import { createComponent } from '../../../../../component/create/create-component';
-import { compileStyleAsComponentStyle } from '../../../../../component/style/compile-style-as-component-style';
-import { compileReactiveHTMLAsComponentTemplate } from '../../../../../component/template/compile-reactive-html-as-component-template';
-import { VirtualCustomElementNode } from '../../../../../virtual-node/dom/nodes/reactive/custom-element/virtual-custom-element-node.class';
-import { ISetStylePropertyOrStringOrNull } from '../../../../../virtual-node/dom/nodes/static/element/style/style-property.type';
+import {
+  compileReactiveHTMLAsComponentTemplate,
+  compileStyleAsComponentStyle,
+  createComponent,
+  ISetStylePropertyOrStringOrNull,
+  VirtualCustomElementNode,
+} from '@lirx/dom';
 import { MatRippleComponent } from '../../buttons/ripple/mat-ripple.component';
 
 // @ts-ignore

@@ -1,4 +1,4 @@
-import { bootstrap } from '../../../component/bootstrap';
+import { bootstrap } from '@lirx/dom';
 import { AppRxIfExampleComponent } from './component/rx-if-example.component';
 
 

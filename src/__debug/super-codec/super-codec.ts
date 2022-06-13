@@ -107,6 +107,7 @@ function codec<GValue, GEncoded>(
   value: GValue,
   encode: IEncode<GValue, GEncoded>,
   decode: IDecode<GEncoded, GValue>,
+  compareValue: boolean = false,
 ): void {
   const encoder: IEncoder<GEncoded> = encode(value);
   const decoder: IDecoder<GEncoded, GValue> = decode();
@@ -125,9 +126,12 @@ function codec<GValue, GEncoded>(
 
   if (encoder() !== COMPLETE) {
     throw new Error(`Decoder finished before Encoder finished`);
-  } else if (decodedValue !== value) {
+  } else if (compareValue && (decodedValue !== value)) {
     throw new Error(`Decoded value is different than encoded value`);
   }
+
+  console.log(value);
+  console.log(decodedValue);
 }
 
 /*----------------*/
@@ -144,35 +148,21 @@ function debugSuperCodec1(): void {
 
 /*----------------*/
 
-export function jbson_encode_size(
+export function jbson_size_encoder_statement(
   size: number,
-): IEncoder<u8> {
-  let next: IEncoder<u8>;
-  let byte: number;
-
-  const next0 = (): IEncoderReturn<u8> => {
-    byte = (size & 0b01111111);
-    size >>= 7;
-    byte |= ((size !== 0) as any) << 7;
-    next = next1;
-    return byte;
-  };
-
-  const next1 = (): IEncoderReturn<u8> => {
-    if (size === 0) {
-      next = COMPLETE_ENCODER;
-    } else {
-      next = next0;
-    }
-    return next();
-  };
-
-  next = next0;
-
-  return (): IEncoderReturn<u8> => next();
+): IEncoderStatement<u8> {
+  return do_while_encoder_statement<u8>(
+    (): IEncoder<u8> => {
+      let byte: number = (size & 0b01111111);
+      size >>= 7;
+      byte |= ((size !== 0) as any) << 7;
+      return value_encoder<u8>(byte);
+    },
+    () => (size !== 0),
+  );
 }
 
-export function jbson_decode_size(): IDecoder<u8, number> {
+export function jbson_size_decoder(): IDecoder<u8, number> {
   let next: IDecoder<u8, number>;
   let size: number;
   let offset: number;
@@ -208,107 +198,463 @@ export function jbson_decode_size(): IDecoder<u8, number> {
   return (value: u8): IDecoderReturn<number> => next(value);
 }
 
+// export function jbson_size_decoder(): IDecoder<u8, number> {
+//   let next: IDecoder<u8, number>;
+//   let size: number;
+//   let offset: number;
+//
+//   const next0 = (
+//     byte: u8,
+//   ): IDecoderReturn<number> => {
+//     size = 0;
+//     offset = 0;
+//     next = next1;
+//     return next(byte);
+//   };
+//
+//   const next1 = (
+//     byte: u8,
+//   ): IDecoderReturn<number> => {
+//     size |= (byte & 0b01111111) << offset;
+//     if (byte & 0b10000000) {
+//       offset += 7;
+//       return INCOMPLETE;
+//     } else {
+//       next = next2;
+//       return next(byte);
+//     }
+//   };
+//
+//   const next2 = (): IDecoderReturn<number> => {
+//     return size;
+//   };
+//
+//   next = next0;
+//
+//   return (value: u8): IDecoderReturn<number> => next(value);
+// }
+
 /*---*/
 
-function chain_encoders<GOut>(
-  encoderA: IEncoder<GOut>,
-  encoderB: IEncoder<GOut>,
-): IEncoder<GOut> {
-  let next: IEncoder<GOut> = (): IEncoderReturn<GOut> => {
-    const result: IEncoderReturn<GOut> = encoderA();
-    if (result === COMPLETE) {
-      next = encoderB;
-      return next();
-    } else {
-      return result;
-    }
-  };
-  return (): IEncoderReturn<GOut> => next();
+export function jbson_uint8_array_encoder_statement(
+  array: Uint8Array,
+): IEncoderStatement<u8> {
+  return chain_encoder_statements_as_statement<u8>([
+    jbson_size_encoder_statement(array.length),
+    () => array_encoder(array),
+  ]);
 }
 
-function e_for<GContext, GLocalContext, GOut>(
-  context: GContext,
-  initialization: (context: GContext) => GLocalContext,
-  condition: (context: GContext & GLocalContext) => boolean,
-  finalExpression: (context: GContext & GLocalContext) => void,
-  statement: (context: GContext & GLocalContext) => IEncoder<GOut>,
+export function jbson_decode_uint8_array(): IDecoder<u8, Uint8Array> {
+  let next: IDecoder<u8, Uint8Array>;
+  let sizeDecoder: IDecoder<u8, number>;
+  let size: IDecoderReturn<number>;
+  let array: IDecoderReturn<Uint8Array>;
+
+  const next0 = (
+    byte: u8,
+  ): IDecoderReturn<Uint8Array> => {
+    sizeDecoder = jbson_size_decoder();
+    return next(byte);
+  };
+
+  const next1 = (
+    byte: u8,
+  ): IDecoderReturn<Uint8Array> => {
+    size = sizeDecoder(byte);
+    if (size === INCOMPLETE) {
+      return INCOMPLETE;
+    } else {
+
+    }
+  };
+
+  const next2 = (
+    byte: u8,
+  ): IDecoderReturn<Uint8Array> => {
+    size = sizeDecoder(byte);
+    if (size === INCOMPLETE) {
+      return INCOMPLETE;
+    } else {
+
+    }
+  };
+
+  const next5 = (): IDecoderReturn<Uint8Array> => {
+    return array;
+  };
+
+  next = next0;
+
+  return (value: u8): IDecoderReturn<Uint8Array> => next(value);
+}
+
+/*---*/
+
+function encode<GOut>(
+  encoder: IEncoder<GOut>,
+  write: (value: GOut) => void,
+): void {
+  let value: IEncoderReturn<GOut>;
+  while ((value = encoder()) !== COMPLETE) {
+    write(value);
+  }
+}
+
+function encode_to_array<GOut>(
+  encoder: IEncoder<GOut>,
+): GOut[] {
+  const array: GOut[] = [];
+  encode(encoder, (value: GOut): void => {
+    array.push(value);
+  });
+  return array;
+}
+
+function decode<GIn, GOut>(
+  decoder: IDecoder<GIn, GOut>,
+  read: () => GIn,
+): GOut {
+  let value: IDecoderReturn<GOut>;
+  while ((value = decoder(read())) === INCOMPLETE) {
+  }
+  return value;
+}
+
+function decode_from_array<GIn, GOut>(
+  decoder: IDecoder<GIn, GOut>,
+  array: ArrayLike<GIn>,
+): [GOut, number] {
+  let i: number = 0;
+  const value: GOut = decode(decoder, (): GIn => {
+    return array[i++];
+  });
+  return [
+    value,
+    i,
+  ];
+}
+
+/*---*/
+
+interface IEncoderStatement<GOut> {
+  (): IEncoder<GOut>;
+}
+
+function context_proxy<GContext extends object>(
+  contexts: readonly object[],
+): GContext {
+  const map = new Map<PropertyKey, object>(
+    contexts.flatMap((context: object) => {
+      return Object.keys(context).map((key: string): [string, object] => {
+        return [
+          key,
+          context,
+        ];
+      });
+    }),
+  );
+
+  return new Proxy<GContext>({} as any, {
+    get(
+      target: GContext,
+      propertyKey: PropertyKey,
+      receiver: any,
+    ): any {
+      if (map.has(propertyKey)) {
+        return Reflect.get(map.get(propertyKey)!, propertyKey);
+        // return map.get(propertyKey)![propertyKey];
+      } else {
+        return void 0;
+      }
+    },
+    set(
+      target: GContext,
+      propertyKey: PropertyKey,
+      value: any,
+      receiver: any,
+    ): any {
+      if (map.has(propertyKey)) {
+        return Reflect.set(map.get(propertyKey)!, propertyKey, value);
+        // return map.get(propertyKey)![propertyKey];
+      } else {
+        return false;
+      }
+    },
+    has(
+      target: GContext,
+      propertyKey: PropertyKey,
+    ): boolean {
+      if (map.has(propertyKey)) {
+        return Reflect.has(map.get(propertyKey)!, propertyKey);
+      } else {
+        return false;
+      }
+    },
+    ownKeys(
+      target: GContext,
+    ): ArrayLike<string | symbol> {
+      return contexts.flatMap((context: object): (string | symbol)[] => {
+        return Reflect.ownKeys(context);
+      });
+    },
+  });
+}
+
+function chain_encoder_statements_as_encoder<GOut>(
+  statements: readonly IEncoderStatement<GOut>[],
 ): IEncoder<GOut> {
   let next: IEncoder<GOut>;
-  let localContext: GContext & GLocalContext;
+
+  let i: number = 0;
+  let encoder: IEncoder<GOut>;
 
   const next0 = (): IEncoderReturn<GOut> => {
-    localContext = {
-      ...context,
-      ...initialization(context),
-    };
-    next = next1;
+    if (i < statements.length) {
+      encoder = statements[i]();
+      i++;
+      next = next1;
+    } else {
+      next = COMPLETE_ENCODER;
+    }
     return next();
   };
 
   const next1 = (): IEncoderReturn<GOut> => {
-    if (condition(localContext)) {
-      next = chain_encoders(
-        statement(localContext),
-        next1,
-      );
-    } else {
-      next = COMPLETE_ENCODER;
-    }
-    return next();
-  };
-
-  next = next0;
-
-  return (): IEncoderReturn<GOut> => next();
-}
-
-/*---*/
-
-export function jbson_encode_uint8_array(
-  array: Uint8Array,
-): IEncoder<u8> {
-  let next: IEncoder<u8>;
-  let sizeEncoder: IEncoder<u8>;
-
-  const next0 = (): IEncoderReturn<u8> => {
-    sizeEncoder = jbson_encode_size(array.length);
-    next = next1;
-    return next();
-  };
-
-  const next1 = (): IEncoderReturn<u8> => {
-    const result: IEncoderReturn<u8> = sizeEncoder();
+    const result: IEncoderReturn<GOut> = encoder();
     if (result === COMPLETE) {
-      next = next2;
+      next = next0;
       return next();
     } else {
       return result;
     }
   };
 
-  let i: number;
-  let l: number;
+  next = next0;
 
-  const next2 = (): IEncoderReturn<u8> => {
-    i = 0;
-    l = array.length;
-    next = next3;
-    return next();
-  };
+  return (): IEncoderReturn<GOut> => next();
+  // return chain_encoders<GOut>(statements.map((statement: IEncoderStatement<GOut>): IEncoder<GOut> => statement());
+}
 
-  const next3 = (): IEncoderReturn<u8> => {
-    if (i < l) {
-      return array[i++];
+function chain_encoder_statements_as_statement<GOut>(
+  statements: readonly IEncoderStatement<GOut>[],
+): IEncoderStatement<GOut> {
+  return () => chain_encoder_statements_as_encoder<GOut>(statements);
+}
+
+function array_encoder_statement<GOut>(
+  values: ArrayLike<GOut>,
+): IEncoderStatement<GOut> {
+  return (): IEncoder<GOut> => array_encoder<GOut>(values);
+}
+
+function array_encoder<GOut>(
+  values: ArrayLike<GOut>,
+): IEncoder<GOut> {
+  let i: number = 0;
+
+  let next: IEncoder<GOut> = (): IEncoderReturn<GOut> => {
+    if (i < values.length) {
+      return values[i++];
     } else {
       next = COMPLETE_ENCODER;
       return next();
     }
   };
 
-  next = next0;
-
-  return (): IEncoderReturn<u8> => next();
+  return (): IEncoderReturn<GOut> => next();
 }
+
+function value_encoder<GOut>(
+  value: GOut,
+): IEncoder<GOut> {
+  let next: IEncoder<GOut> = (): IEncoderReturn<GOut> => {
+    next = COMPLETE_ENCODER;
+    return value;
+  };
+  return (): IEncoderReturn<GOut> => next();
+}
+
+function while_encoder_statement<GOut>(
+  condition: () => boolean,
+  statement: IEncoderStatement<GOut>,
+): IEncoderStatement<GOut> {
+  const loop = (): IEncoder<GOut> => {
+    if (condition()) {
+      return chain_encoder_statements_as_encoder<GOut>([
+        statement,
+        loop,
+      ]);
+    } else {
+      return COMPLETE_ENCODER;
+    }
+  };
+  return loop;
+}
+
+function while_encoder<GOut>(
+  condition: () => boolean,
+  statement: IEncoderStatement<GOut>,
+): IEncoder<GOut> {
+  return while_encoder_statement<GOut>(
+    condition,
+    statement,
+  )();
+}
+
+/* DO WHILE */
+
+function do_while_encoder_statement<GOut>(
+  statement: IEncoderStatement<GOut>,
+  condition: () => boolean,
+): IEncoderStatement<GOut> {
+  const loop = (): IEncoder<GOut> => {
+    return chain_encoder_statements_as_encoder<GOut>([
+      statement,
+      (): IEncoder<GOut> => {
+        return condition()
+          ? loop()
+          : COMPLETE_ENCODER;
+      },
+    ]);
+  };
+  return loop;
+}
+
+function do_while_encoder<GOut>(
+  statement: IEncoderStatement<GOut>,
+  condition: () => boolean,
+): IEncoder<GOut> {
+  return do_while_encoder_statement(
+    statement,
+    condition,
+  )();
+}
+
+/* FOR */
+
+function for_loop_encoder_statement<GOut>(
+  condition: () => boolean,
+  finalExpression: () => void,
+  statement: IEncoderStatement<GOut>,
+): IEncoderStatement<GOut> {
+  return while_encoder_statement<GOut>(
+    condition,
+    chain_encoder_statements_as_statement<GOut>([
+      statement,
+      (): IEncoder<GOut> => {
+        finalExpression();
+        return COMPLETE_ENCODER;
+      },
+    ]),
+  );
+}
+
+function for_loop_encoder<GOut>(
+  condition: () => boolean,
+  finalExpression: () => void,
+  statement: IEncoderStatement<GOut>,
+): IEncoder<GOut> {
+  return for_loop_encoder_statement<GOut>(
+    condition,
+    finalExpression,
+    statement,
+  )();
+}
+
+/*---*/
+
+interface IDecoderStatement<GIn, GOut> {
+  (): IDecoder<GIn, GOut>;
+}
+
+function array_decoder<GIn, GOut>(
+  values: ArrayLike<GOut>,
+): IEncoder<GOut> {
+  let i: number = 0;
+
+  let next: IEncoder<GOut> = (): IEncoderReturn<GOut> => {
+    if (i < values.length) {
+      return values[i++];
+    } else {
+      next = COMPLETE_ENCODER;
+      return next();
+    }
+  };
+
+  return (): IEncoderReturn<GOut> => next();
+}
+
+/*---*/
+
+function debugEncoders(): void {
+  // const encoder = jbson_encode_size(130);
+  // const data = encodeToUint8Array(encoder);
+  // console.log(data);
+  // e_while();
+
+  const debugContextProxy = () => {
+    const ctx1 = { a: 'a', c: 'c-a' };
+    const ctx2 = { b: 'b', c: 'c-b' };
+
+    const ctx = context_proxy([ctx1, ctx2]);
+    console.log(ctx['a']);
+    console.log(ctx['c']);
+    ctx['a'] = 'a1';
+    ctx['c'] = 'c1';
+    console.log(ctx1, ctx2);
+  };
+
+  const debug_e_while = () => {
+    let i: number = 0;
+    const it: IEncoder<number> = while_encoder(
+      () => (i < 10),
+      chain_encoder_statements_as_statement([
+        () => value_encoder(i),
+        () => {
+          i++;
+          return COMPLETE_ENCODER;
+        },
+      ]),
+    );
+
+    console.log(encode_to_array(it));
+  };
+
+  // const debug_d_while = () => {
+  //   let i: number = 0;
+  //   const it = d_while(
+  //     () => (i < 10),
+  //     chain_statements(
+  //       () => e_value(i),
+  //       () => {
+  //         i++;
+  //         return COMPLETE_ENCODER;
+  //       },
+  //     )
+  //   );
+  //
+  //   console.log(decode_from_array(it));
+  // };
+
+  const debug_e_for = () => {
+    let i: number = 0;
+    const it: IEncoder<number> = for_loop_encoder(
+      () => (i < 10),
+      () => (i++),
+      () => value_encoder(i),
+    );
+
+    console.log(encode_to_array(it));
+  };
+
+  // debugContextProxy();
+  // debug_e_while();
+  debug_e_for();
+
+}
+
+/*---*/
 
 /*----------------*/
 
@@ -316,7 +662,10 @@ function debugJBSON(): void {
   // const encoder = jbson_encode_size(130);
   // const data = encodeToUint8Array(encoder);
   // console.log(data);
-  codec(130, jbson_encode_size, jbson_decode_size);
+  console.log(encode_to_array(jbson_size_encoder_statement(130)()));
+  // console.log(encode_to_array(jbson_encode_uint8_array(new Uint8Array([1, 2, 3]))));
+  // codec(130, jbson_encode_size, jbson_decode_size);
+  // codec(new Uint8Array([1, 2, 3]), jbson_encode_uint8_array, jbson_decode_uint8_array);
 
 }
 
@@ -324,6 +673,7 @@ function debugJBSON(): void {
 
 export function debugSuperCodec(): void {
   // debugSuperCodec1();
+  // debugEncoders();
   debugJBSON();
 }
 

@@ -1,3 +1,4 @@
+import { aotPlugin } from '@lirx/dom-aot-plugin';
 
 /**
  * @type {import('vite').UserConfig}
@@ -30,6 +31,20 @@ const config = {
     },
   },
   plugins: [
+    aotPlugin({
+      pathMatches: (path) => {
+        // console.log(path);
+        const matches = path.endsWith('.ts')
+          || path.endsWith('.component.mjs')
+          || (
+            path.includes('lirx/mdi')
+          );
+        // if (matches) {
+        //   console.log(`\nOPTIMIZING => ${path}`);
+        // }
+        return matches;
+      },
+    }),
   ],
   server: {
     // https: true,
@@ -38,6 +53,8 @@ const config = {
   optimizeDeps: {
     include: [
       '@lirx/core',
+      '@lirx/dom',
+      '@lirx/mdi',
     ],
   },
 };

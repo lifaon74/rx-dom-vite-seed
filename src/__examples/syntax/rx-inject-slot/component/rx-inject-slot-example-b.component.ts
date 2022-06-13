@@ -1,13 +1,12 @@
-import { compileReactiveHTMLAsComponentTemplate } from '../../../../component/template/compile-reactive-html-as-component-template';
-import { createComponent, IComponentTemplate } from '../../../../component/create/create-component';
-
-/** SOURCES **/
-
-type ISources = [];
+import { compileReactiveHTMLAsComponentTemplate, createComponent, IComponentTemplate } from '@lirx/dom';
 
 /** DATA **/
 
 interface IData {
+}
+
+interface IAppRxInjectSlotExampleBComponentConfig {
+  data: IData;
 }
 
 /** TEMPLATE **/
@@ -31,7 +30,7 @@ const template: IComponentTemplate<IData> = compileReactiveHTMLAsComponentTempla
 
 /** COMPONENT **/
 
-export const AppRxInjectSlotExampleBComponent = createComponent<HTMLElement, ISources, IData>({
+export const AppRxInjectSlotExampleBComponent = createComponent<IAppRxInjectSlotExampleBComponentConfig>({
   name: 'app-rx-inject-slot-example-b',
   template,
   inputs: [],

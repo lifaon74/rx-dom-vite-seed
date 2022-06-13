@@ -20,6 +20,10 @@
   },
   "dependencies": {
     "@lirx/core": "1.0.0",
+    "@lirx/dom": "1.0.0",
+    "@lirx/router": "0.9.0",
+    "@lirx/mdi": "1.0.0",
+    "@lirx/dom-aot-plugin": "1.0.0",
     "tslib": "^2.4.0"
   }
 }

@@ -33,4 +33,4 @@ export interface IDecode<GIn, GOut> {
   (): IDecoder<GIn, GOut>;
 }
 
-// export const COMPLETE_DECODER: IEncoder<any> = () => INCOMPLETE;
+// export const INCOMPLETE_DECODER: IDecoder<any, any> = () => INCOMPLETE;

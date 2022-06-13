@@ -1,8 +1,11 @@
 import { IObservable } from '@lirx/core';
-import { createComponent } from '../../../../../component/create/create-component';
-import { compileStyleAsComponentStyle } from '../../../../../component/style/compile-style-as-component-style';
-import { compileReactiveHTMLAsComponentTemplate } from '../../../../../component/template/compile-reactive-html-as-component-template';
-import { VirtualCustomElementNode } from '../../../../../virtual-node/dom/nodes/reactive/custom-element/virtual-custom-element-node.class';
+import {
+  compileReactiveHTMLAsComponentTemplate,
+  compileStyleAsComponentStyle,
+  createComponent,
+  ICreateComponentOptions,
+  VirtualCustomElementNode,
+} from '@lirx/dom';
 import { MatRippleComponent } from '../ripple/mat-ripple.component';
 
 // @ts-ignore
@@ -18,15 +21,15 @@ interface IData {
   readonly disabled$: IObservable<boolean>;
 }
 
-interface IMatButtonComponentConfig {
+export interface IMatButtonComponentConfig {
   element: HTMLButtonElement;
   inputs: [
-    ['disabled', false],
+    ['disabled', boolean],
   ];
   data: IData;
 }
 
-export const MatButtonComponent = createComponent<IMatButtonComponentConfig>({
+export const MAT_BUTTON_COMPONENT_OPTIONS: ICreateComponentOptions<IMatButtonComponentConfig> = {
   name: 'mat-button',
   extends: 'button',
   template: compileReactiveHTMLAsComponentTemplate({
@@ -48,4 +51,6 @@ export const MatButtonComponent = createComponent<IMatButtonComponentConfig>({
       disabled$,
     };
   },
-});
+};
+
+export const MatButtonComponent = createComponent<IMatButtonComponentConfig>(MAT_BUTTON_COMPONENT_OPTIONS);

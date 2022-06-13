@@ -1,27 +1,30 @@
 import { IObservable, map$$ } from '@lirx/core';
-import { compileReactiveHTMLAsComponentTemplate } from '../../../../component/template/compile-reactive-html-as-component-template';
-import { compileStyleAsComponentStyle } from '../../../../component/style/compile-style-as-component-style';
-import { createComponent, IComponentStyle, IComponentTemplate } from '../../../../component/create/create-component';
-import { createComponentReference } from '../../../../component/create/create-component-reference';
-import { ITypedSourcesMapEntry } from '../../../../misc/typed-sources-map/types/typed-sources-map-entry.type';
+import {
+  compileReactiveHTMLAsComponentTemplate, compileStyleAsComponentStyle,
+  createComponent,
+  createComponentReference,
+  IComponentStyle,
+  IComponentTemplate,
+} from '@lirx/dom';
 
-export interface IAppRecursiveExampleComponentConfig {
+/** TYPES **/
+
+export interface IAppRecursiveExampleComponentInputConfig {
   readonly name: string;
-  readonly children: readonly IAppRecursiveExampleComponentConfig[];
+  readonly children: readonly IAppRecursiveExampleComponentInputConfig[];
 }
-
-/** SOURCES **/
-
-type ISources = [
-  ITypedSourcesMapEntry<'config', IAppRecursiveExampleComponentConfig>,
-];
-
-/** DATA **/
 
 interface IData {
   readonly name$: IObservable<string>;
-  readonly children$: IObservable<readonly IAppRecursiveExampleComponentConfig[]>;
+  readonly children$: IObservable<readonly IAppRecursiveExampleComponentInputConfig[]>;
   readonly notEmpty$: IObservable<boolean>;
+}
+
+interface IAppRecursiveExampleComponentConfig {
+  data: IData;
+  inputs: [
+    ['config', IAppRecursiveExampleComponentInputConfig],
+  ];
 }
 
 /** TEMPLATE **/
@@ -37,7 +40,7 @@ const template: IComponentTemplate<IData> = compileReactiveHTMLAsComponentTempla
     >
       <app-recursive-example
         *for="let child of $.children$"
-        [config$]="child"
+        $[config]="child"
       ></app-recursive-example>
     </div>
   `,
@@ -61,15 +64,15 @@ const style: IComponentStyle = compileStyleAsComponentStyle(`
 
 /** COMPONENT **/
 
-export const AppRecursiveExampleComponent = createComponent<HTMLElement, ISources, IData>({
+export const AppRecursiveExampleComponent = createComponent<IAppRecursiveExampleComponentConfig>({
   name: 'app-recursive-example',
   template,
   styles: [style],
   inputs: [
     ['config'],
   ],
-  init: ({ io }): IData => {
-    const config$: IObservable<IAppRecursiveExampleComponentConfig> = io.get$('config');
+  init: (node): IData => {
+    const config$: IObservable<IAppRecursiveExampleComponentInputConfig> = node.inputs.get$('config');
 
     const name$ = map$$(config$, _ => _.name);
     const children$ = map$$(config$, _ => _.children);

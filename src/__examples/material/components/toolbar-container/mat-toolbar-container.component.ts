@@ -1,9 +1,11 @@
 import { function$$ } from '@lirx/core';
-import { createComponent } from '../../../../component/create/create-component';
-import { compileStyleAsComponentStyle } from '../../../../component/style/compile-style-as-component-style';
-import { compileReactiveHTMLAsComponentTemplate } from '../../../../component/template/compile-reactive-html-as-component-template';
-import { VirtualCustomElementNode } from '../../../../virtual-node/dom/nodes/reactive/custom-element/virtual-custom-element-node.class';
-import { IClassNamesList } from '../../../../virtual-node/dom/nodes/reactive/element/class/class-names-list.type';
+import {
+  compileReactiveHTMLAsComponentTemplate,
+  compileStyleAsComponentStyle,
+  createComponent,
+  IClassNamesList,
+  VirtualCustomElementNode,
+} from '@lirx/dom';
 
 // @ts-ignore
 import html from './mat-toolbar-container.component.html?raw';

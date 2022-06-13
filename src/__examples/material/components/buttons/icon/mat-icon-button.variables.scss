@@ -1,0 +1,18 @@
+@import '../button/mat-button.variables';
+
+$mat-icon-button-transition-duration: var(--mat-icon-button-transition-duration, 250ms);
+
+$mat-icon-button-padding: var(--mat-icon-button-padding, 7px);
+
+$mat-icon-button-color: var(--mat-icon-button-color, $mat-button-color);
+$mat-icon-button-background-color: var(--mat-icon-button-background-color, $mat-button-background-color);
+
+$mat-icon-button-color-hover: var(--mat-icon-button-color-hover, $mat-icon-button-color);
+$mat-icon-button-background-color-hover: var(--mat-icon-button-background-color-hover, $mat-button-background-color-hover);
+
+$mat-icon-button-color-focus: var(--mat-icon-button-color-focus, $mat-icon-button-color);
+$mat-icon-button-background-color-focus: var(--mat-icon-button-background-color-focus, $mat-button-background-color-focus);
+
+$mat-icon-button-color-disabled: var(--mat-icon-button-color-disabled, $mat-button-color-disabled);
+$mat-icon-button-background-color-disabled: var(--mat-icon-button-background-color-disabled, $mat-icon-button-background-color);
+
