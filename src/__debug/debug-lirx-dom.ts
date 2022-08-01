@@ -1,6 +1,6 @@
 import { fromEventTarget, interval, IObservable, logState$$, map$$, merge, scan$$, single } from '@lirx/core';
 import {
-  BODY_ROOT, compileReactiveHTMLAsComponentTemplate, createComponent,
+  compileReactiveHTMLAsComponentTemplate, createComponent,
   IComponentTemplate,
   IGenericVirtualReactiveDOMNodeTemplate,
   ISetStyleProperty,
@@ -11,7 +11,7 @@ import {
 import { NODE_REFERENCE_MODIFIER } from '../__examples/material/modifiers/node-reference.modifier';
 import { debugReactiveDOMCompiler } from './aot/debug-reactive-dom-compiler';
 
-const ROOT = BODY_ROOT;
+const ROOT = VirtualRootNode.body;
 
 function createTextObservable(
   name: string,

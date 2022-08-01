@@ -40,7 +40,6 @@ export const AppListPageComponent = createComponent<IAppListPageComponentConfig>
   }),
   init: (): IData => {
     const canBack$ = map$$(idle(), () => NAVIGATION.canBack());
-    NAVIGATION.change$($log);
     return {
       navigation: NAVIGATION,
       canBack$,

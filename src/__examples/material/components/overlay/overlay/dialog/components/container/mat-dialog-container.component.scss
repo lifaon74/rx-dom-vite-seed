@@ -1,0 +1,11 @@
+@import 'mat-dialog-container.variables';
+
+/** STYLE **/
+
+:host {
+  display: block;
+
+  & > mat-dialog-title {
+    padding-right: calc(#{$mat-dialog-close-offset} + #{$mat-icon-button-icon-size});
+  }
+}

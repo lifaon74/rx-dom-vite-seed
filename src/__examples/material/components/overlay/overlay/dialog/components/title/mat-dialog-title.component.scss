@@ -1,0 +1,20 @@
+@import 'mat-dialog-title.variables';
+
+/** STYLE **/
+
+:host {
+  display: block;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 32px;
+  font-family: $mat-dialog-title-font-family;
+  margin-top: calc(#{$mat-dialog-vertical-padding} * -1);
+
+  &:empty {
+    padding-top: $mat-dialog-vertical-padding;
+  }
+
+  &:not(:empty) {
+    padding: 14px 0;
+  }
+}

@@ -23,8 +23,8 @@ export type IMatSidenavComponentMode =
   ;
 
 export type IMatSidenavComponentPosition =
-  | 'start'
-  | 'end'
+  | 'left'
+  | 'right'
   ;
 
 // export type IMatSidenavComponentUserCloseEvent = CustomEvent<'backdrop' | 'escape'>;
@@ -39,9 +39,9 @@ export type IMatSidenavComponentUserCloseType =
 
 interface IData {
   readonly hasBackdrop$: IObservable<boolean>;
-  readonly onClickBackdrop: IObserver<MouseEvent>;
-  readonly onClickDrag: IObserver<MouseEvent>;
-  readonly onKeyDownSidenav: IObserver<KeyboardEvent>;
+  readonly $onClickBackdrop: IObserver<MouseEvent>;
+  readonly $onClickDrag: IObserver<MouseEvent>;
+  readonly $onKeyDownSidenav: IObserver<KeyboardEvent>;
 }
 
 interface IMatSidenavContainerComponentConfig {
@@ -64,7 +64,7 @@ export const MatSidenavContainerComponent = createComponent<IMatSidenavContainer
   styles: [compileStyleAsComponentStyle(style)],
   inputs: [
     ['mode', 'over'],
-    ['position', 'start'],
+    ['position', 'left'],
     ['hasBackdrop', true],
     ['enableUserClose', false],
     ['opened', false],
@@ -103,7 +103,7 @@ export const MatSidenavContainerComponent = createComponent<IMatSidenavContainer
     );
     node.setReactiveClassNamesList(classList$);
 
-    const onClickBackdrop = (): void => {
+    const $onClickBackdrop = (): void => {
       $userClose('backdrop');
 
       if (enableUserClose()) {
@@ -111,11 +111,11 @@ export const MatSidenavContainerComponent = createComponent<IMatSidenavContainer
       }
     };
 
-    const onClickDrag = (): void => {
+    const $onClickDrag = (): void => {
       $opened(!opened());
     };
 
-    const onKeyDownSidenav = (event: KeyboardEvent): void => {
+    const $onKeyDownSidenav = (event: KeyboardEvent): void => {
       if (event.key === 'Escape') {
         $userClose('escape');
 
@@ -138,9 +138,9 @@ export const MatSidenavContainerComponent = createComponent<IMatSidenavContainer
     return {
       hasBackdrop$,
 
-      onClickBackdrop,
-      onClickDrag,
-      onKeyDownSidenav,
+      $onClickBackdrop,
+      $onClickDrag,
+      $onKeyDownSidenav,
     };
   },
 });

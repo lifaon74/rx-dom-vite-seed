@@ -1,0 +1,35 @@
+@import '../../styles/mat.variables';
+
+$mat-badge-size: var(--mat-badge-size, 20px);
+$mat-badge-size-dot: var(--mat-badge-size-dot, 8px);
+$mat-badge-text-color: var(--mat-badge-text-color, #fff);
+$mat-badge-background-color: var(--mat-badge-background-color, $mat-color-primary);
+
+
+@mixin mat-badge-position(
+  $size
+) {
+  &.mat-left {
+    & > .badge {
+      left: calc(#{$size} * -0.5);
+    }
+  }
+
+  &.mat-bottom {
+    & > .badge {
+      bottom: calc(#{$size} * -0.5);
+    }
+  }
+
+  &:not(.mat-left) {
+    & > .badge {
+      right: calc(#{$size} * -0.5);
+    }
+  }
+
+  &:not(.mat-bottom) {
+    & > .badge {
+      top: calc(#{$size} * -0.5);
+    }
+  }
+}

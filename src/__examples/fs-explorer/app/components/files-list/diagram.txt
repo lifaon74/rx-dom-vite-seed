@@ -1,0 +1,48 @@
+
+[CTRL + A] => select all files
+
+[POINTER DOWN] =>
+
+  - on FILE:
+    - if NOT SELECTED
+      - if NOT CTRL down
+        - if NOT SHIFT down
+          -> selectedFiles = [file]
+          -> set currentFile to file
+        - if SHIFT down
+          -> selectedFiles = [...currentFile to file]
+
+      - if CTRL down
+        - if NOT SHIFT down
+          -> selectedFiles = [...selectedFiles, file]
+          -> set currentFile to file
+        - if SHIFT down
+          -> selectedFiles = [...selectedFiles, ...currentFile to file]
+
+    - if SELECTED
+      - [POINTER MOVE] => DRAG
+      - [POINTER UP]
+        - if NOT CTRL down
+          - if NOT SHIFT down
+            -> selectedFiles = [file]
+            -> set currentFile to file
+          - if SHIFT down
+            -> selectedFiles = [...currentFile to file]
+
+        - if CTRL down
+          - if NOT SHIFT down
+            -> selectedFiles = [...selectedFiles -file]
+            -> set currentFile to null
+          - if SHIFT down
+            -> selectedFiles = [...selectedFiles, ...currentFile to file]
+
+  - on BACKGROUND
+    - if NOT CTRL down
+      -> selectedFiles = [files on drag area]
+      -> set currentFile to null
+    - if CTRL down
+      -> store selected files
+      -> selectedFiles = symmetricDifference(storedSelectedFiles, [files on drag area])
+      -> set currentFile to null
+
+

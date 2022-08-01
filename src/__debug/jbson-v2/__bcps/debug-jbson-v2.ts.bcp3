@@ -1,0 +1,1850 @@
+/*------------------------*/
+
+/*
+WITH TYPED DATA
+ */
+/*--------*/
+
+/* UNKNOWN */
+
+interface IUnknownType {
+  type: string;
+}
+
+/* UNION */
+
+interface IUnionType {
+  type: 'union';
+  types: readonly IUnknownType[];
+}
+
+const EMPTY_UNION_TYPE: IUnionType = {
+  type: 'union',
+  types: [],
+};
+
+function isUnionType(
+  value: IUnknownType,
+): value is IUnionType {
+  return (value.type === 'union');
+}
+
+function createSimpleUnion(
+  typeA: IUnknownType,
+  typeB: IUnknownType,
+): IUnionType {
+  return {
+    type: 'union',
+    types: [
+      typeA,
+      typeB,
+    ],
+  };
+}
+
+function compareUnionTypeWithUnknownType(
+  typeA: IUnionType,
+  typeB: IUnknownType,
+): typeB is IUnionType {
+  return isUnionType(typeB)
+    && (typeA.types.length === typeB.types.length)
+    && typeA.types.every((_typeA: IUnknownType): boolean => {
+      return typeB.types.some((_typeB: IUnknownType): boolean => {
+        return compareUnknownTypes(_typeA, _typeB);
+      });
+    });
+}
+
+function doesUnionTypeContainsUnknownType(
+  typeA: IUnionType,
+  typeB: IUnknownType,
+): boolean {
+  return typeA.types.every((type: IUnknownType) => compareUnknownTypes(type, typeB));
+}
+
+function mergeUnionTypeWithUnknownType(
+  typeA: IUnionType,
+  typeB: IUnknownType,
+): IUnionType {
+  let typesToAppend: IUnknownType[];
+
+  if (isUnionType(typeB)) {
+    typesToAppend = typeB.types.filter((_typeB: IUnknownType): boolean => {
+      return !doesUnionTypeContainsUnknownType(typeA, _typeB);
+    });
+  } else {
+    typesToAppend = doesUnionTypeContainsUnknownType(typeA, typeB)
+      ? []
+      : [typeB];
+  }
+
+  return {
+    type: 'union',
+    types: [
+      ...typeA.types,
+      ...typesToAppend,
+    ],
+  };
+}
+
+/* UNDEFINED */
+
+interface IUndefinedType {
+  type: 'undefined';
+}
+
+const UNDEFINED_TYPE: IUndefinedType = {
+  type: 'undefined',
+};
+
+function isUndefinedType(
+  value: IUnknownType,
+): value is IUndefinedType {
+  return (value.type === 'undefined');
+}
+
+function compareUndefinedTypeWithUnknownType(
+  typeA: IUndefinedType,
+  typeB: IUnknownType,
+): typeB is IUndefinedType {
+  return isUndefinedType(typeB);
+}
+
+function mergeUndefinedTypeWithUnknownType(
+  typeA: IUndefinedType,
+  typeB: IUnknownType,
+): IUnknownType {
+  if (isUnionType(typeB)) {
+    return mergeUnionTypeWithUnknownType(typeB, typeA);
+  } else if (isUndefinedType(typeB)) {
+    return UNDEFINED_TYPE;
+  } else if (isNullType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isBooleanType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isU8Type(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isU16Type(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isU32Type(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isI8Type(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isI16Type(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isI32Type(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isF64Type(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isStringType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isArrayType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isObjectType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else {
+    throw new Error(`Unsupported type`);
+  }
+}
+
+/* NULL */
+
+interface INullType {
+  type: 'null';
+}
+
+const NULL_TYPE: INullType = {
+  type: 'null',
+};
+
+function isNullType(
+  value: IUnknownType,
+): value is INullType {
+  return (value.type === 'null');
+}
+
+function compareNullTypeWithUnknownType(
+  typeA: INullType,
+  typeB: IUnknownType,
+): typeB is INullType {
+  return isNullType(typeB);
+}
+
+function mergeNullTypeWithUnknownType(
+  typeA: INullType,
+  typeB: IUnknownType,
+): IUnknownType {
+  if (isUnionType(typeB)) {
+    return mergeUnionTypeWithUnknownType(typeB, typeA);
+  } else if (isUndefinedType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isNullType(typeB)) {
+    return NULL_TYPE;
+  } else if (isBooleanType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isU8Type(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isU16Type(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isU32Type(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isI8Type(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isI16Type(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isI32Type(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isF64Type(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isStringType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isArrayType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isObjectType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else {
+    throw new Error(`Unsupported type`);
+  }
+}
+
+/* BOOLEAN */
+
+interface IBooleanType {
+  type: 'boolean';
+}
+
+const BOOLEAN_TYPE: IBooleanType = {
+  type: 'boolean',
+};
+
+function isBooleanType(
+  value: IUnknownType,
+): value is IBooleanType {
+  return (value.type === 'boolean');
+}
+
+function compareBooleanTypeWithUnknownType(
+  typeA: IBooleanType,
+  typeB: IUnknownType,
+): typeB is IBooleanType {
+  return isBooleanType(typeB);
+}
+
+function mergeBooleanTypeWithUnknownType(
+  typeA: IBooleanType,
+  typeB: IUnknownType,
+): IUnknownType {
+  if (isUnionType(typeB)) {
+    return mergeUnionTypeWithUnknownType(typeB, typeA);
+  } else if (isUndefinedType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isNullType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isBooleanType(typeB)) {
+    return BOOLEAN_TYPE;
+  } else if (isU8Type(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isU16Type(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isU32Type(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isI8Type(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isI16Type(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isI32Type(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isF64Type(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isStringType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isArrayType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isObjectType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else {
+    throw new Error(`Unsupported type`);
+  }
+}
+
+/* U8 */
+
+interface IU8Type {
+  type: 'u8';
+}
+
+const U8_TYPE: IU8Type = {
+  type: 'u8',
+};
+
+function isU8Type(
+  value: IUnknownType,
+): value is IU8Type {
+  return (value.type === 'u8');
+}
+
+function compareU8Type(
+  typeA: IU8Type,
+  typeB: IUnknownType,
+): typeB is IU8Type {
+  return isU8Type(typeB);
+}
+
+function mergeU8TypeWithUnknownType(
+  typeA: IU8Type,
+  typeB: IUnknownType,
+): IUnknownType {
+  if (isUnionType(typeB)) {
+    return mergeUnionTypeWithUnknownType(typeB, typeA);
+  } else if (isUndefinedType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isNullType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isBooleanType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isU8Type(typeB)) {
+    return U8_TYPE;
+  } else if (isU16Type(typeB)) {
+    return U16_TYPE;
+  } else if (isU32Type(typeB)) {
+    return U32_TYPE;
+  } else if (isI8Type(typeB)) {
+    return I16_TYPE;
+  } else if (isI16Type(typeB)) {
+    return I32_TYPE;
+  } else if (isI32Type(typeB)) {
+    return F64_TYPE;
+  } else if (isF64Type(typeB)) {
+    return F64_TYPE;
+  } else if (isStringType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isArrayType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isObjectType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else {
+    throw new Error(`Unsupported type`);
+  }
+}
+
+/* U16 */
+
+interface IU16Type {
+  type: 'u16';
+}
+
+const U16_TYPE: IU16Type = {
+  type: 'u16',
+};
+
+function isU16Type(
+  value: IUnknownType,
+): value is IU16Type {
+  return (value.type === 'u16');
+}
+
+function compareU16Type(
+  typeA: IU16Type,
+  typeB: IUnknownType,
+): typeB is IU16Type {
+  return isU16Type(typeB);
+}
+
+function mergeU16TypeWithUnknownType(
+  typeA: IU16Type,
+  typeB: IUnknownType,
+): IUnknownType {
+  if (isUnionType(typeB)) {
+    return mergeUnionTypeWithUnknownType(typeB, typeA);
+  } else if (isUndefinedType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isNullType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isBooleanType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isU8Type(typeB)) {
+    return U16_TYPE;
+  } else if (isU16Type(typeB)) {
+    return U16_TYPE;
+  } else if (isU32Type(typeB)) {
+    return U32_TYPE;
+  } else if (isI8Type(typeB)) {
+    return I32_TYPE;
+  } else if (isI16Type(typeB)) {
+    return I32_TYPE;
+  } else if (isI32Type(typeB)) {
+    return F64_TYPE;
+  } else if (isF64Type(typeB)) {
+    return F64_TYPE;
+  } else if (isStringType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isArrayType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isObjectType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else {
+    throw new Error(`Unsupported type`);
+  }
+}
+
+/* U32 */
+
+interface IU32Type {
+  type: 'u32';
+}
+
+const U32_TYPE: IU32Type = {
+  type: 'u32',
+};
+
+function isU32Type(
+  value: IUnknownType,
+): value is IU32Type {
+  return (value.type === 'u32');
+}
+
+function compareU32TypeWithUnknownType(
+  typeA: IU32Type,
+  typeB: IUnknownType,
+): typeB is IU32Type {
+  return isU32Type(typeB);
+}
+
+function mergeU32TypeWithUnknownType(
+  typeA: IU32Type,
+  typeB: IUnknownType,
+): IUnknownType {
+  if (isUnionType(typeB)) {
+    return mergeUnionTypeWithUnknownType(typeB, typeA);
+  } else if (isUndefinedType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isNullType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isBooleanType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isU8Type(typeB)) {
+    return U32_TYPE;
+  } else if (isU16Type(typeB)) {
+    return U32_TYPE;
+  } else if (isU32Type(typeB)) {
+    return U32_TYPE;
+  } else if (isI8Type(typeB)) {
+    return F64_TYPE;
+  } else if (isI16Type(typeB)) {
+    return F64_TYPE;
+  } else if (isI32Type(typeB)) {
+    return F64_TYPE;
+  } else if (isF64Type(typeB)) {
+    return F64_TYPE;
+  } else if (isStringType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isArrayType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isObjectType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else {
+    throw new Error(`Unsupported type`);
+  }
+}
+
+/* I8 */
+
+interface II8Type {
+  type: 'i8';
+}
+
+const I8_TYPE: II8Type = {
+  type: 'i8',
+};
+
+function isI8Type(
+  value: IUnknownType,
+): value is II8Type {
+  return (value.type === 'i8');
+}
+
+function compareI8TypeWithUnknownType(
+  typeA: II8Type,
+  typeB: IUnknownType,
+): typeB is II8Type {
+  return isI8Type(typeB);
+}
+
+function mergeI8TypeWithUnknownType(
+  typeA: II8Type,
+  typeB: IUnknownType,
+): IUnknownType {
+  if (isUnionType(typeB)) {
+    return mergeUnionTypeWithUnknownType(typeB, typeA);
+  } else if (isUndefinedType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isNullType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isBooleanType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isU8Type(typeB)) {
+    return I16_TYPE;
+  } else if (isU16Type(typeB)) {
+    return I32_TYPE;
+  } else if (isU32Type(typeB)) {
+    return F64_TYPE;
+  } else if (isI8Type(typeB)) {
+    return I8_TYPE;
+  } else if (isI16Type(typeB)) {
+    return I16_TYPE;
+  } else if (isI32Type(typeB)) {
+    return I32_TYPE;
+  } else if (isF64Type(typeB)) {
+    return F64_TYPE;
+  } else if (isStringType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isArrayType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isObjectType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else {
+    throw new Error(`Unsupported type`);
+  }
+}
+
+/* I16 */
+
+interface II16Type {
+  type: 'i16';
+}
+
+const I16_TYPE: II16Type = {
+  type: 'i16',
+};
+
+function isI16Type(
+  value: IUnknownType,
+): value is II16Type {
+  return (value.type === 'i16');
+}
+
+function compareI16TypeWithUnknownType(
+  typeA: II16Type,
+  typeB: IUnknownType,
+): typeB is II16Type {
+  return isI16Type(typeB);
+}
+
+function mergeI16TypeWithUnknownType(
+  typeA: II16Type,
+  typeB: IUnknownType,
+): IUnknownType {
+  if (isUnionType(typeB)) {
+    return mergeUnionTypeWithUnknownType(typeB, typeA);
+  } else if (isUndefinedType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isNullType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isBooleanType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isU8Type(typeB)) {
+    return I16_TYPE;
+  } else if (isU16Type(typeB)) {
+    return I32_TYPE;
+  } else if (isU32Type(typeB)) {
+    return F64_TYPE;
+  } else if (isI8Type(typeB)) {
+    return I16_TYPE;
+  } else if (isI16Type(typeB)) {
+    return I16_TYPE;
+  } else if (isI32Type(typeB)) {
+    return I32_TYPE;
+  } else if (isF64Type(typeB)) {
+    return F64_TYPE;
+  } else if (isStringType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isArrayType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isObjectType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else {
+    throw new Error(`Unsupported type`);
+  }
+}
+
+/* I32 */
+
+interface II32Type {
+  type: 'i32';
+}
+
+const I32_TYPE: II32Type = {
+  type: 'i32',
+};
+
+function isI32Type(
+  value: IUnknownType,
+): value is II32Type {
+  return (value.type === 'i32');
+}
+
+function compareI32TypeWithUnknownType(
+  typeA: II32Type,
+  typeB: IUnknownType,
+): typeB is II32Type {
+  return isI32Type(typeB);
+}
+
+function mergeI32TypeWithUnknownType(
+  typeA: II32Type,
+  typeB: IUnknownType,
+): IUnknownType {
+  if (isUnionType(typeB)) {
+    return mergeUnionTypeWithUnknownType(typeB, typeA);
+  } else if (isUndefinedType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isNullType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isBooleanType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isU8Type(typeB)) {
+    return I32_TYPE;
+  } else if (isU16Type(typeB)) {
+    return I32_TYPE;
+  } else if (isU32Type(typeB)) {
+    return F64_TYPE;
+  } else if (isI8Type(typeB)) {
+    return I32_TYPE;
+  } else if (isI16Type(typeB)) {
+    return I32_TYPE;
+  } else if (isI32Type(typeB)) {
+    return I32_TYPE;
+  } else if (isF64Type(typeB)) {
+    return F64_TYPE;
+  } else if (isStringType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isArrayType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isObjectType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else {
+    throw new Error(`Unsupported type`);
+  }
+}
+
+/* F64 */
+
+interface IF64Type {
+  type: 'f64';
+}
+
+const F64_TYPE: IF64Type = {
+  type: 'f64',
+};
+
+function isF64Type(
+  value: IUnknownType,
+): value is IF64Type {
+  return (value.type === 'f64');
+}
+
+function compareF64TypeWithUnknownType(
+  typeA: IF64Type,
+  typeB: IUnknownType,
+): typeB is IF64Type {
+  return isF64Type(typeB);
+}
+
+function mergeF64TypeWithUnknownType(
+  typeA: IF64Type,
+  typeB: IUnknownType,
+): IUnknownType {
+  if (isUnionType(typeB)) {
+    return mergeUnionTypeWithUnknownType(typeB, typeA);
+  } else if (isUndefinedType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isNullType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isBooleanType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isU8Type(typeB)) {
+    return F64_TYPE;
+  } else if (isU16Type(typeB)) {
+    return F64_TYPE;
+  } else if (isU32Type(typeB)) {
+    return F64_TYPE;
+  } else if (isI8Type(typeB)) {
+    return F64_TYPE;
+  } else if (isI16Type(typeB)) {
+    return F64_TYPE;
+  } else if (isI32Type(typeB)) {
+    return F64_TYPE;
+  } else if (isF64Type(typeB)) {
+    return F64_TYPE;
+  } else if (isStringType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isArrayType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else if (isObjectType(typeB)) {
+    return createSimpleUnion(typeA, typeB);
+  } else {
+    throw new Error(`Unsupported type`);
+  }
+}
+
+
+/* NUMBER */
+
+type INumberType =
+  | IU8Type
+  | IU16Type
+  | IU32Type
+  | II8Type
+  | II16Type
+  | II32Type
+  | IF64Type
+  ;
+
+function isNumberType(
+  value: IUnknownType,
+): value is INumberType {
+  return isU8Type(value)
+    || isU16Type(value)
+    || isU32Type(value)
+    || isI8Type(value)
+    || isI16Type(value)
+    || isI32Type(value)
+    || isF64Type(value)
+    ;
+}
+
+/* STRING */
+
+interface IStringType {
+  type: 'string';
+}
+
+const STRING_TYPE: IStringType = {
+  type: 'string',
+};
+
+function isStringType(
+  value: IUnknownType,
+): value is IStringType {
+  return (value.type === 'string');
+}
+
+function compareStringTypeWithUnknownType(
+  typeA: IStringType,
+  typeB: IUnknownType,
+): typeB is IStringType {
+  return isStringType(typeB);
+}
+
+/* ARRAY */
+
+interface IArrayType {
+  type: 'array';
+  itemsType: IUnknownType;
+}
+
+type IObjectTypeProperty = [
+  key: string,
+  type: IUnknownType,
+];
+
+function isArrayType(
+  value: IUnknownType,
+): value is IArrayType {
+  return (value.type === 'array');
+}
+
+function compareArrayTypeWithUnknownType(
+  typeA: IArrayType,
+  typeB: IUnknownType,
+): typeB is IArrayType {
+  return isArrayType(typeB)
+    && compareUnknownTypes(typeA.itemsType, typeB.itemsType);
+}
+
+/* OBJECT */
+
+interface IObjectType {
+  type: 'object';
+  properties: readonly IObjectTypeProperty[];
+  // properties: ReadonlyMap<string, IGenericType>;
+}
+
+function isObjectType(
+  value: IUnknownType,
+): value is IObjectType {
+  return (value.type === 'object');
+}
+
+function compareObjectTypeWithUnknownType(
+  typeA: IObjectType,
+  typeB: IUnknownType,
+): typeB is IObjectType {
+  return isObjectType(typeB)
+    && (typeA.properties.length === typeB.properties.length)
+    && typeA.properties.every(([keyA, valueA]: IObjectTypeProperty, index: number): boolean => {
+      const [keyB, valueB] = typeB.properties[index];
+      return (keyA === keyB)
+        && compareUnknownTypes(valueA, valueB);
+    });
+}
+
+/* UNKNOWN */
+
+function compareUnknownTypes<GTypeA extends IUnknownType>(
+  typeA: GTypeA,
+  typeB: IUnknownType,
+): typeB is GTypeA {
+  if (isUnionType(typeA)) {
+    return compareUnionTypeWithUnknownType(typeA, typeB);
+  } else if (isUndefinedType(typeA)) {
+    return compareUndefinedTypeWithUnknownType(typeA, typeB);
+  } else if (isNullType(typeA)) {
+    return compareNullTypeWithUnknownType(typeA, typeB);
+  } else if (isBooleanType(typeA)) {
+    return compareBooleanTypeWithUnknownType(typeA, typeB);
+  } else if (isU8Type(typeA)) {
+    return compareU8Type(typeA, typeB);
+  } else if (isU16Type(typeA)) {
+    return compareU16Type(typeA, typeB);
+  } else if (isU32Type(typeA)) {
+    return compareU32TypeWithUnknownType(typeA, typeB);
+  } else if (isI8Type(typeA)) {
+    return compareI8TypeWithUnknownType(typeA, typeB);
+  } else if (isI16Type(typeA)) {
+    return compareI16TypeWithUnknownType(typeA, typeB);
+  } else if (isI32Type(typeA)) {
+    return compareI32TypeWithUnknownType(typeA, typeB);
+  } else if (isF64Type(typeA)) {
+    return compareF64TypeWithUnknownType(typeA, typeB);
+  } else if (isStringType(typeA)) {
+    return compareStringTypeWithUnknownType(typeA, typeB);
+  } else if (isArrayType(typeA)) {
+    return compareArrayTypeWithUnknownType(typeA, typeB);
+  } else if (isObjectType(typeA)) {
+    return compareObjectTypeWithUnknownType(typeA, typeB);
+  } else {
+    throw new Error(`Unsupported type`);
+  }
+}
+
+function mergeUnknownTypes<GTypeA extends IUnknownType>(
+  typeA: IUnknownType,
+  typeB: IUnknownType,
+): IUnknownType {
+  if (isUnionType(typeA)) {
+    return mergeUnionTypeWithUnknownType(typeA, typeB);
+  } else if (isUndefinedType(typeA)) {
+    return mergeUndefinedTypeWithUnknownType(typeA, typeB);
+  } else if (isNullType(typeA)) {
+    return mergeNullTypeWithUnknownType(typeA, typeB);
+  } else if (isBooleanType(typeA)) {
+    return mergeBooleanTypeWithUnknownType(typeA, typeB);
+  } else if (isU8Type(typeA)) {
+    return mergeU8TypeWithUnknownType(typeA, typeB);
+  } else if (isU16Type(typeA)) {
+    return mergeU16TypeWithUnknownType(typeA, typeB);
+  } else if (isU32Type(typeA)) {
+    return mergeU32TypeWithUnknownType(typeA, typeB);
+  } else if (isI8Type(typeA)) {
+    return mergeI8TypeWithUnknownType(typeA, typeB);
+  } else if (isI16Type(typeA)) {
+    return mergeI16TypeWithUnknownType(typeA, typeB);
+  } else if (isI32Type(typeA)) {
+    return mergeI32TypeWithUnknownType(typeA, typeB);
+  } else if (isF64Type(typeA)) {
+    return mergeF64TypeWithUnknownType(typeA, typeB);
+    // } else if (isStringType(typeA)) {
+    //   return mergeStringTypeWithUnknownType(typeA, typeB);
+    // } else if (isArrayType(typeA)) {
+    //   return mergeArrayTypeWithUnknownType(typeA, typeB);
+    // } else if (isObjectType(typeA)) {
+    //   return mergeObjectTypeWithUnknownType(typeA, typeB);
+  } else {
+    throw new Error(`Unsupported type`);
+  }
+}
+
+function coerceTypesList(
+  types: readonly IUnknownType[],
+): IUnknownType {
+  return (types.length === 0)
+    ? EMPTY_UNION_TYPE
+    : types.reduce(mergeUnknownTypes, types[0]);
+}
+
+/*------------------------*/
+
+function inferNumberType(
+  input: number,
+): INumberType {
+  if (Number.isSafeInteger(input)) {
+    if (input >= 0) {
+      if (input <= 0xff) {
+        return U8_TYPE;
+      } else if (input <= 0xffff) {
+        return U16_TYPE;
+      } else if (input <= 0xffffffff) {
+        return U32_TYPE;
+      } else {
+        return F64_TYPE;
+      }
+    } else {
+      if (input >= -0x7f) {
+        return I8_TYPE;
+      } else if (input >= -0x7fff) {
+        return I16_TYPE;
+      } else if (input >= -0x7fffffff) {
+        return I32_TYPE;
+      } else {
+        return F64_TYPE;
+      }
+    }
+  } else {
+    return F64_TYPE;
+  }
+}
+
+function inferArrayType(
+  input: readonly any[],
+): IArrayType {
+  return {
+    type: 'array',
+    itemsType: coerceTypesList(input.map(inferUnknownType)),
+  };
+}
+
+function inferObjectType(
+  input: object,
+): IObjectType {
+  return {
+    type: 'object',
+    properties: Object.entries(input)
+      .map(([key, value]: [string, any]): IObjectTypeProperty => {
+        return [
+          key,
+          inferUnknownType(value),
+        ];
+      })
+      .sort((
+        [a]: IObjectTypeProperty,
+        [b]: IObjectTypeProperty,
+      ): number => {
+        return (a === b) ? 0 : ((a < b) ? -1 : 1);
+      }),
+  };
+}
+
+function inferUnknownType(
+  input: unknown,
+): IUnknownType {
+  if (input === null) {
+    return NULL_TYPE;
+  } else if (input === void 0) {
+    return UNDEFINED_TYPE;
+  } else {
+    switch (typeof input) {
+      case 'boolean':
+        return BOOLEAN_TYPE;
+      case 'number':
+        return inferNumberType(input);
+      case 'string':
+        return STRING_TYPE;
+      case 'object': {
+        if (Array.isArray(input)) {
+          return inferArrayType(input);
+        } else {
+          return inferObjectType(input as object);
+        }
+      }
+      default:
+        throw new Error(`Unsupported type`);
+    }
+  }
+}
+
+/*------------------------*/
+
+export type WriteFunction = (value: number) => void;
+export type ReadFunction = () => number;
+
+/* SIZE */
+
+export function jbson_encode_size(
+  write: WriteFunction,
+  size: number,
+): void {
+  let byte: number;
+  do {
+    byte = (size & 0b01111111);
+    size >>= 7;
+    byte |= ((size !== 0) as any) << 7;
+    write(byte);
+  } while (size !== 0);
+}
+
+export function jbson_decode_size(
+  read: ReadFunction,
+): number {
+  let size: number = 0;
+  let byte: number;
+  let offset: number = 0;
+  do {
+    byte = read();
+    size |= (byte & 0b01111111) << offset;
+    offset += 7;
+  } while (byte & 0b10000000);
+  return size;
+}
+
+/* UINT8_ARRAY */
+
+export function jbson_encode_uint8_array_value(
+  write: WriteFunction,
+  input: Uint8Array,
+): void {
+  jbson_encode_size(write, input.length);
+  jbson_encode_uint8_array_values(write, input);
+}
+
+export function jbson_encode_uint8_array_values(
+  write: WriteFunction,
+  input: Uint8Array,
+): void {
+  for (let i = 0, l = input.length; i < l; i++) {
+    write(input[i]);
+  }
+}
+
+export function jbson_decode_uint8_array_value(
+  read: ReadFunction,
+): Uint8Array {
+  const size: number = jbson_decode_size(read);
+  const output: Uint8Array = new Uint8Array(size);
+  jbson_decode_uint8_array_values(read, output);
+  return output;
+}
+
+export function jbson_decode_uint8_array_values(
+  read: ReadFunction,
+  output: Uint8Array,
+): void {
+  for (let i = 0, l = output.length; i < l; i++) {
+    output[i] = read();
+  }
+}
+
+/* UTF8_STRING */
+
+export function jbson_encode_utf8_string_value(
+  write: WriteFunction,
+  input: string,
+): void {
+  jbson_encode_uint8_array_value(write, new TextEncoder().encode(input));
+}
+
+export function jbson_decode_utf8_string_value(
+  read: ReadFunction,
+): string {
+  return new TextDecoder().decode(jbson_decode_uint8_array_value(read));
+}
+
+/* NUMBER */
+
+const DATA_VIEW_BUFFER = new ArrayBuffer(8);
+const DATA_VIEW = new DataView(DATA_VIEW_BUFFER);
+const DATA_VIEW_UINT8_ARRAY_1 = new Uint8Array(DATA_VIEW_BUFFER, 0, 1); // 8b
+const DATA_VIEW_UINT8_ARRAY_2 = new Uint8Array(DATA_VIEW_BUFFER, 0, 2); // 16b
+const DATA_VIEW_UINT8_ARRAY_4 = new Uint8Array(DATA_VIEW_BUFFER, 0, 4); // 32b
+const DATA_VIEW_UINT8_ARRAY_8 = new Uint8Array(DATA_VIEW_BUFFER, 0, 8); // 64b
+
+// export function jbson_decode_number_value(
+//   read: ReadFunction,
+//   output: Uint8Array,
+// ): void {
+//   jbson_decode_uint8_array_values(read, output);
+// }
+
+/* TYPES */
+
+const UNION_TYPE_BYTE = 30;
+const UNDEFINED_TYPE_BYTE = 0;
+const NULL_TYPE_BYTE = 1;
+const BOOLEAN_TYPE_BYTE = 2;
+const U8_TYPE_BYTE = 3;
+const U16_TYPE_BYTE = 4;
+const U32_TYPE_BYTE = 5;
+const I8_TYPE_BYTE = 6;
+const I16_TYPE_BYTE = 7;
+const I32_TYPE_BYTE = 8;
+const F64_TYPE_BYTE = 9;
+const STRING_TYPE_BYTE = 10;
+const ARRAY_TYPE_BYTE = 11;
+const OBJECT_TYPE_BYTE = 12;
+
+/* UNION */
+
+export function jbson_encode_union_type(
+  write: WriteFunction,
+  type: IUnionType,
+): void {
+  write(UNION_TYPE_BYTE);
+  const length: number = type.types.length;
+  jbson_encode_size(write, length);
+  for (let i = 0; i < length; i++) {
+    jbson_encode_unknown_type(write, type.types[i]);
+  }
+}
+
+export function jbson_encode_union_value(
+  write: WriteFunction,
+  type: IUnionType,
+  input: unknown,
+): void {
+  const valueType: IUnknownType = inferUnknownType(input);
+  const index: number = type.types.findIndex((type: IUnknownType): boolean => {
+    return compareUnknownTypes(valueType, type);
+  });
+
+  if (index === -1) {
+    throw new Error(`Unable to find type into the union`);
+  } else {
+    jbson_encode_size(write, index);
+    jbson_encode_unknown_value(write, type.types[index], input);
+  }
+}
+
+export function jbson_decode_union_type(
+  read: ReadFunction,
+): IUnionType {
+  const length: number = jbson_decode_size(read);
+  const types: IUnknownType[] = new Array<IUnknownType>(length);
+  for (let i = 0; i < length; i++) {
+    types[i] = jbson_decode_unknown_type(read);
+  }
+  return {
+    type: 'union',
+    types,
+  };
+}
+
+export function jbson_decode_union_value(
+  read: ReadFunction,
+  type: IUnionType,
+): unknown {
+  const index: number = jbson_decode_size(read);
+  const output: unknown = jbson_decode_unknown_value(read, type.types[index]);
+  return output;
+}
+
+/* UNDEFINED */
+
+export function jbson_encode_undefined_type(
+  write: WriteFunction,
+  type: IUndefinedType,
+): void {
+  write(UNDEFINED_TYPE_BYTE);
+}
+
+export function jbson_encode_undefined_value(
+  write: WriteFunction,
+  type: IUndefinedType,
+  input: undefined,
+): void {
+}
+
+export function jbson_decode_undefined_type(
+  read: ReadFunction,
+): IUndefinedType {
+  return UNDEFINED_TYPE;
+}
+
+export function jbson_decode_undefined_value(
+  read: ReadFunction,
+  type: IUndefinedType,
+): undefined {
+  return undefined;
+}
+
+/* NULL */
+
+export function jbson_encode_null_type(
+  write: WriteFunction,
+  type: INullType,
+): void {
+  write(NULL_TYPE_BYTE);
+}
+
+export function jbson_encode_null_value(
+  write: WriteFunction,
+  type: INullType,
+  input: null,
+): void {
+}
+
+export function jbson_decode_null_type(
+  read: ReadFunction,
+): INullType {
+  return NULL_TYPE;
+}
+
+export function jbson_decode_null_value(
+  read: ReadFunction,
+  type: INullType,
+): null {
+  return null;
+}
+
+/* BOOLEAN */
+
+export function jbson_encode_boolean_type(
+  write: WriteFunction,
+  type: IBooleanType,
+): void {
+  write(BOOLEAN_TYPE_BYTE);
+}
+
+export function jbson_encode_boolean_value(
+  write: WriteFunction,
+  type: IBooleanType,
+  input: boolean,
+): void {
+  write(input ? 1 : 0);
+}
+
+export function jbson_decode_boolean_type(
+  read: ReadFunction,
+): IBooleanType {
+  return BOOLEAN_TYPE;
+}
+
+export function jbson_decode_boolean_value(
+  read: ReadFunction,
+  type: IBooleanType,
+): boolean {
+  return (read() !== 0);
+}
+
+/* U8 */
+
+const DATA_VIEW_U8 = DATA_VIEW;
+const DATA_VIEW_UINT8_ARRAY_U8 = DATA_VIEW_UINT8_ARRAY_1;
+
+export function jbson_encode_u8_type(
+  write: WriteFunction,
+  type: IU8Type,
+): void {
+  write(U8_TYPE_BYTE);
+}
+
+export function jbson_encode_u8_value(
+  write: WriteFunction,
+  type: IU8Type,
+  input: number,
+): void {
+  DATA_VIEW_U8.setUint8(0, input);
+  jbson_encode_uint8_array_values(write, DATA_VIEW_UINT8_ARRAY_U8);
+}
+
+export function jbson_decode_u8_type(
+  read: ReadFunction,
+): IU8Type {
+  return U8_TYPE;
+}
+
+export function jbson_decode_u8_value(
+  read: ReadFunction,
+  type: IU8Type,
+): number {
+  jbson_decode_uint8_array_values(read, DATA_VIEW_UINT8_ARRAY_U8);
+  return DATA_VIEW_U8.getUint8(0);
+}
+
+/* U16 */
+
+const DATA_VIEW_U16 = DATA_VIEW;
+const DATA_VIEW_UINT8_ARRAY_U16 = DATA_VIEW_UINT8_ARRAY_2;
+
+export function jbson_encode_u16_type(
+  write: WriteFunction,
+  type: IU16Type,
+): void {
+  write(U16_TYPE_BYTE);
+}
+
+export function jbson_encode_u16_value(
+  write: WriteFunction,
+  type: IU16Type,
+  input: number,
+): void {
+  DATA_VIEW_U16.setUint16(0, input);
+  jbson_encode_uint8_array_values(write, DATA_VIEW_UINT8_ARRAY_U16);
+}
+
+export function jbson_decode_u16_type(
+  read: ReadFunction,
+): IU16Type {
+  return U16_TYPE;
+}
+
+export function jbson_decode_u16_value(
+  read: ReadFunction,
+  type: IU16Type,
+): number {
+  jbson_decode_uint8_array_values(read, DATA_VIEW_UINT8_ARRAY_U16);
+  return DATA_VIEW_U16.getUint16(0);
+}
+
+/* U32 */
+
+const DATA_VIEW_U32 = DATA_VIEW;
+const DATA_VIEW_UINT8_ARRAY_U32 = DATA_VIEW_UINT8_ARRAY_4;
+
+export function jbson_encode_u32_type(
+  write: WriteFunction,
+  type: IU32Type,
+): void {
+  write(U32_TYPE_BYTE);
+}
+
+export function jbson_encode_u32_value(
+  write: WriteFunction,
+  type: IU32Type,
+  input: number,
+): void {
+  DATA_VIEW_U32.setUint32(0, input);
+  jbson_encode_uint8_array_values(write, DATA_VIEW_UINT8_ARRAY_U32);
+}
+
+export function jbson_decode_u32_type(
+  read: ReadFunction,
+): IU32Type {
+  return U32_TYPE;
+}
+
+export function jbson_decode_u32_value(
+  read: ReadFunction,
+  type: IU32Type,
+): number {
+  jbson_decode_uint8_array_values(read, DATA_VIEW_UINT8_ARRAY_U32);
+  return DATA_VIEW_U32.getUint32(0);
+}
+
+/* I8 */
+
+const DATA_VIEW_I8 = DATA_VIEW;
+const DATA_VIEW_UINT8_ARRAY_I8 = DATA_VIEW_UINT8_ARRAY_1;
+
+export function jbson_encode_i8_type(
+  write: WriteFunction,
+  type: II8Type,
+): void {
+  write(I8_TYPE_BYTE);
+}
+
+export function jbson_encode_i8_value(
+  write: WriteFunction,
+  type: II8Type,
+  input: number,
+): void {
+  DATA_VIEW_I8.setInt8(0, input);
+  jbson_encode_uint8_array_values(write, DATA_VIEW_UINT8_ARRAY_I8);
+}
+
+export function jbson_decode_i8_type(
+  read: ReadFunction,
+): II8Type {
+  return I8_TYPE;
+}
+
+export function jbson_decode_i8_value(
+  read: ReadFunction,
+  type: II8Type,
+): number {
+  jbson_decode_uint8_array_values(read, DATA_VIEW_UINT8_ARRAY_I8);
+  return DATA_VIEW_I8.getInt8(0);
+}
+
+/* I16 */
+
+const DATA_VIEW_I16 = DATA_VIEW;
+const DATA_VIEW_UINT8_ARRAY_I16 = DATA_VIEW_UINT8_ARRAY_2;
+
+export function jbson_encode_i16_type(
+  write: WriteFunction,
+  type: II16Type,
+): void {
+  write(I16_TYPE_BYTE);
+}
+
+export function jbson_encode_i16_value(
+  write: WriteFunction,
+  type: II16Type,
+  input: number,
+): void {
+  DATA_VIEW_I16.setInt16(0, input);
+  jbson_encode_uint8_array_values(write, DATA_VIEW_UINT8_ARRAY_I16);
+}
+
+export function jbson_decode_i16_type(
+  read: ReadFunction,
+): II16Type {
+  return I16_TYPE;
+}
+
+export function jbson_decode_i16_value(
+  read: ReadFunction,
+  type: II16Type,
+): number {
+  jbson_decode_uint8_array_values(read, DATA_VIEW_UINT8_ARRAY_I16);
+  return DATA_VIEW_I16.getInt16(0);
+}
+
+/* I32 */
+
+const DATA_VIEW_I32 = DATA_VIEW;
+const DATA_VIEW_UINT8_ARRAY_I32 = DATA_VIEW_UINT8_ARRAY_4;
+
+export function jbson_encode_i32_type(
+  write: WriteFunction,
+  type: II32Type,
+): void {
+  write(I32_TYPE_BYTE);
+}
+
+export function jbson_encode_i32_value(
+  write: WriteFunction,
+  type: II32Type,
+  input: number,
+): void {
+  DATA_VIEW_I32.setInt32(0, input);
+  jbson_encode_uint8_array_values(write, DATA_VIEW_UINT8_ARRAY_I32);
+}
+
+export function jbson_decode_i32_type(
+  read: ReadFunction,
+): II32Type {
+  return I32_TYPE;
+}
+
+export function jbson_decode_i32_value(
+  read: ReadFunction,
+  type: II32Type,
+): number {
+  jbson_decode_uint8_array_values(read, DATA_VIEW_UINT8_ARRAY_I32);
+  return DATA_VIEW_I32.getInt32(0);
+}
+
+/* F64 */
+
+const DATA_VIEW_F64 = DATA_VIEW;
+const DATA_VIEW_UINT8_ARRAY_F64 = DATA_VIEW_UINT8_ARRAY_8;
+
+export function jbson_encode_f64_type(
+  write: WriteFunction,
+  type: IF64Type,
+): void {
+  write(F64_TYPE_BYTE);
+}
+
+export function jbson_encode_f64_value(
+  write: WriteFunction,
+  type: IF64Type,
+  input: number,
+): void {
+  DATA_VIEW_F64.setFloat64(0, input);
+  jbson_encode_uint8_array_values(write, DATA_VIEW_UINT8_ARRAY_F64);
+}
+
+export function jbson_decode_f64_type(
+  read: ReadFunction,
+): IF64Type {
+  return F64_TYPE;
+}
+
+export function jbson_decode_f64_value(
+  read: ReadFunction,
+  type: IF64Type,
+): number {
+  jbson_decode_uint8_array_values(read, DATA_VIEW_UINT8_ARRAY_F64);
+  return DATA_VIEW_F64.getFloat64(0);
+}
+
+/* STRING */
+
+export function jbson_encode_string_type(
+  write: WriteFunction,
+  type: IStringType,
+): void {
+  write(STRING_TYPE_BYTE);
+}
+
+export function jbson_encode_string_value(
+  write: WriteFunction,
+  type: IStringType,
+  input: string,
+): void {
+  jbson_encode_utf8_string_value(write, input);
+}
+
+export function jbson_decode_string_type(
+  read: ReadFunction,
+): IStringType {
+  return STRING_TYPE;
+}
+
+export function jbson_decode_string_value(
+  read: ReadFunction,
+  type: IStringType,
+): string {
+  return jbson_decode_utf8_string_value(read);
+}
+
+/* ARRAY */
+
+export function jbson_encode_array_type(
+  write: WriteFunction,
+  type: IArrayType,
+): void {
+  write(ARRAY_TYPE_BYTE);
+  jbson_encode_unknown_type(write, type.itemsType);
+}
+
+export function jbson_encode_array_value(
+  write: WriteFunction,
+  type: IArrayType,
+  input: readonly unknown[],
+): void {
+  const length: number = input.length;
+  jbson_encode_size(write, length);
+  for (let i = 0; i < length; i++) {
+    jbson_encode_unknown_value(write, type.itemsType, input[i]);
+  }
+}
+
+export function jbson_decode_array_type(
+  read: ReadFunction,
+): IArrayType {
+  return {
+    type: 'array',
+    itemsType: jbson_decode_unknown_type(read),
+  };
+}
+
+export function jbson_decode_array_value(
+  read: ReadFunction,
+  type: IArrayType,
+): unknown[] {
+  const length: number = jbson_decode_size(read);
+  const output: unknown[] = new Array<unknown>(length);
+  for (let i = 0; i < length; i++) {
+    output[i] = jbson_decode_unknown_value(read, type.itemsType);
+  }
+  return output;
+}
+
+/* OBJECT */
+
+export function jbson_encode_object_type(
+  write: WriteFunction,
+  type: IObjectType,
+): void {
+  write(OBJECT_TYPE_BYTE);
+  const length: number = type.properties.length;
+  jbson_encode_size(write, length);
+  for (let i = 0; i < length; i++) {
+    jbson_encode_object_type_property(write, type.properties[i]);
+  }
+}
+
+export function jbson_encode_object_type_property(
+  write: WriteFunction,
+  property: IObjectTypeProperty,
+): void {
+  jbson_encode_utf8_string_value(write, property[0]);
+  jbson_encode_unknown_type(write, property[1]);
+}
+
+export function jbson_encode_object_value(
+  write: WriteFunction,
+  type: IObjectType,
+  input: object,
+): void {
+  const length: number = type.properties.length;
+  for (let i = 0; i < length; i++) {
+    jbson_encode_object_value_property(write, type.properties[i], input);
+  }
+}
+
+export function jbson_encode_object_value_property(
+  write: WriteFunction,
+  property: IObjectTypeProperty,
+  input: object,
+): void {
+  jbson_encode_unknown_value(write, property[1], input[property[0]]);
+}
+
+export function jbson_decode_object_type(
+  read: ReadFunction,
+): IObjectType {
+  const length: number = jbson_decode_size(read);
+  const properties: IObjectTypeProperty[] = new Array<IObjectTypeProperty>(length);
+  for (let i = 0; i < length; i++) {
+    properties[i] = jbson_decode_object_type_property(read);
+  }
+  return {
+    type: 'object',
+    properties,
+  };
+}
+
+export function jbson_decode_object_type_property(
+  read: ReadFunction,
+): IObjectTypeProperty {
+  return [
+    jbson_decode_utf8_string_value(read),
+    jbson_decode_unknown_type(read),
+  ];
+}
+
+export function jbson_decode_object_value(
+  read: ReadFunction,
+  type: IObjectType,
+): object {
+  const output: object = {};
+  const length: number = type.properties.length;
+  for (let i = 0; i < length; i++) {
+    jbson_decode_object_value_property(read, type.properties[i], output);
+  }
+  return output;
+}
+
+export function jbson_decode_object_value_property(
+  read: ReadFunction,
+  property: IObjectTypeProperty,
+  output: object,
+): void {
+  output[property[0]] = jbson_decode_unknown_value(read, property[1]);
+}
+
+/* UNKNOWN */
+
+export function jbson_encode_unknown_type(
+  write: WriteFunction,
+  type: IUnknownType,
+): void {
+  if (isUnionType(type)) {
+    return jbson_encode_union_type(write, type);
+  } else if (isUndefinedType(type)) {
+    return jbson_encode_undefined_type(write, type);
+  } else if (isNullType(type)) {
+    return jbson_encode_null_type(write, type);
+  } else if (isBooleanType(type)) {
+    return jbson_encode_boolean_type(write, type);
+  } else if (isU8Type(type)) {
+    return jbson_encode_u8_type(write, type);
+  } else if (isU16Type(type)) {
+    return jbson_encode_u16_type(write, type);
+  } else if (isU32Type(type)) {
+    return jbson_encode_u32_type(write, type);
+  } else if (isI8Type(type)) {
+    return jbson_encode_i8_type(write, type);
+  } else if (isI16Type(type)) {
+    return jbson_encode_i16_type(write, type);
+  } else if (isI32Type(type)) {
+    return jbson_encode_i32_type(write, type);
+  } else if (isF64Type(type)) {
+    return jbson_encode_f64_type(write, type);
+  } else if (isStringType(type)) {
+    return jbson_encode_string_type(write, type);
+  } else if (isArrayType(type)) {
+    return jbson_encode_array_type(write, type);
+  } else if (isObjectType(type)) {
+    return jbson_encode_object_type(write, type);
+  } else {
+    throw new Error(`Unsupported type`);
+  }
+}
+
+export function jbson_encode_unknown_value(
+  write: WriteFunction,
+  type: IUnknownType,
+  input: unknown,
+): void {
+  if (isUnionType(type)) {
+    return jbson_encode_union_value(write, type, input as unknown);
+  } else if (isUndefinedType(type)) {
+    return jbson_encode_undefined_value(write, type, input as undefined);
+  } else if (isNullType(type)) {
+    return jbson_encode_null_value(write, type, input as null);
+  } else if (isBooleanType(type)) {
+    return jbson_encode_boolean_value(write, type, input as boolean);
+  } else if (isU8Type(type)) {
+    return jbson_encode_u8_value(write, type, input as number);
+  } else if (isU16Type(type)) {
+    return jbson_encode_u16_value(write, type, input as number);
+  } else if (isU32Type(type)) {
+    return jbson_encode_u32_value(write, type, input as number);
+  } else if (isI8Type(type)) {
+    return jbson_encode_i8_value(write, type, input as number);
+  } else if (isI16Type(type)) {
+    return jbson_encode_i16_value(write, type, input as number);
+  } else if (isI32Type(type)) {
+    return jbson_encode_i32_value(write, type, input as number);
+  } else if (isF64Type(type)) {
+    return jbson_encode_f64_value(write, type, input as number);
+  } else if (isStringType(type)) {
+    return jbson_encode_string_value(write, type, input as string);
+  } else if (isArrayType(type)) {
+    return jbson_encode_array_value(write, type, input as readonly unknown[]);
+  } else if (isObjectType(type)) {
+    return jbson_encode_object_value(write, type, input as object);
+  } else {
+    throw new Error(`Unsupported type`);
+  }
+}
+
+export function jbson_decode_unknown_type(
+  read: ReadFunction,
+): IUnknownType {
+  const typeByte: number = read();
+  if (typeByte === UNION_TYPE_BYTE) {
+    return jbson_decode_union_type(read);
+  } else if (typeByte === UNDEFINED_TYPE_BYTE) {
+    return jbson_decode_undefined_type(read);
+  } else if (typeByte === NULL_TYPE_BYTE) {
+    return jbson_decode_null_type(read);
+  } else if (typeByte === BOOLEAN_TYPE_BYTE) {
+    return jbson_decode_boolean_type(read);
+  } else if (typeByte === U8_TYPE_BYTE) {
+    return jbson_decode_u8_type(read);
+  } else if (typeByte === U16_TYPE_BYTE) {
+    return jbson_decode_u16_type(read);
+  } else if (typeByte === U32_TYPE_BYTE) {
+    return jbson_decode_u32_type(read);
+  } else if (typeByte === I8_TYPE_BYTE) {
+    return jbson_decode_i8_type(read);
+  } else if (typeByte === I16_TYPE_BYTE) {
+    return jbson_decode_i16_type(read);
+  } else if (typeByte === I32_TYPE_BYTE) {
+    return jbson_decode_i32_type(read);
+  } else if (typeByte === F64_TYPE_BYTE) {
+    return jbson_decode_f64_type(read);
+  } else if (typeByte === STRING_TYPE_BYTE) {
+    return jbson_decode_string_type(read);
+  } else if (typeByte === ARRAY_TYPE_BYTE) {
+    return jbson_decode_array_type(read);
+  } else if (typeByte === OBJECT_TYPE_BYTE) {
+    return jbson_decode_object_type(read);
+  } else {
+    throw new Error(`Unsupported type`);
+  }
+}
+
+export function jbson_decode_unknown_value(
+  read: ReadFunction,
+  type: IUnknownType,
+): unknown {
+  if (isUnionType(type)) {
+    return jbson_decode_union_value(read, type);
+  } else if (isUndefinedType(type)) {
+    return jbson_decode_undefined_value(read, type);
+  } else if (isNullType(type)) {
+    return jbson_decode_null_value(read, type);
+  } else if (isBooleanType(type)) {
+    return jbson_decode_boolean_value(read, type);
+  } else if (isU8Type(type)) {
+    return jbson_decode_u8_value(read, type);
+  } else if (isU16Type(type)) {
+    return jbson_decode_u16_value(read, type);
+  } else if (isU32Type(type)) {
+    return jbson_decode_u32_value(read, type);
+  } else if (isI8Type(type)) {
+    return jbson_decode_i8_value(read, type);
+  } else if (isI16Type(type)) {
+    return jbson_decode_i16_value(read, type);
+  } else if (isI32Type(type)) {
+    return jbson_decode_i32_value(read, type);
+  } else if (isF64Type(type)) {
+    return jbson_decode_f64_value(read, type);
+  } else if (isStringType(type)) {
+    return jbson_decode_string_value(read, type);
+  } else if (isArrayType(type)) {
+    return jbson_decode_array_value(read, type);
+  } else if (isObjectType(type)) {
+    return jbson_decode_object_value(read, type);
+  } else {
+    throw new Error(`Unsupported type`);
+  }
+}
+
+/*------------------------*/
+
+function jbson_encode_to_uin8_array(
+  type: IUnknownType,
+  input: unknown,
+): Uint8Array {
+  const array: Uint8Array = new Uint8Array(1e6);
+  let i: number = 0;
+
+  const write = (byte: number): void => {
+    array[i++] = byte;
+  };
+
+  jbson_encode_unknown_type(write, type);
+  jbson_encode_unknown_value(write, type, input);
+
+  return array.subarray(0, i);
+}
+
+function jbson_decode_from_uin8_array(
+  array: Uint8Array,
+): unknown {
+  let i: number = 0;
+
+  const read = (): number => {
+    return array[i++];
+  };
+
+  const type: IUnknownType = jbson_decode_unknown_type(read);
+  const value: unknown = jbson_decode_unknown_value(read, type);
+
+  return value;
+}
+
+/*-------------------------*/
+
+function debugJBSONV2_1(): void {
+  // const input = true;
+  // const input = 8;
+  // const input = 0x100;
+  // const input = 0x10000;
+  // const input = -8;
+  // const input = -0x100;
+  // const input = -0x10000;
+  // const input = -0.1;
+  // const input = Number.NaN;
+  // const input = Number.POSITIVE_INFINITY;
+  // const input = 'abc';
+  // const input = [0, 1, 2, 4];
+  // const input = [789, 'abc', true];
+  // const input = { b: 0, a: 'b' };
+  // const input = [1, 0.1, -1];
+  const input = [1, -1, 'a'];
+
+
+  const type = inferUnknownType(input);
+  console.log(type);
+
+  const encoded = jbson_encode_to_uin8_array(type, input);
+  console.log(encoded);
+
+  const decoded = jbson_decode_from_uin8_array(encoded);
+  console.log(decoded);
+}
+
+/*------------------------*/
+
+export function debugJBSONV2(): void {
+  debugJBSONV2_1();
+}

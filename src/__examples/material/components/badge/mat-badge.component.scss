@@ -1,0 +1,47 @@
+@import 'mat-badge.variables';
+
+
+
+:host {
+  display: inline-block;
+  position: relative;
+
+  & > .badge {
+    position: absolute;
+    background-color: $mat-badge-background-color;
+  }
+
+  @include mat-badge-position($mat-badge-size);
+
+  &.mat-dot {
+    @include mat-badge-position($mat-badge-size-dot);
+
+    & > .badge {
+      font-size: 0;
+      width: $mat-badge-size-dot;
+      height: $mat-badge-size-dot;
+      border-radius: 50%;
+    }
+  }
+
+  &:not(.mat-dot) {
+    & > .badge {
+      height: $mat-badge-size;
+      line-height: $mat-badge-size;
+      min-width: $mat-badge-size;
+      max-width: calc(100% + (#{$mat-badge-size} * 0.5));
+      padding: 0 5px;
+      border-radius: calc(#{$mat-badge-size} * 0.5);
+
+      text-align: center;
+      color: $mat-badge-text-color;
+      font-weight: 600;
+      font-size: 12px;
+
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      pointer-events: none;
+    }
+  }
+}

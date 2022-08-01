@@ -1,6 +1,10 @@
+@import '../../../styles/mat.variables';
+
 $mat-button-transition-duration: var(--mat-button-transition-duration, 250ms);
 
-$mat-button-vertical-padding: var(--mat-button-vertical-padding, 7px);
+$mat-button-font-family: var(--mat-button-font-family, $mat-font-family);
+
+$mat-button-vertical-padding: var(--mat-button-vertical-padding, 8px);
 $mat-button-horizontal-padding: var(--mat-button-horizontal-padding, 16px);
 
 

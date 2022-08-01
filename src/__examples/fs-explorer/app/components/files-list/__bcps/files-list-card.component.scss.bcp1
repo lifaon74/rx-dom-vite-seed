@@ -1,0 +1,69 @@
+
+$files-list-card-horizontal-padding: 16px;
+$files-list-card-vertical-padding: 16px;
+$files-list-card-file-width: 92px;
+$files-list-card-file-horizontal-gap: 16px;
+$files-list-card-file-vertical-gap: 16px;
+
+
+:host {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #232729;
+  overflow: auto;
+
+  & > .files-list {
+    padding: $files-list-card-vertical-padding $files-list-card-horizontal-padding;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: $files-list-card-file-vertical-gap $files-list-card-file-horizontal-gap;
+
+    & > * { // .file
+      width: $files-list-card-file-width;
+
+      & > .preview {
+        height: 86px;
+        background-position: center center;
+        background-size: contain;
+        background-repeat: no-repeat;
+      }
+
+      & > .name {
+        $line-height: 18px;
+        $max-line: 3;
+
+        text-align: center;
+        color: #fff;
+        font-size: 14px;
+        line-height: $line-height;
+        max-height: $line-height * $max-line;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        display: -webkit-box;
+        -webkit-line-clamp: $max-line;
+        -webkit-box-orient: vertical;
+      }
+    }
+
+    $breakpoint: $files-list-card-horizontal-padding
+    + $files-list-card-file-width
+    + $files-list-card-file-horizontal-gap
+    + $files-list-card-file-width
+    + $files-list-card-horizontal-padding
+    + 20px;
+
+    @media (max-width: $breakpoint) {
+      flex-direction: column;
+      justify-content: center;
+
+      & > * { // .file
+        width: auto;
+      }
+    }
+  }
+}

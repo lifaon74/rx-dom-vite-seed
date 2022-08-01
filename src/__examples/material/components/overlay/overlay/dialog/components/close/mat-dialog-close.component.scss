@@ -1,0 +1,12 @@
+@import 'mat-dialog-close.variables';
+
+/** STYLE **/
+
+:host {
+  display: block;
+  position: absolute;
+  top: $mat-dialog-close-offset;
+  right: $mat-dialog-close-offset;
+
+  --mat-icon-button-background-color-hover: transparent;
+}

@@ -8,8 +8,10 @@ import style from './mat-icon-button.component.scss?inline';
  * COMPONENT: 'mat-icon-button'
  */
 
+export interface IMatIconButtonComponentConfig extends IMatButtonComponentConfig {
+}
 
-export const MatIconButtonComponent = createComponent<IMatButtonComponentConfig>({
+export const MatIconButtonComponent = createComponent<IMatIconButtonComponentConfig>({
   ...MAT_BUTTON_COMPONENT_OPTIONS,
   name: 'mat-icon-button',
   styles: [

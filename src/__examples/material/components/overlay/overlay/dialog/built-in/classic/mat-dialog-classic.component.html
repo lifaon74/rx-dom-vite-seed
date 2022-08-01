@@ -1,0 +1,18 @@
+<mat-dialog
+  #ref="$.$matDialogRef"
+  $(user-close)="$.$onUserClose"
+>
+  <mat-dialog-container
+    $(click-close-icon)="$.$onClickCloseIcon"
+  >
+    <rx-slot
+      proxy="title"
+    ></rx-slot>
+    <rx-slot
+      proxy="content"
+    ></rx-slot>
+    <rx-slot
+      proxy="actions"
+    ></rx-slot>
+  </mat-dialog-container>
+</mat-dialog>

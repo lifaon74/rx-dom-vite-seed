@@ -1,0 +1,260 @@
+import {
+  $log,
+  fromEventTarget,
+  function$$,
+  functionI$$,
+  IMulticastReplayLastSource,
+  IObservable,
+  IObserver,
+  let$$,
+  map$$,
+  merge,
+  single, switchMap$$,
+} from '@lirx/core';
+import {
+  compileReactiveHTMLAsComponentTemplate,
+  compileStyleAsComponentStyle,
+  createComponent,
+  ISetStyleProperty,
+  VirtualCustomElementNode, VirtualDOMNode, VirtualElementNode,
+} from '@lirx/dom';
+import { NODE_REFERENCE_MODIFIER } from '../../../../material/modifiers/node-reference.modifier';
+
+// @ts-ignore
+import html from './files-list-card.component.html?raw';
+// @ts-ignore
+import style from './files-list-card.component.scss?inline';
+
+export interface IFileEntry {
+  id: string;
+  name: string;
+  previewURL: string;
+  $reference$: IMulticastReplayLastSource<VirtualElementNode<HTMLElement>>;
+}
+
+/**
+ * COMPONENT: 'app-files-list-card'
+ */
+
+interface IData {
+  readonly files$: IObservable<readonly IFileEntry[]>;
+  readonly isFileSelected$$: (id: string) => IObservable<boolean>;
+  readonly pointerSelectAreaVisible$: IObservable<boolean>;
+  readonly pointerSelectAreaStyleLeft$: IObservable<ISetStyleProperty>;
+  readonly pointerSelectAreaStyleTop$: IObservable<ISetStyleProperty>;
+  readonly pointerSelectAreaStyleWidth$: IObservable<ISetStyleProperty>;
+  readonly pointerSelectAreaStyleHeight$: IObservable<ISetStyleProperty>;
+}
+
+interface IAppFilesListCardComponentConfig {
+  element: HTMLElement;
+  outputs: [
+    ['selectedFiles', ReadonlySet<IFileEntry>],
+  ];
+  data: IData;
+}
+
+export const AppFilesListCardComponent = createComponent<IAppFilesListCardComponentConfig>({
+  name: 'app-files-list-card',
+  template: compileReactiveHTMLAsComponentTemplate({
+    html,
+    customElements: [],
+    modifiers: [
+      NODE_REFERENCE_MODIFIER,
+    ],
+  }),
+  styles: [compileStyleAsComponentStyle(style)],
+  outputs: [
+    'selectedFiles',
+  ],
+  init: (node: VirtualCustomElementNode<IAppFilesListCardComponentConfig>): IData => {
+    const element: HTMLElement = node.elementNode;
+
+    const dummyFiles = Array.from({ length: 100 }, (_, index: number): IFileEntry => {
+      return {
+        id: String(index),
+        name: `name # ${index} w da wd awd a wd awd aw d  da wd awd a wd awd aw d`,
+        previewURL: `/assets/images/0${Math.floor(Math.random() * 3 + 1)}.jpg`,
+        $reference$: let$$<VirtualElementNode<HTMLElement>>(),
+      };
+    });
+
+
+    const { emit: $files, subscribe: files$ } = let$$<readonly IFileEntry[]>(dummyFiles);
+    // SELECTED FILES
+    const { emit: $selectedFiles, subscribe: selectedFiles$, getValue: getSelectedFiles } = let$$<Set<string>>(new Set<string>());
+
+    const deselectAllFiles = (): void => {
+      getSelectedFiles().clear();
+    };
+
+
+    const isFileSelected$$ = (id: string): IObservable<boolean> => {
+      return map$$(selectedFiles$, (selectedFiles: Set<string>): boolean => {
+        return selectedFiles.has(id);
+      });
+    };
+
+    /*--*/
+
+
+    const setFileElementReference = (
+      id: string,
+    ): IObserver<VirtualElementNode<HTMLElement>> => {
+      return (reference: VirtualElementNode<HTMLElement>): void => {
+        // reference.elementNode.
+      };
+    };
+
+
+    // POINTER SELECT AREA
+    const { emit: $pointerSelectAreaVisible, subscribe: pointerSelectAreaVisible$ } = let$$<boolean>(false);
+    const { emit: $pointerSelectAreaLeft, subscribe: pointerSelectAreaLeft$ } = let$$<number>(0);
+    const { emit: $pointerSelectAreaTop, subscribe: pointerSelectAreaTop$ } = let$$<number>(0);
+    const { emit: $pointerSelectAreaWidth, subscribe: pointerSelectAreaWidth$ } = let$$<number>(0);
+    const { emit: $pointerSelectAreaHeight, subscribe: pointerSelectAreaHeight$ } = let$$<number>(0);
+
+    const pointerSelectAreaStyleLeft$ = map$$(pointerSelectAreaLeft$, numberToPxSetStyleProperty);
+    const pointerSelectAreaStyleTop$ = map$$(pointerSelectAreaTop$, numberToPxSetStyleProperty);
+    const pointerSelectAreaStyleWidth$ = map$$(pointerSelectAreaWidth$, numberToPxSetStyleProperty);
+    const pointerSelectAreaStyleHeight$ = map$$(pointerSelectAreaHeight$, numberToPxSetStyleProperty);
+
+    const pointerDown$ = node.on$<PointerEvent>('pointerdown');
+
+    type IPosition = [number, number];
+
+    const getPointerPosition = (event: PointerEvent): IPosition => {
+      const { x, y } = element.getBoundingClientRect();
+      return [
+        event.clientX + x,
+        event.clientY + y,
+      ];
+    };
+
+    const getScrollPosition = (): IPosition => {
+      return [
+        element.scrollLeft,
+        element.scrollTop,
+      ];
+    }
+
+    const addPositions = (
+      a: IPosition,
+      b: IPosition,
+    ): IPosition => {
+      return [
+        a[0] + b[0],
+        a[1] + b[1],
+      ];
+    };
+
+
+    const $onPointerDown = (event: PointerEvent): void => {
+      event.preventDefault();
+
+      const initialPointerPosition: IPosition = getPointerPosition(event);
+      const initialScrollPosition: IPosition = getScrollPosition();
+
+      const [x0, y0] = addPositions(
+        initialPointerPosition,
+        initialScrollPosition,
+      );
+
+      const pointerUp$ = fromEventTarget<'pointerup', PointerEvent>(window, 'pointerup');
+
+      const pointerPosition$ = merge([
+        single(initialPointerPosition),
+        map$$(
+          merge([
+            fromEventTarget<'pointermove', PointerEvent>(window, 'pointermove'),
+            pointerUp$,
+          ]),
+          getPointerPosition,
+        )
+      ]);
+
+
+      const scrollPosition$ = merge([
+        single(initialScrollPosition),
+        map$$(
+          fromEventTarget<'scroll', Event>(element, 'scroll', { passive: true }),
+          getScrollPosition,
+        ),
+      ]);
+
+      const currentPosition$ = functionI$$(
+        [pointerPosition$, scrollPosition$],
+        addPositions,
+      );
+
+      $pointerSelectAreaVisible(true);
+
+      const unsubscribeOfCurrentPosition = currentPosition$(([x1, y1]: IPosition): void => {
+        let left: number;
+        let top: number;
+        let width: number;
+        let height: number;
+
+        if (x0 <= x1) {
+          left = x0;
+          width = x1 - x0;
+        } else {
+          left = x1;
+          width = x0 - x1;
+        }
+        if (y0 <= y1) {
+          top = y0;
+          height = y1 - y0;
+        } else {
+          top = y1;
+          height = y0 - y1;
+        }
+
+        $pointerSelectAreaLeft(left);
+        $pointerSelectAreaTop(top);
+        $pointerSelectAreaWidth(width);
+        $pointerSelectAreaHeight(height);
+      });
+
+      // const isFileSelected$$ = (file: IFileEntry): IObservable<boolean> => {
+      //   return switchMap$$(file.$reference$.subscribe, (): IObservable<boolean> => {
+      //       return
+      //   });
+      // };
+      // const _selectedFiles$ = functionI$$(
+      //   [files$, currentPosition$],
+      //   (files: ) => {
+      //
+      //   },
+      // );
+
+      pointerUp$((): void => {
+        unsubscribeOfCurrentPosition();
+        $pointerSelectAreaVisible(false);
+      });
+    };
+
+    pointerDown$($onPointerDown);
+
+
+    return {
+      files$,
+      isFileSelected$$,
+      pointerSelectAreaVisible$,
+      pointerSelectAreaStyleLeft$,
+      pointerSelectAreaStyleTop$,
+      pointerSelectAreaStyleWidth$,
+      pointerSelectAreaStyleHeight$,
+    };
+  },
+});
+
+/*----*/
+
+function numberToPxSetStyleProperty(
+  value: number,
+): ISetStyleProperty {
+  return {
+    value: `${value}px`,
+  };
+}

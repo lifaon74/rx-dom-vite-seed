@@ -1,0 +1,182 @@
+import {
+  $log,
+  createUnicastSource, distinct$$,
+  fromEventTarget, IMulticastReplayLastSource,
+  IObservable,
+  IObserver, IReplayLastSource,
+  IUnsubscribe,
+  let$$,
+  map$$,
+  merge, pipe$$, share$$$,
+  shareObservable, shareRL$$$, single,
+} from '@lirx/core';
+
+class InputController {
+  protected readonly _input: HTMLInputElement;
+
+  constructor(
+    input: HTMLInputElement,
+  ) {
+    this._input = input;
+  }
+
+  get input(): HTMLInputElement {
+    return this._input;
+  }
+}
+
+class InputPristineController extends InputController {
+  protected readonly _$pristine$: IMulticastReplayLastSource<boolean>;
+  protected readonly _pristine$: IObservable<boolean>;
+  constructor(
+    input: HTMLInputElement,
+  ) {
+    super(input);
+    this._$pristine$ = let$$<boolean>(true);
+    this._pristine$ = distinct$$(this._$pristine$.subscribe);
+
+    fromEventTarget(input, 'input')(() => this._$pristine$.emit(false));
+  }
+
+  get pristine(): boolean {
+    return this._$pristine$.getValue();
+  }
+
+ get pristine$(): IObservable<boolean> {
+    return this._pristine$;
+  }
+
+  reset(): void {
+    this._$pristine$.emit(true);
+  }
+}
+
+class InputTouchedController extends InputController {
+  protected readonly _$touched$: IMulticastReplayLastSource<boolean>;
+  protected readonly _touched$: IObservable<boolean>;
+
+  constructor(
+    input: HTMLInputElement,
+  ) {
+    super(input);
+    this._$touched$ = let$$<boolean>(false);
+    this._touched$ = distinct$$(this._$touched$.subscribe);
+    fromEventTarget(input, 'blur')(() => this._$touched$.emit(true));
+  }
+
+  get touched(): boolean {
+    return this._$touched$.getValue();
+  }
+
+  get touched$(): IObservable<boolean> {
+    return this._touched$;
+  }
+
+  reset(): void {
+    this._$touched$.emit(false);
+  }
+}
+
+/*--------*/
+
+type IValidationErrors = Map<string, any>;
+
+interface IInputValidityValidator<GValue> {
+  (
+    value: GValue | null,
+    errors: IValidationErrors,
+  ): void;
+}
+
+// export function composeInputValidityValidators(
+//   validators: readonly IInputValidityValidator[],
+// ): IInputValidityValidator {
+//   return (
+//     input: HTMLInputElement,
+//     errors: IValidationErrors,
+//   ): void => {
+//     for (let i = 0, l = validators.length; i < l; i++) {
+//       validators[i](input, errors);
+//     }
+//   };
+// }
+
+function requiredInputValidityValidator<GValue>(
+  value: GValue | null,
+  errors: IValidationErrors,
+): void {
+  if (value === null) {
+    errors.set('required', 'Required value')
+  }
+}
+
+
+class InputValidityController extends InputController {
+
+  constructor(
+    input: HTMLInputElement,
+  ) {
+    super(input);
+    fromEventTarget(input, 'blur')(() => this._$touched$.emit(true));
+  }
+}
+
+
+
+// abstract class InputController<GValue> {
+//   protected readonly _input: HTMLInputElement;
+//   protected _value: GValue | null;
+//   protected _pristine: boolean;
+//
+//   protected constructor(
+//     input: HTMLInputElement,
+//     value: GValue | null = null,
+//   ) {
+//     this._input = input;
+//     this._value = value;
+//     this._pristine = true;
+//   }
+//
+//   get input(): HTMLInputElement {
+//     return this._input;
+//   }
+//
+//   getValue(): GValue | null {
+//     return this._value;
+//   }
+//
+//   setValue(
+//     value: GValue | null,
+//   ): void {
+//     this._value = value;
+//   }
+//
+//   isValid(): boolean {
+//     // return this._input.checkValidity()
+//     return this._input.validity.valid;
+//   }
+//
+//   isDisabled(): boolean {
+//     return this._input.disabled;
+//   }
+//
+//   isPristine(): boolean {
+//     return this._pristine;
+//   }
+//
+//   reset(): void {
+//     this._value = null;
+//     this._pristine = true;
+//   }
+// }
+
+export function matFormExample() {
+  const input = document.createElement('input');
+  document.body.appendChild(input);
+
+
+  const pristineController = new InputPristineController(input);
+
+  pristineController.pristine$($log);
+
+}

@@ -1,0 +1,33 @@
+@import 'mat-dialog-actions.variables';
+
+
+/** STYLE **/
+
+:host {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: calc(#{$mat-dialog-vertical-padding} * -1);
+
+  justify-content: flex-end;
+
+  &.mat-start {
+    justify-content: flex-start;
+  }
+
+  &.mat-center {
+    justify-content: center;
+  }
+
+  &.mat-end {
+    justify-content: flex-end;
+  }
+
+  &:empty {
+    padding-bottom: $mat-dialog-vertical-padding;
+  }
+
+  &:not(:empty) {
+    padding: 8px 0;
+  }
+}

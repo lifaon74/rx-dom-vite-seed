@@ -6,7 +6,7 @@
 
 <div
   class="backdrop"
-  (click)="$.onClickBackdrop"
+  (click)="$.$onClickBackdrop"
 ></div>
 
 <div class="sidenav">
@@ -17,7 +17,7 @@
   <div
     class="content"
     tabindex="0"
-    (keydown)="$.onKeyDownSidenav"
+    (keydown)="$.$onKeyDownSidenav"
   >
     <rx-inject-slot
       name="sidenav"

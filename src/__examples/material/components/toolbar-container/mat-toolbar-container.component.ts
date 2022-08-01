@@ -17,11 +17,13 @@ import style from './mat-toolbar-container.component.scss?inline';
 // https://material.angular.io/components/toolbar/overview
 
 export type IMatToolbarComponentPosition =
-  | 'start'
-  | 'end'
+  | 'top'
+  | 'bottom'
   ;
 
-/** COMPONENT **/
+/**
+ * COMPONENT: 'mat-toolbar-container'
+ */
 
 interface IMatToolbarContainerComponentConfig {
   inputs: [
@@ -34,7 +36,7 @@ export const MatToolbarContainerComponent = createComponent<IMatToolbarContainer
   template: compileReactiveHTMLAsComponentTemplate({ html }),
   styles: [compileStyleAsComponentStyle(style)],
   inputs: [
-    ['position', 'start'],
+    ['position', 'top'],
   ],
   init: (node: VirtualCustomElementNode<IMatToolbarContainerComponentConfig>): void => {
     const position$ = node.inputs.get$('position');

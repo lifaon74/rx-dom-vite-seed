@@ -2,7 +2,8 @@
 
 $mat-icon-button-transition-duration: var(--mat-icon-button-transition-duration, 250ms);
 
-$mat-icon-button-padding: var(--mat-icon-button-padding, 7px);
+$mat-icon-button-padding: var(--mat-icon-button-padding, 6px);
+$mat-icon-button-icon-size: var(--mat-icon-button-icon-size, 24px);
 
 $mat-icon-button-color: var(--mat-icon-button-color, $mat-button-color);
 $mat-icon-button-background-color: var(--mat-icon-button-background-color, $mat-button-background-color);

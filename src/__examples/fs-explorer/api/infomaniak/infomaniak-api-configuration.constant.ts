@@ -1,0 +1,4 @@
+export const INFOMANIAK_API_CONFIGURATION = {
+  token: 'Ha7eYqlK3_7v6nrleO-qS7eCn_pq7D5LkiJrHvRfmfJSD6scNz9MN5BSQis3B7r42ex--g3qNrXiLXyA',
+  // token: 'e6veYrpU3pkYAxQGZLi9b5_HIUqON3H_5Sgv1pjc30pvCUFxcVWLYPeEI9-H4RSBP5BW7UvMENR7uLSC',
+};

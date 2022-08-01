@@ -1,0 +1,814 @@
+import {
+  $log,
+  combineLatest,
+  debounceFrame$$$,
+  filter$$,
+  first$$,
+  fromEventTarget,
+  fromSelfEventTarget,
+  function$$,
+  IMulticastReplayLastSource,
+  IObservable,
+  IObserver,
+  IReadonlyEventTarget,
+  let$$,
+  map$$,
+  map$$$,
+  merge,
+  pipe$$,
+  reference, scan$$,
+  shareRL$$,
+  shareRL$$$,
+  single,
+  switchMap$$,
+  switchMap$$$,
+  throttleTime$$,
+} from '@lirx/core';
+import {
+  compileReactiveHTMLAsComponentTemplate,
+  compileStyleAsComponentStyle,
+  createComponent,
+  IClassNamesList,
+  ISetStylePropertyOrNull,
+  VirtualCustomElementNode,
+  VirtualElementNode,
+} from '@lirx/dom';
+import { NODE_REFERENCE_MODIFIER } from '../../../../material/modifiers/node-reference.modifier';
+
+// @ts-ignore
+import html from './files-list.component.html?raw';
+// @ts-ignore
+import style from './files-list.component.scss?inline';
+
+export type IAppFilesListCardComponentView =
+  | 'card'
+  | 'table'
+  ;
+
+export interface IFileEntry {
+  readonly id: string;
+  readonly name: string;
+  readonly previewURL: string;
+  readonly size: string;
+  readonly modified: string;
+}
+
+export type IFilesList = readonly IFileEntry[];
+
+export interface IFileEntryExtended extends IFileEntry {
+  readonly $reference$: IMulticastReplayLastSource<VirtualElementNode<HTMLElement>>;
+  // readonly size$: IObservable<string>;
+}
+
+export type IFilesListExtended = readonly IFileEntryExtended[];
+
+type ISelectedFiles = Set<string>;
+
+/**
+ * COMPONENT: 'app-files-list'
+ */
+
+interface IData {
+  readonly $filesContainer: IObserver<VirtualElementNode<HTMLElement>>;
+  readonly files$: IObservable<IFilesListExtended>;
+  readonly isFileSelected$$: (id: string) => IObservable<boolean>;
+  readonly pointerSelectAreaVisible$: IObservable<boolean>;
+  readonly pointerSelectAreaStyleLeft$: IObservable<ISetStylePropertyOrNull>;
+  readonly pointerSelectAreaStyleTop$: IObservable<ISetStylePropertyOrNull>;
+  readonly pointerSelectAreaStyleWidth$: IObservable<ISetStylePropertyOrNull>;
+  readonly pointerSelectAreaStyleHeight$: IObservable<ISetStylePropertyOrNull>;
+}
+
+interface IAppFilesListComponentConfig {
+  element: HTMLElement;
+  inputs: [
+    ['files', IFilesList],
+    ['view', IAppFilesListCardComponentView],
+  ];
+  outputs: [
+    ['selectedFiles', ReadonlySet<IFileEntry>],
+  ];
+  data: IData;
+}
+
+export const AppFilesListComponent = createComponent<IAppFilesListComponentConfig>({
+  name: 'app-files-list',
+  template: compileReactiveHTMLAsComponentTemplate({
+    html,
+    customElements: [],
+    modifiers: [
+      NODE_REFERENCE_MODIFIER,
+    ],
+  }),
+  styles: [compileStyleAsComponentStyle(style)],
+  inputs: [
+    ['files', []],
+    ['view', 'card'],
+    // ['view', 'table'],
+  ],
+  outputs: [
+    'selectedFiles',
+  ],
+  init: (node: VirtualCustomElementNode<IAppFilesListComponentConfig>): IData => {
+    // const element: HTMLElement = node.elementNode;
+
+    const dummyFiles = Array.from({ length: 100 }, (_, index: number): IFileEntry => {
+      return {
+        id: String(index),
+        name: `file-${index}.txt`,
+        previewURL: `/assets/images/0${Math.floor(Math.random() * 3 + 1)}.jpg`,
+        size: '5KB',
+        modified: 'Today',
+      };
+    });
+
+    const { emit: $files, subscribe: files$ } = let$$<IFilesList>(dummyFiles);
+    const { emit: $filesContainer, subscribe: filesContainer$ } = let$$<VirtualElementNode<HTMLElement>>();
+
+    // FILE CONTAINER
+
+    const fileContainerElement$ = map$$(filesContainer$, (filesContainer: VirtualElementNode<HTMLElement>): HTMLElement => {
+      return filesContainer.elementNode;
+    });
+
+    const fromEventForFilesContainer$$ = <GType extends string, GEvent extends Event>(
+      type: GType,
+      options?: boolean | AddEventListenerOptions,
+    ): IObservable<GEvent> => {
+      return switchMap$$(fileContainerElement$, (element: HTMLElement): IObservable<GEvent> => {
+        return fromSelfEventTarget<GType, GEvent>(
+          element as IReadonlyEventTarget<Record<GType, GEvent>>,
+          type,
+          options,
+        );
+      });
+    };
+
+
+    // VIEW
+    const view$ = node.inputs.get$('view');
+
+    const classNames$ = map$$(view$, (view: IAppFilesListCardComponentView): IClassNamesList => {
+      return new Set<string>([
+        `view-${view}`,
+      ]);
+    });
+
+    node.setReactiveClassNamesList(classNames$);
+
+    // FUNCTIONS
+
+    // FILES
+
+    const filesExtended$ = pipe$$(files$, [
+      map$$$<IFilesList, IFilesListExtended>((files: IFilesList): IFilesListExtended => {
+        return files.map((file: IFileEntry): IFileEntryExtended => {
+          return {
+            ...file,
+            $reference$: let$$<VirtualElementNode<HTMLElement>>(),
+            // $pointerDown$: createMulticastSource<PointerEvent>(),
+            // $dragStart$: createMulticastSource<DragEvent>(),
+            // $dragStart: (event: DragEvent): void => {
+            //   if (event.dataTransfer !== null) {
+            //     const image = new Image();
+            //     image.src = file.previewURL;
+            //     // const ctx = document.createElement('canvas').getContext('2d') as CanvasRenderingContext2D;
+            //     // ctx.drawImage(image)
+            //     // event.dataTransfer.dropEffect = 'link';
+            //     // event.dataTransfer.effectAllowed = 'link';
+            //     event.dataTransfer.setDragImage(image, 0, 0);
+            //     // event.dataTransfer.setData('text/uri-list', document.location.href);
+            //     // event.dataTransfer.items.add(document.location.href, 'text/uri-list');
+            //     event.dataTransfer.items.add(new File([document.location.href], file.name, { type: 'text/plain' }));
+            //   }
+            // },
+          };
+        });
+      }),
+      shareRL$$$<IFilesListExtended>(),
+    ]);
+
+    const filesWithReferences$ = getFilesWithReferences$(filesExtended$);
+
+
+    // EMPTY SELECTED FILES
+    const emptySelectedFiles$ = map$$(filesExtended$, () => new Set<string>());
+
+    // SELECT FILE WITH KEYBOARD
+
+    const keyDownFilesContainer$ = fromEventForFilesContainer$$<'keydown', KeyboardEvent>('keydown');
+    const keyUDownWindow$ = fromEventTarget<'keydown', KeyboardEvent>(window, 'keydown');
+    const keyUpWindow$ = fromEventTarget<'keyup', KeyboardEvent>(window, 'keyup');
+
+    const ctrlA$ = filter$$(keyDownFilesContainer$, (event: KeyboardEvent): boolean => {
+      return event.ctrlKey
+        && (event.key === 'a');
+    });
+
+    const ctrlDown$ = filter$$(keyUDownWindow$, (event: KeyboardEvent): boolean => {
+      return (event.key === 'Control');
+    });
+
+    const ctrlUp$ = filter$$(keyUpWindow$, (event: KeyboardEvent): boolean => {
+      return (event.key === 'Control');
+    });
+
+    const isCTRLDown$ = merge([
+      single(false),
+      map$$(ctrlDown$, () => true),
+      map$$(ctrlUp$, () => false),
+    ])
+
+    const selectedFilesFromCtrlA$ = switchMap$$(filesExtended$, (files: IFilesListExtended): IObservable<ISelectedFiles> => {
+      return map$$(ctrlA$, (): ISelectedFiles => {
+        return new Set<string>(
+          files.map((file: IFileEntryExtended): string => {
+            return file.id;
+          }),
+        );
+      });
+    });
+
+    // SELECT WITH SELECT AREA
+
+    const {
+      pointerSelectAreaVisible$,
+      pointerSelectAreaStyleLeft$,
+      pointerSelectAreaStyleTop$,
+      pointerSelectAreaStyleWidth$,
+      pointerSelectAreaStyleHeight$,
+      selectedFilesFromPointerSelectArea$,
+    } = getPointerSelectAreaObservables({
+      fileContainerElement$,
+      filesWithReferences$,
+    });
+
+    // const onPointerDownFile$ = onPointerDownFile$$();
+
+
+    // const selectedFilesFromPointerSelectArea2$ = switchMap$$(isCTRLDown$, (isCTRLDown: boolean): IObservable<ISelectedFiles> => {
+    //   if (isCTRLDown) {
+    //     return scan$$(
+    //       selectedFilesFromPointerSelectArea$,
+    //       (selectedFiles: ISelectedFiles, selectedFilesFromPointerSelectArea: ISelectedFiles): ISelectedFiles => {
+    //         return new Set([
+    //           ...selectedFiles.values(),
+    //           ...selectedFilesFromPointerSelectArea.values(),
+    //         ]);
+    //       },
+    //       new Set<string>(),
+    //     );
+    //   } else {
+    //     return selectedFilesFromPointerSelectArea$;
+    //   }
+    // });
+
+
+    // const selectedFilesWithoutClick$ = shareRL$$(
+    //   merge([
+    //     emptySelectedFiles$,
+    //     selectedFilesFromSelectArea$,
+    //     selectedFilesFromCtrlA$,
+    //   ]),
+    // );
+    //
+    // // SELECT WITH POINTER DOWN/UP
+    //
+    // // type IFileWithPointerEvent = [
+    // //   file: IFileEntryExtended,
+    // //   event: PointerEvent,
+    // // ];
+    // //
+    // // const onFileSelectedByPointer$$ = (file: IFileEntryExtended): IObservable<PointerEvent> => {
+    // //   return switchMap$$(file.$reference$.subscribe, (reference: VirtualElementNode<HTMLElement>): IObservable<PointerEvent> => {
+    // //     const element: HTMLElement = reference.elementNode;
+    // //
+    // //     const pointerDown$ = fromEventTarget<'pointerdown', PointerEvent>(element, 'pointerdown');
+    // //     const pointerUp$ = fromEventTarget<'pointerup', PointerEvent>(window, 'pointerup');
+    // //     const dragStart$ = fromEventTarget<'dragstart', DragEvent>(element, 'dragstart');
+    // //
+    // //     const pointerUpOrDragStart$ = first$$(
+    // //       merge([
+    // //         pointerUp$,
+    // //         dragStart$,
+    // //       ]),
+    // //     );
+    // //
+    // //     return switchMap$$(pointerDown$, (): IObservable<PointerEvent> => {
+    // //       return filter$$<PointerEvent | DragEvent, PointerEvent>(pointerUpOrDragStart$, (event: PointerEvent | DragEvent): event is PointerEvent => {
+    // //         return event instanceof PointerEvent;
+    // //       });
+    // //     });
+    // //   });
+    // // };
+    // //
+    // // const pointerDownOnFile$$ = (file: IFileEntryExtended): IObservable<PointerEvent> => {
+    // //   return switchMap$$(file.$reference$.subscribe, (reference: VirtualElementNode<HTMLElement>): IObservable<PointerEvent> => {
+    // //     const element: HTMLElement = reference.elementNode;
+    // //     return fromEventTarget<'pointerdown', PointerEvent>(element, 'pointerdown');
+    // //   });
+    // // };
+    // //
+    // // // const clickFile$ = pipe$$(filesExtended$, [
+    // // //   switchMap$$$<IFilesListExtended, IFileWithPointerEvent>((files: IFilesListExtended): IObservable<IFileWithPointerEvent> => {
+    // // //     return merge(
+    // // //       files.map((file: IFileEntryExtended): IObservable<IFileWithPointerEvent> => {
+    // // //         return map$$(clickOnFile$$(file), (event: PointerEvent): IFileWithPointerEvent => {
+    // // //           return [
+    // // //             file,
+    // // //             event,
+    // // //           ];
+    // // //         });
+    // // //       }),
+    // // //     );
+    // // //   }),
+    // // //   share$$$<IFileWithPointerEvent>(),
+    // // // ]);
+    // //
+    // // const filesAndSelectedFiles$ = combineLatest(tuple(
+    // //   filesExtended$,
+    // //   selectedFilesWithoutClick$,
+    // // ));
+    // //
+    // // const selectedFilesFromClick$ = pipe$$(filesAndSelectedFiles$, [
+    // //   switchMap$$$(([files, selectedFiles]: readonly [IFilesListExtended, ISelectedFiles]): IObservable<ISelectedFiles> => {
+    // //     let firstClickedFile: IFileEntryExtended | undefined;
+    // //
+    // //
+    // //
+    // //     const clickFile$ = pipe$$(filesExtended$, [
+    // //       switchMap$$$<IFilesListExtended, IFileWithPointerEvent>((files: IFilesListExtended): IObservable<IFileWithPointerEvent> => {
+    // //         return merge(
+    // //           files.map((file: IFileEntryExtended): IObservable<IFileWithPointerEvent> => {
+    // //             return map$$(onFileSelectedByPointer$$(file), (event: PointerEvent): IFileWithPointerEvent => {
+    // //               return [
+    // //                 file,
+    // //                 event,
+    // //               ];
+    // //             });
+    // //           }),
+    // //         );
+    // //       }),
+    // //       share$$$<IFileWithPointerEvent>(),
+    // //     ]);
+    // //
+    // //     // const pointerDownFile$ = merge(
+    // //     //   files.map((file: IFileEntryExtended): IObservable<IFileWithPointerEvent> => {
+    // //     //     return mapFilter$$(pointerDownOnFile$$(file), (event: PointerEvent): IFileWithPointerEvent => {
+    // //     //       return [
+    // //     //         file,
+    // //     //         event,
+    // //     //       ];
+    // //     //     });
+    // //     //   }),
+    // //     // );
+    // //
+    // //     // const pointerDownFileEmpty$ = filter$$(pointerDownFile$, (): boolean => {
+    // //     //   return selectedFiles.size === 0;
+    // //     // })
+    // //     //
+    // //     // const clickOrPointerDownFile$ = merge([
+    // //     //   clickFile$,
+    // //     //   pointerDownFileEmpty$,
+    // //     // ]);
+    // //
+    // //     return pipe$$(clickFile$, [
+    // //       map$$$(([file, event]: IFileWithPointerEvent): ISelectedFiles => {
+    // //         if (firstClickedFile === void 0) {
+    // //           firstClickedFile = file;
+    // //         }
+    // //         if (event.ctrlKey) {
+    // //           firstClickedFile = void 0;
+    // //           if (selectedFiles.has(file.id)) {
+    // //             selectedFiles.delete(file.id);
+    // //           } else {
+    // //             selectedFiles.add(file.id);
+    // //           }
+    // //         } else if (event.shiftKey) {
+    // //           selectedFiles.clear();
+    // //
+    // //           let selected: boolean = false;
+    // //           const fileIdA: string = file.id;
+    // //           const fileIdB: string = firstClickedFile.id;
+    // //           if (fileIdA === fileIdB) {
+    // //             selectedFiles.add(fileIdA);
+    // //           } else {
+    // //             for (let i = 0; i < files.length; i++) {
+    // //               const fileIdC: string = files[i].id;
+    // //               if (
+    // //                 (fileIdC === fileIdA)
+    // //                 || (fileIdC === fileIdB)
+    // //               ) {
+    // //                 selected = !selected;
+    // //                 selectedFiles.add(fileIdC);
+    // //               } else {
+    // //                 if (selected) {
+    // //                   selectedFiles.add(fileIdC);
+    // //                 } else {
+    // //                   selectedFiles.delete(fileIdC);
+    // //                 }
+    // //               }
+    // //             }
+    // //           }
+    // //         } else {
+    // //           firstClickedFile = file;
+    // //           selectedFiles.clear();
+    // //           selectedFiles.add(file.id);
+    // //         }
+    // //
+    // //         return selectedFiles;
+    // //       }),
+    // //     ]);
+    // //   }),
+    // // ]);
+    // //
+    //
+    // // SELECTED FILES
+    //
+
+    // const selectedFiles$ = shareRL$$(
+    //   merge([
+    //     emptySelectedFiles$,
+    //     selectedFilesFromPointerSelectArea$,
+    //     // selectedFilesFromPointerSelectArea2$,
+    //     selectedFilesFromCtrlA$,
+    //     // selectedFilesFromClick$,
+    //   ]),
+    // );
+
+    function getSelectedFilesFromPointerSelectArea(
+      selectedFiles: ISelectedFiles,
+    ): IObservable<ISelectedFiles> {
+
+    }
+
+    const selectedFiles$ = pipe$$(emptySelectedFiles$, [
+      switchMap$$$((selectedFiles: ISelectedFiles) => {
+
+      }),
+    ]);
+    //   merge([
+    //     emptySelectedFiles$,
+    //     selectedFilesFromPointerSelectArea$,
+    //     // selectedFilesFromPointerSelectArea2$,
+    //     selectedFilesFromCtrlA$,
+    //     // selectedFilesFromClick$,
+    //   ]),
+    // );
+
+    const isFileSelected$$ = (id: string): IObservable<boolean> => {
+      return pipe$$(selectedFiles$, [
+        debounceFrame$$$(),
+        map$$$((selectedFiles: ISelectedFiles): boolean => {
+          return selectedFiles.has(id);
+        }),
+      ]);
+    };
+
+    return {
+      $filesContainer,
+      files$: filesExtended$,
+      isFileSelected$$,
+      pointerSelectAreaVisible$,
+      pointerSelectAreaStyleLeft$,
+      pointerSelectAreaStyleTop$,
+      pointerSelectAreaStyleWidth$,
+      pointerSelectAreaStyleHeight$,
+    };
+  },
+});
+
+/* POSITION */
+
+type IPosition = [
+  x: number,
+  y: number,
+];
+
+function getElementScrollPosition(
+  element: HTMLElement,
+): IPosition {
+  return [
+    element.scrollLeft,
+    element.scrollTop,
+  ];
+}
+
+function getMousePosition(
+  event: MouseEvent,
+): IPosition {
+  return [
+    event.clientX,
+    event.clientY,
+  ];
+}
+
+function getElementPosition(
+  element: HTMLElement,
+): IPosition {
+  const { x, y } = element.getBoundingClientRect();
+  return [x, y];
+}
+
+
+/* POINTER SELECT AREA */
+
+interface IPointerSelectArea {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  absoluteLeft: number;
+  absoluteTop: number;
+}
+
+type IPointerSelectAreaOrNull = IPointerSelectArea | null;
+
+function getPointerSelectArea$$(
+  container: HTMLElement,
+): IObservable<IPointerSelectAreaOrNull> {
+
+  const pointerDownWindow$ = fromEventTarget<'pointerdown', PointerEvent>(window, 'pointerdown');
+  const pointerMoveWindow$ = fromEventTarget<'pointermove', PointerEvent>(window, 'pointermove');
+  const pointerUpWindow$ = fromEventTarget<'pointerup', PointerEvent>(window, 'pointerup');
+
+  const pointerEventWindow$ = merge([
+    pointerDownWindow$,
+    pointerMoveWindow$,
+    pointerUpWindow$,
+  ]);
+
+  const pointerWindowPosition$ = map$$(pointerEventWindow$, getMousePosition);
+
+  const pointerDownContainer$ = fromSelfEventTarget<'pointerdown', PointerEvent>(container, 'pointerdown');
+
+  const getContainerScrollPosition = (): IPosition => {
+    return getElementScrollPosition(container);
+  };
+
+  const scrollContainerPosition$ = merge([
+    reference(getContainerScrollPosition),
+    map$$(
+      fromSelfEventTarget<'scroll', Event>(container, 'scroll'),
+      getContainerScrollPosition,
+    ),
+  ]);
+
+  return pipe$$(pointerDownContainer$, [
+    switchMap$$$<PointerEvent, IPointerSelectAreaOrNull>((event: PointerEvent): IObservable<IPointerSelectAreaOrNull> => {
+      const [xpi, ypi]: IPosition = getMousePosition(event);
+      const [xsi, ysi]: IPosition = getContainerScrollPosition();
+      const [xe, ye]: IPosition = getElementPosition(container);
+
+      const selectArea$ = function$$(
+        [pointerWindowPosition$, scrollContainerPosition$],
+        ([xpc, ypc]: IPosition, [xsc, ysc]: IPosition): IPointerSelectArea => {
+          const [x0, y0] = [
+            xpi + xsi - xe,
+            ypi + ysi - ye,
+          ];
+
+          const [x1, y1] = [
+            xpc + xsc - xe,
+            ypc + ysc - ye,
+          ];
+
+          let left: number;
+          let top: number;
+          let width: number;
+          let height: number;
+          let absoluteLeft: number;
+          let absoluteTop: number;
+
+          if (x0 <= x1) {
+            left = x0;
+            width = x1 - x0;
+          } else {
+            left = x1;
+            width = x0 - x1;
+          }
+          if (y0 <= y1) {
+            top = y0;
+            height = y1 - y0;
+          } else {
+            top = y1;
+            height = y0 - y1;
+          }
+
+          absoluteLeft = left - xsc;
+          absoluteTop = top - ysc;
+
+          return {
+            left,
+            top,
+            width,
+            height,
+            absoluteLeft,
+            absoluteTop,
+          };
+        },
+      );
+
+      const isActive$ = merge([
+        single(true),
+        map$$(first$$(pointerUpWindow$), () => false),
+      ]);
+
+      return switchMap$$(isActive$, (isActive: boolean): IObservable<IPointerSelectAreaOrNull> => {
+        return isActive
+          ? selectArea$
+          : single(null);
+      });
+    }),
+    shareRL$$$<IPointerSelectAreaOrNull>(),
+  ]);
+
+}
+
+interface IGetSelectedFilesFromPointerSelectArea$$Options {
+  readonly filesWithReferences$: IObservable<readonly IFileWithReference[]>;
+  readonly selectArea$: IObservable<IPointerSelectAreaOrNull>;
+}
+
+function getSelectedFilesFromPointerSelectArea$$(
+  {
+    filesWithReferences$,
+    selectArea$,
+  }: IGetSelectedFilesFromPointerSelectArea$$Options,
+): IObservable<ISelectedFiles> {
+  const selectAreaNonNull$ = filter$$<IPointerSelectAreaOrNull, IPointerSelectArea>(selectArea$, (value: IPointerSelectAreaOrNull): value is IPointerSelectArea => (value !== null));
+
+  return function$$(
+    [filesWithReferences$, throttleTime$$(selectAreaNonNull$, 200)],
+    (
+      filesWithReferences: readonly IFileWithReference[],
+      {
+        left,
+        top,
+        width,
+        height,
+      }: IPointerSelectArea,
+    ): ISelectedFiles => {
+      const selectedFiles = new Set<string>();
+
+      for (let i = 0, l = filesWithReferences.length; i < l; i++) {
+        const [file, reference]: IFileWithReference = filesWithReferences[i];
+        const element = reference.elementNode;
+
+        const elementLeft = element.offsetLeft;
+        const elementWidth = element.offsetWidth;
+        const elementRight = elementLeft + elementWidth;
+
+        const elementTop = element.offsetTop;
+        const elementHeight = element.offsetHeight;
+        const elementBottom = elementTop + elementHeight;
+
+        if (
+          (elementRight >= left)
+          && (elementLeft <= (left + width))
+          && (elementBottom >= top)
+          && (elementTop <= (top + height))
+        ) {
+          selectedFiles.add(file.id);
+        }
+      }
+      return selectedFiles;
+    },
+  );
+}
+
+function extractStylePropertyFromPointerSelectArea$$(
+  onSelectAreaChange$: IObservable<IPointerSelectAreaOrNull>,
+  propertyName: keyof IPointerSelectArea,
+): IObservable<ISetStylePropertyOrNull> {
+  return pipe$$(onSelectAreaChange$, [
+    debounceFrame$$$(),
+    map$$$((value: IPointerSelectAreaOrNull): ISetStylePropertyOrNull => {
+      return (value === null)
+        ? null
+        : {
+          value: `${value[propertyName]}px`,
+        };
+    }),
+  ]);
+}
+
+interface IGetPointerSelectAreaObservablesOptions {
+  readonly fileContainerElement$: IObservable<HTMLElement>;
+  readonly filesWithReferences$: IObservable<readonly IFileWithReference[]>;
+}
+
+type IGetPointerSelectAreaObservablesResultDataKeys =
+  | 'pointerSelectAreaVisible$'
+  | 'pointerSelectAreaStyleLeft$'
+  | 'pointerSelectAreaStyleTop$'
+  | 'pointerSelectAreaStyleWidth$'
+  | 'pointerSelectAreaStyleHeight$'
+  ;
+
+interface IGetPointerSelectAreaObservablesResult extends Pick<IData, IGetPointerSelectAreaObservablesResultDataKeys> {
+  readonly selectedFilesFromPointerSelectArea$: IObservable<ISelectedFiles>;
+}
+
+function getPointerSelectAreaObservables(
+  {
+    fileContainerElement$,
+    filesWithReferences$,
+  }: IGetPointerSelectAreaObservablesOptions,
+): IGetPointerSelectAreaObservablesResult {
+  const pointerSelectArea$ = switchMap$$(fileContainerElement$, getPointerSelectArea$$);
+  // pointerSelectArea$($log);
+
+  const pointerSelectAreaStyleLeft$ = extractStylePropertyFromPointerSelectArea$$(pointerSelectArea$, 'absoluteLeft');
+  const pointerSelectAreaStyleTop$ = extractStylePropertyFromPointerSelectArea$$(pointerSelectArea$, 'absoluteTop');
+  const pointerSelectAreaStyleWidth$ = extractStylePropertyFromPointerSelectArea$$(pointerSelectArea$, 'width');
+  const pointerSelectAreaStyleHeight$ = extractStylePropertyFromPointerSelectArea$$(pointerSelectArea$, 'height');
+  const pointerSelectAreaVisible$ = map$$(pointerSelectArea$, _ => (_ !== null));
+
+  const selectedFilesFromPointerSelectArea$ = getSelectedFilesFromPointerSelectArea$$({
+    filesWithReferences$,
+    selectArea$: pointerSelectArea$,
+  });
+
+  return {
+    pointerSelectAreaStyleLeft$,
+    pointerSelectAreaStyleTop$,
+    pointerSelectAreaStyleWidth$,
+    pointerSelectAreaStyleHeight$,
+    pointerSelectAreaVisible$,
+    selectedFilesFromPointerSelectArea$,
+  };
+}
+
+/* FILES SELECTED WITH CLICK */
+
+
+
+
+/* FILES WITH REFERENCE */
+
+type IFileWithReference = [
+  file: IFileEntryExtended,
+  reference: VirtualElementNode<HTMLElement>,
+];
+
+function getFilesWithReferences$(
+  filesExtended$: IObservable<IFilesListExtended>,
+): IObservable<readonly IFileWithReference[]> {
+  return switchMap$$(filesExtended$, (files: IFilesListExtended): IObservable<readonly IFileWithReference[]> => {
+    return combineLatest(
+      files.map((file: IFileEntryExtended): IObservable<IFileWithReference> => {
+        return map$$(file.$reference$.subscribe, (reference: VirtualElementNode<HTMLElement>): IFileWithReference => {
+          return [
+            file,
+            reference,
+          ];
+        });
+      }),
+    );
+  });
+}
+
+
+/* FILES WITH EVENT */
+
+type IFileWithEvent<GEvent extends Event> = [
+  file: IFileEntryExtended,
+  event: GEvent,
+];
+
+function createEventObservableOnFile<GEvent extends Event>(
+  filesExtended$: IObservable<IFilesListExtended>,
+  type: string,
+): IObservable<IFileWithEvent<GEvent>> {
+  return switchMap$$(filesExtended$, (files: IFilesListExtended): IObservable<IFileWithEvent<GEvent>> => {
+    return merge(
+      files.map((file: IFileEntryExtended): IObservable<IFileWithEvent<GEvent>> => {
+        return switchMap$$(file.$reference$.subscribe, (reference: VirtualElementNode<HTMLElement>): IObservable<IFileWithEvent<GEvent>> => {
+          return map$$(fromEventTarget<string, GEvent>(reference.elementNode as any, type), (event: GEvent): IFileWithEvent<GEvent> => {
+            return [
+              file,
+              event,
+            ];
+          });
+        });
+      }),
+    );
+  });
+}
+
+type IFileWithPointerEvent = IFileWithEvent<PointerEvent>;
+
+function onPointerDownFile$$(
+  filesExtended$: IObservable<IFilesListExtended>,
+): IObservable<IFileWithPointerEvent> {
+  return createEventObservableOnFile<PointerEvent>(filesExtended$, 'pointerdown');
+}
+
+// function numberToPxSetStyleProperty(
+//   value: number,
+// ): ISetStyleProperty {
+//   return {
+//     value: `${value}px`,
+//   };
+// }

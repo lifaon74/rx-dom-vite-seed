@@ -63,13 +63,13 @@ $mat-sidenav-container-sidenav-width: min(#{$mat-sidenav-container-sidenav-max-w
       pointer-events: none;
     }
 
-    &.mat-position-start {
+    &.mat-position-left {
       & > .sidenav {
         @include mat-sidenav-container-sidenav-shadow(1);
       }
     }
 
-    &.mat-position-end {
+    &.mat-position-right {
       & > .sidenav {
         @include mat-sidenav-container-sidenav-shadow(-1);
       }
@@ -81,13 +81,13 @@ $mat-sidenav-container-sidenav-width: min(#{$mat-sidenav-container-sidenav-max-w
       display: none;
     }
 
-    &.mat-position-start {
+    &.mat-position-left {
       & > .sidenav {
         border-right: $mat-sidenav-container-sidenav-border;
       }
     }
 
-    &.mat-position-end {
+    &.mat-position-right {
       & > .sidenav {
         border-left: $mat-sidenav-container-sidenav-border;
       }
@@ -103,7 +103,7 @@ $mat-sidenav-container-sidenav-width: min(#{$mat-sidenav-container-sidenav-max-w
       }
     }
 
-    &.mat-position-start {
+    &.mat-position-left {
       & > .sidenav {
         transform: translateX(0);
       }
@@ -115,7 +115,7 @@ $mat-sidenav-container-sidenav-width: min(#{$mat-sidenav-container-sidenav-max-w
       }
     }
 
-    &.mat-position-end {
+    &.mat-position-right {
       & > .sidenav {
         transform: translateX(0);
       }
@@ -128,7 +128,7 @@ $mat-sidenav-container-sidenav-width: min(#{$mat-sidenav-container-sidenav-max-w
     }
   }
 
-  &.mat-position-start {
+  &.mat-position-left {
     & > .sidenav {
       right: auto;
       transform: translateX(-100%);
@@ -140,7 +140,7 @@ $mat-sidenav-container-sidenav-width: min(#{$mat-sidenav-container-sidenav-max-w
     }
   }
 
-  &.mat-position-end {
+  &.mat-position-right {
     & > .sidenav {
       left: auto;
       transform: translateX(100%);

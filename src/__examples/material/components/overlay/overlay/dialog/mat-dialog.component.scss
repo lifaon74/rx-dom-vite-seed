@@ -1,0 +1,48 @@
+@import 'mat-dialog.variables';
+
+/** STYLE **/
+
+:host {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: auto;
+
+  position: absolute;
+  inset: 0;
+  background-color: rgba(#000, 0.32);
+
+  & > .content {
+    position: static;
+    background-color: $mat-dialog-background-color;
+    box-shadow: 0 5px 10px rgba(#000, 0.15);
+    max-width: min(#{$mat-dialog-max-width}, calc(100% - #{$mat-dialog-horizontal-margin}));
+    max-height: 100%;
+    padding: $mat-dialog-vertical-padding $mat-dialog-horizontal-padding;
+    border-radius: 4px;
+    overflow: auto;
+    color: $mat-dialog-color;
+  }
+
+  &.mat-with-animation {
+    opacity: 0;
+    transition: opacity $mat-dialog-transition-duration;
+
+    & > .content {
+      transform: scale(0.75);
+      transition: transform $mat-dialog-transition-duration;
+    }
+
+    &.mat-open {
+      opacity: 1;
+
+      & > .content {
+        transform: scale(1);
+      }
+    }
+
+    &.mat-close {
+      pointer-events: none;
+    }
+  }
+}

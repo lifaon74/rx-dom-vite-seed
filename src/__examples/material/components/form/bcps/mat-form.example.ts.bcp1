@@ -1,0 +1,47 @@
+
+abstract class InputController<GValue> {
+  protected readonly _input: HTMLInputElement;
+  protected readonly _pristine: boolean;
+
+  protected constructor(
+    input: HTMLInputElement,
+  ) {
+    this._input = input;
+    this._pristine = true;
+  }
+
+  get input(): HTMLInputElement {
+    return this._input;
+  }
+
+  abstract getValue(): GValue;
+
+  abstract setValue(
+    value: GValue,
+  ): void;
+
+  isValid(): boolean {
+    // return this._input.checkValidity()
+    return this._input.validity.valid;
+  }
+
+  isDisabled(): boolean {
+    // return this._input.checkValidity()
+    return this._input.validity.valid;
+  }
+
+  isPristine(): boolean {
+
+  }
+
+  // getValue(): GValue {
+  //   return
+  // }
+}
+
+
+
+
+export function matFormExample() {
+
+}

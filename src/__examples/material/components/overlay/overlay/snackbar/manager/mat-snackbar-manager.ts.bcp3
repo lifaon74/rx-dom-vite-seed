@@ -1,0 +1,177 @@
+import {
+  createAbortError,
+  createMulticastSource,
+  first$$$,
+  IMapFilterMapFunctionReturn,
+  IObservable,
+  let$$,
+  MAP_FILTER_DISCARD,
+  mapFilter$$,
+  pipe$$,
+  switchMap$$$,
+  toPromise,
+} from '@lirx/core';
+import { VirtualCustomElementNode } from '@lirx/dom';
+import { MatOverlayManager } from '../../../manager/mat-overlay-manager';
+import { closeMatOverlayWithAnimation } from '../../helpers/close-mat-overlay-with-animation';
+import { openMatOverlayWithAnimation } from '../../helpers/open-mat-overlay-with-animation';
+import { IMatSnackbarComponentConfig, MatSnackbarComponent } from '../snackbar/mat-snackbar.component';
+
+// // @ts-ignore
+// import style from './mat-overlay-manager.scss?inline';
+
+/** TYPES **/
+
+// INPUT
+export interface IMatSnackbarManagerOpenOptionsOnClickAction {
+  (
+    event: MouseEvent,
+  ): void;
+}
+
+export interface IMatSnackbarManagerOpenOptions {
+  message: string;
+  actionText?: string | undefined;
+  onClickAction?: IMatSnackbarManagerOpenOptionsOnClickAction;
+}
+
+// OUTPUT
+export type IMatSnackbarState =
+  | 'opening'
+  | 'opened'
+  | 'closing'
+  | 'closed'
+  ;
+
+export interface IMatSnackbarManagerClose {
+  (): void;
+}
+
+export interface IMatSnackbarManagerOpenResult {
+  node: VirtualCustomElementNode<IMatSnackbarComponentConfig>;
+  close: IMatSnackbarManagerClose;
+  state$: IObservable<IMatSnackbarState>;
+}
+
+
+export type IMatSnackbarWithQueueState =
+  | IMatSnackbarState
+  | 'queued'
+  ;
+
+export interface IMatSnackbarManagerOpenQueue {
+  close: IMatSnackbarManagerClose;
+  state$: IObservable<IMatSnackbarWithQueueState>;
+}
+
+/** FUNCTIONS **/
+
+export function untilClosed$$(
+  state$: IObservable<IMatSnackbarState>,
+): IObservable<void> {
+  return mapFilter$$(state$, (state: IMatSnackbarState): IMapFilterMapFunctionReturn<void> => {
+    return (state === 'closed')
+      ? void 0
+      : MAP_FILTER_DISCARD;
+  });
+}
+
+/** CLASS **/
+
+export class MatSnackbarManager {
+
+  protected readonly _manager: MatOverlayManager;
+  // protected _queue: IObservable<IMatSnackbarManagerOpenResult>;
+  protected _queue: Promise<IMatSnackbarManagerOpenResult | undefined>;
+
+  constructor(
+    manager: MatOverlayManager,
+  ) {
+    this._manager = manager;
+    // this._queue = single<IMatSnackbarManagerOpenResult>(void 0 as any);
+    this._queue = Promise.resolve<IMatSnackbarManagerOpenResult | undefined>(void 0 as any);
+  }
+
+  get manager(): MatOverlayManager {
+    return this._manager;
+  }
+
+  openQueue(
+    options: IMatSnackbarManagerOpenOptions,
+  ): IMatSnackbarManagerOpenQueue {
+
+  }
+
+  // open$(
+  //   options: IMatSnackbarManagerOpenOptions,
+  // ): IObservable<IMatSnackbarManagerOpenResult> {
+  //   return this._queue = switchMap$$(this._queue, (result: IMatSnackbarManagerOpenResult): IObservable<IMatSnackbarManagerOpenResult> => {
+  //     result.close();
+  //     return this.open$(options);
+  //   });
+  // }
+
+  open(
+    {
+      message,
+      actionText,
+      onClickAction,
+    }: IMatSnackbarManagerOpenOptions,
+  ): IMatSnackbarManagerOpenResult {
+    const node: VirtualCustomElementNode<IMatSnackbarComponentConfig> = this.manager.open(MatSnackbarComponent);
+    node.inputs.set('message', message);
+    node.inputs.set('actionText', actionText);
+
+    if (onClickAction !== void 0) {
+      node.outputs.get$('clickAction')(onClickAction);
+    }
+
+    const { emit: $state, subscribe: state$ } = let$$<IMatSnackbarState>('opening');
+    const { emit: $triggerClose, subscribe: triggerClose$ } = createMulticastSource<void>();
+
+    const open$ = openMatOverlayWithAnimation(node);
+
+    const unsubscribeOfOpen = open$(() => {
+      $state('opened');
+    });
+
+    const close$ = pipe$$(triggerClose$, [
+      first$$$(),
+      switchMap$$$((): IObservable<void> => {
+        unsubscribeOfOpen();
+        $state('closing');
+        return closeMatOverlayWithAnimation(node);
+      }),
+    ]);
+
+    close$(() => {
+      $state('closed');
+      node.detach();
+    });
+
+    return {
+      node,
+      close: $triggerClose,
+      state$,
+    };
+  }
+}
+
+/*----------*/
+
+export class MatSnackbar {
+  protected readonly _manager: MatOverlayManager;
+  protected readonly _node: VirtualCustomElementNode<IMatSnackbarComponentConfig>;
+
+  constructor(
+    manager: MatOverlayManager,
+  ) {
+    this._manager = manager;
+    this._node = this._manager.open(MatSnackbarComponent);
+    const open$ = openMatOverlayWithAnimation(node);
+  }
+
+  open(): void {
+
+  }
+}

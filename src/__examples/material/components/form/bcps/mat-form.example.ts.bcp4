@@ -1,0 +1,154 @@
+import { $log, distinct$$, fromEventTarget, IMulticastReplayLastSource, IObservable, let$$ } from '@lirx/core';
+
+// class InputController {
+//   protected readonly _input: HTMLInputElement;
+//
+//   constructor(
+//     input: HTMLInputElement,
+//   ) {
+//     this._input = input;
+//   }
+//
+//   get input(): HTMLInputElement {
+//     return this._input;
+//   }
+// }
+//
+// class InputPristineController extends InputController {
+//   protected readonly _$pristine$: IMulticastReplayLastSource<boolean>;
+//   protected readonly _pristine$: IObservable<boolean>;
+//   constructor(
+//     input: HTMLInputElement,
+//   ) {
+//     super(input);
+//     this._$pristine$ = let$$<boolean>(true);
+//     this._pristine$ = distinct$$(this._$pristine$.subscribe);
+//
+//     fromEventTarget(input, 'input')(() => this._$pristine$.emit(false));
+//   }
+//
+//   get pristine(): boolean {
+//     return this._$pristine$.getValue();
+//   }
+//
+//  get pristine$(): IObservable<boolean> {
+//     return this._pristine$;
+//   }
+//
+//   reset(): void {
+//     this._$pristine$.emit(true);
+//   }
+// }
+//
+// class InputTouchedController extends InputController {
+//   protected readonly _$touched$: IMulticastReplayLastSource<boolean>;
+//   protected readonly _touched$: IObservable<boolean>;
+//
+//   constructor(
+//     input: HTMLInputElement,
+//   ) {
+//     super(input);
+//     this._$touched$ = let$$<boolean>(false);
+//     this._touched$ = distinct$$(this._$touched$.subscribe);
+//     fromEventTarget(input, 'blur')(() => this._$touched$.emit(true));
+//   }
+//
+//   get touched(): boolean {
+//     return this._$touched$.getValue();
+//   }
+//
+//   get touched$(): IObservable<boolean> {
+//     return this._touched$;
+//   }
+//
+//   reset(): void {
+//     this._$touched$.emit(false);
+//   }
+// }
+
+
+/*---------*/
+
+interface InputControllerOptions<GValue> {
+  input: HTMLInputElement;
+}
+
+abstract class InputController2<GValue> {
+  protected readonly _input: HTMLInputElement;
+  protected _pristine: boolean;
+
+  protected constructor(
+    {
+      input,
+    }: InputControllerOptions<GValue>,
+  ) {
+    this._input = input;
+    this._pristine = true;
+  }
+
+  get input(): HTMLInputElement {
+    return this._input;
+  }
+
+  abstract getValue(): GValue | null;
+
+  abstract setValue(
+    value: GValue | null,
+  ): void;
+
+  isValid(): boolean {
+    // return this._input.checkValidity()
+    return this._input.validity.valid;
+  }
+
+  isDisabled(): boolean {
+    return this._input.disabled;
+  }
+
+  isPristine(): boolean {
+    return this._pristine;
+  }
+
+  reset(): void {
+    this.setValue(null);
+    this._pristine = true;
+  }
+}
+
+
+interface NumberInputControllerOptions extends InputControllerOptions<number> {
+  min: number;
+  max: number;
+}
+
+
+class NumberInputController extends InputController2<number> {
+
+  constructor() {
+    super();
+  }
+
+  getValue(): number | null {
+    return Number(this._input);
+  }
+
+  setValue(
+    value: number | null,
+  ): void {
+    this._value = value;
+  }
+
+  setMin()
+}
+
+
+export function matFormExample() {
+  const input = document.createElement('input');
+  document.body.appendChild(input);
+
+
+  const pristineController = new InputPristineController(input);
+
+  pristineController.pristine$($log);
+
+}

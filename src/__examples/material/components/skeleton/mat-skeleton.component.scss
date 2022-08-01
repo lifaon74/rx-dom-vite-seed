@@ -1,0 +1,82 @@
+@import 'mat-skeleton.variables';
+
+:host {
+  display: block;
+  position: relative;
+  background-color: $mat-skeleton-background-color;
+  height: 1.2em;
+  animation: 1.5s ease-in-out 0.5s infinite normal none running mat-skeleton-pulse-animation;
+
+  // SHAPE
+
+  &.mat-text {
+    height: auto;
+    transform-origin: 0 55%;
+    transform: scale(1, 0.6);
+    border-radius: 4px / 6.7px;
+
+    &::before {
+      display: inline;
+      content: '⠀';
+    }
+  }
+
+  &.mat-circular {
+    width: $mat-skeleton-circular-size;
+    height: $mat-skeleton-circular-size;
+    border-radius: 50%;
+  }
+
+  &.mat-rectangular {
+  }
+
+
+  // ANIMATIONS
+
+  &.mat-pulse {
+  }
+
+  &.mat-wave {
+    animation: none;
+    overflow: hidden;
+
+    &::after {
+      content: '';
+      display: block;
+
+      animation: mat-skeleton-wave-animation 1.6s linear 0.5s infinite;
+      background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.04), transparent);
+      position: absolute;
+      transform: translateX(-100%);
+      inset: 0
+    }
+  }
+
+  &.mat-no-animation {
+    animation: none;
+  }
+}
+
+@keyframes mat-skeleton-pulse-animation {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes mat-skeleton-wave-animation {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}

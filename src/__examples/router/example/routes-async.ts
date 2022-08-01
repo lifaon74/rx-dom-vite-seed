@@ -1,5 +1,5 @@
 import { IRXRoutesList, navigateTo } from '@lirx/router';
-import { fromPromise, mergeMapS$$, singleN, timeout } from '@lirx/core';
+import { fromPromise, switchMap$$, singleN, timeout } from '@lirx/core';
 import { createSlugs } from '../slugs/create-slugs';
 import { SLUGS } from './slugs';
 
@@ -19,7 +19,7 @@ export const APP_ROUTES_ASYNC: IRXRoutesList = [
   {
     path: '/home',
     // canActivate: () => {
-    //   return mergeMapS$$(timeout(2000), () => singleN<ICanActivateFunctionReturnedValue>(true));
+    //   return switchMap$$(timeout(2000), () => singleN<ICanActivateFunctionReturnedValue>(true));
     // },
     component: () => {
       return fromPromise(import('../pages/home/home.page.component').then(_ => _.AppHomePageComponent));
@@ -40,7 +40,7 @@ export const APP_ROUTES_ASYNC: IRXRoutesList = [
       {
         path: '/async',
         children: () => {
-          return mergeMapS$$(timeout(2000), () => singleN<IRXRoutesList>(listChildRoutes));
+          return switchMap$$(timeout(2000), () => singleN<IRXRoutesList>(listChildRoutes));
         },
       },
       ...listChildRoutes,

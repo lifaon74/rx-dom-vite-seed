@@ -1,0 +1,39 @@
+import { fetchGoogleAPI, IFetchGoogleApiOptions } from './fetch-google-api';
+import { getGoogleIdentityServiceToken, IGetGoogleIdentityServiceToken } from './get-google-identity-service-token';
+
+export interface IGoogleAPIFetcherOptions extends Omit<IFetchGoogleApiOptions, 'token' | 'apiKey'> {
+
+}
+
+export interface ICreateGoogleAPIFetcherOptions extends IGetGoogleIdentityServiceToken, Pick<IFetchGoogleApiOptions, 'apiKey'> {
+
+}
+
+export interface IGoogleAPIFetcher {
+  <GValue>(
+    options: IGoogleAPIFetcherOptions,
+  ): Promise<GValue>;
+}
+
+/**
+ * @deprecated
+ */
+export function createGoogleAPIFetcher(
+  {
+    apiKey,
+    ...options
+  }: ICreateGoogleAPIFetcherOptions,
+): IGoogleAPIFetcher {
+  return <GValue>(
+    _options: IGoogleAPIFetcherOptions,
+  ): Promise<GValue> => {
+    return getGoogleIdentityServiceToken(options)
+      .then((token: string): Promise<GValue> => {
+        return fetchGoogleAPI<GValue>({
+          ..._options,
+          token,
+          apiKey,
+        });
+      });
+  };
+}

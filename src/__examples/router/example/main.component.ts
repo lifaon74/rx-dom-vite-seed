@@ -6,7 +6,7 @@ import {
   IObserver,
   IUnsubscribe,
   map$$,
-  mergeMapS$$,
+  switchMap$$,
   single,
   timeout,
 } from '@lirx/core';
@@ -102,7 +102,7 @@ export const AppMainComponent = createComponent<IAppMainComponentConfig>({
     let router: IRXRouter;
     let unsubscribeLoading: IUnsubscribe;
 
-    const progress$ = mergeMapS$$(routerOutletElement$, (routerOutletElement: IRXRouterOutletElement): IObservable<number> => {
+    const progress$ = switchMap$$(routerOutletElement$, (routerOutletElement: IRXRouterOutletElement): IObservable<number> => {
       if (router !== void 0) {
         router.destroy();
       }
@@ -114,13 +114,13 @@ export const AppMainComponent = createComponent<IAppMainComponentConfig>({
 
       router.error$($log);
 
-      const loading$ = mergeMapS$$(router.state$, (state: IRXRouterNavigationState) => {
+      const loading$ = switchMap$$(router.state$, (state: IRXRouterNavigationState) => {
         return (state === 'updating')
           ? map$$(timeout(200), () => true)
           : single(false);
       });
 
-      const progress$ = mergeMapS$$(loading$, (loading: boolean): IObservable<number> => {
+      const progress$ = switchMap$$(loading$, (loading: boolean): IObservable<number> => {
         return loading
           ? createFakeProgressObservable(2000)
           : single(0);

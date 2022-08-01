@@ -11,7 +11,8 @@
 
   & > * {
     position: absolute;
-    inset: 0;
+    left: 0;
+    right: 0;
   }
 
   & > .toolbar {
@@ -23,7 +24,28 @@
   }
 
   & > .content {
-    top: $mat-toolbar-container-toolbar-height;
     overflow: auto;
+  }
+
+  &.mat-position-top {
+    & > .toolbar {
+      top: 0;
+    }
+
+    & > .content {
+      top: $mat-toolbar-container-toolbar-height;
+      bottom: 0;
+    }
+  }
+
+  &.mat-position-bottom {
+    & > .toolbar {
+      bottom: 0;
+    }
+
+    & > .content {
+      top: 0;
+      bottom: $mat-toolbar-container-toolbar-height;
+    }
   }
 }

@@ -1,0 +1,30 @@
+<mat-dialog-close
+  (click)="$.$onClickCloseIcon"
+></mat-dialog-close>
+
+<mat-dialog-title
+  #ref="$.$matDialogTitleRef"
+>
+  <rx-inject-slot
+    name="title"
+  ></rx-inject-slot>
+</mat-dialog-title>
+
+<mat-dialog-content
+  [style.max-height]="$.matDialogContentHeightProperty$"
+>
+  <rx-inject-slot
+    name="content"
+  ></rx-inject-slot>
+</mat-dialog-content>
+
+<mat-dialog-actions
+  #ref="$.$matDialogActionsRef"
+>
+  <rx-inject-slot
+    name="actions"
+  ></rx-inject-slot>
+</mat-dialog-actions>
+
+
+

@@ -119,7 +119,7 @@ export const MatIconsDemoComponent = createComponent<IMatIconsDemoComponentConfi
           .filter((icon: IIcon): boolean => {
             return reg.test(icon.componentTagName);
           })
-          .slice(0, 100)
+          // .slice(0, 100)
         ;
       });
 

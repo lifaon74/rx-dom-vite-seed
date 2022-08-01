@@ -1,0 +1,127 @@
+
+
+<form
+  class="url-input"
+  (submit)="$.$onSubmit"
+>
+  <input
+    tabindex="0"
+    #element-reference="$.$inputRef"
+    [value]="$.inputValue$"
+  >
+</form>
+
+
+<div
+  class="url-navigator"
+  tabindex="0"
+>
+  <div
+    class="part origin clickable"
+    (click)="$.$onClickOrigin"
+  >
+    <div class="part protocol-with-separator">
+      <div class="part protocol">
+        {{ $.urlProtocol$ }}
+      </div>
+      <div class="part separator">
+        //
+      </div>
+    </div>
+
+
+    <div class="part credentials">
+      <div class="part username">
+        {{ $.urlUsername$ }}
+      </div>
+      <div class="part separator">
+        :
+      </div>
+      <div class="part password">
+        {{ $.urlPassword$ }}
+      </div>
+      <div class="part at">
+        @
+      </div>
+    </div>
+
+    <div class="part host">
+      <div class="part hostname">
+        {{ $.urlHostname$ }}
+      </div>
+      <div class="part port-with-separator">
+        <div class="part separator">
+          :
+        </div>
+        <div class="part port">
+          {{ $.urlPort$ }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="part pathname">
+    <div
+      class="part path-segment"
+      *for="let segment of $.urlPathSegments$; index as index$"
+    >
+      <div class="part separator">
+        /
+      </div>
+      <div
+        class="part segment clickable"
+        (click)="() => $.$onClickPathSegment(index$)"
+      >
+        {{ segment }}
+      </div>
+    </div>
+  </div>
+
+  <div class="part search">
+    <div class="part separator">
+      ?
+    </div>
+    <div
+      class="part search-segment"
+      *for="let segment of $.urlSearchSegments$; index as index$"
+    >
+      <div
+        class="part separator"
+        *if="$.gt$$(index$, $.single(0))"
+      >
+        &
+      </div>
+
+      <div class="part key">
+        {{ segment[0] }}
+      </div>
+
+      <rx-container
+        *if="segment[1] !== ''"
+      >
+        <div class="part separator">
+          =
+        </div>
+        <div class="part value">
+          {{ segment[1] }}
+        </div>
+      </rx-container>
+    </div>
+  </div>
+
+  <div class="part hash">
+    {{ $.urlHash$ }}
+  </div>
+
+</div>
+
+
+<div class="scroll-shadows"></div>
+
+<div
+  class="swap-view-icon"
+  [title]="'Toggle view\nALT + T'"
+  (click)="$.$onClickSwapViewIcon"
+>
+  <icon-swap-vertical></icon-swap-vertical>
+</div>

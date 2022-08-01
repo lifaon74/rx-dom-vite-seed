@@ -1,5 +1,5 @@
 import { ICanActivateFunctionReturn, ICanActivateFunctionReturnedValue, IRXRoutesList, navigateTo } from '@lirx/router';
-import { IObservable, mergeMapS$$, single, singleN, timeout } from '@lirx/core';
+import { IObservable, switchMap$$, single, singleN, timeout } from '@lirx/core';
 import { AppSubListPageComponent } from '../pages/sub-list/sub-list.page.component';
 import { AppHomePageComponent } from '../pages/home/home.page.component';
 import { AppProductPageComponent } from '../pages/product/product.page.component';
@@ -34,7 +34,7 @@ export const APP_ROUTES: IRXRoutesList = [
       {
         path: '/async',
         canActivate: () => {
-          return mergeMapS$$(timeout(2000), () => singleN<ICanActivateFunctionReturnedValue>(true));
+          return switchMap$$(timeout(2000), () => singleN<ICanActivateFunctionReturnedValue>(true));
         },
         children: listChildRoutes,
       },
