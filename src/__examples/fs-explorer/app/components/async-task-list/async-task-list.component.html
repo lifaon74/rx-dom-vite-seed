@@ -1,0 +1,12 @@
+<!--$[pausable]="task.pausable$"-->
+<!--$[paused]="task.paused$"-->
+
+<div class="task-list">
+  <app-async-task
+    *for="let task of $.tasks$"
+    $[name]="task.name$"
+    $[message]="task.message$"
+    $[progress]="task.progress$"
+  ></app-async-task>
+</div>
+

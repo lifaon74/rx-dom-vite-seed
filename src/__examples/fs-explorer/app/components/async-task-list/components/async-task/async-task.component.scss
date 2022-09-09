@@ -1,0 +1,181 @@
+
+$app-async-task-name-color: #333;
+//$app-async-task-name-color-errored: #ef5656;
+
+$app-async-task-message-color: #aaa;
+$app-async-task-message-color-errored: #aaa;
+//$app-async-task-message-color-errored: #f96d6d;
+
+$app-async-task-progress-bar-height: 8px;
+$app-async-task-progress-bar-color: #7fc170;
+$app-async-task-progress-bar-color-errored: #ef5656;
+$app-async-task-progress-bar-color-undetermined: #63aed7;
+$app-async-task-progress-bar-color-completed: #428c2f;
+
+:host {
+  display: block;
+  padding: 8px;
+  font-size: 0;
+
+  & > .name-and-actions {
+    $size: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+
+    & > .name {
+      font-size: 14px;
+      line-height: $size;
+      color: #{$app-async-task-name-color};
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+    }
+
+    & > .actions {
+      white-space: nowrap;
+
+      & > * {
+        $icon-size: 16px;
+
+        --mat-icon-button-icon-size: #{$icon-size};
+        --mat-icon-button-padding: #{($size - $icon-size) * 0.5};
+
+        &:not(:first-child) {
+          margin-left: 2px;
+        }
+      }
+    }
+  }
+
+  & > .message {
+    width: 100%;
+    font-size: 12px;
+    line-height: 16px;
+    color: #{$app-async-task-message-color};
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  & > .progress-bar {
+    $progress-bar-height: 8px;
+
+    margin-top: 8px;
+    height: $progress-bar-height;
+    border-radius: 2px;
+    overflow: hidden;
+    background-color: rgba($app-async-task-progress-bar-color, 0.3);
+
+    & > .progress {
+      height: 100%;
+      background-color: #{$app-async-task-progress-bar-color};
+    }
+  }
+
+  &.state-errored,
+  &.state-complete {
+    & > .progress-bar {
+      & > .progress {
+        display: none;
+      }
+    }
+  }
+
+  &.state-errored {
+    & > .message {
+      color: #{$app-async-task-message-color-errored};
+    }
+
+    & > .progress-bar {
+      background-color: #{$app-async-task-progress-bar-color-errored};
+    }
+  }
+
+  &.undetermined {
+    & > .progress-bar {
+      position: relative;
+      background-color: rgba($app-async-task-progress-bar-color-undetermined, 0.3);
+
+      & > .progress {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        background-color: $app-async-task-progress-bar-color-undetermined;
+      }
+    }
+
+    &:not(.paused) {
+      & > .progress-bar {
+        & > .progress {
+          animation: app-async-task-progress-bar-undetermined-animation 1.2s linear infinite;
+        }
+      }
+    }
+
+    &.paused {
+      & > .progress-bar {
+        & > .progress {
+          left: 20%;
+          right: 30%;
+        }
+      }
+    }
+  }
+
+  &.complete {
+    & > .progress-bar {
+      background-color: #{$app-async-task-progress-bar-color-completed};
+    }
+  }
+
+  &.errored,
+  &.complete,
+  &.paused,
+  &:not(.pausable) {
+    & > .name-and-actions {
+      & > .actions {
+        & > .pause-icon {
+          display: none;
+        }
+      }
+    }
+  }
+
+  &:not(.paused):not(.errored),
+  &:not(.pausable) {
+    & > .name-and-actions {
+      & > .actions {
+        & > .resume-icon {
+          display: none;
+        }
+      }
+    }
+  }
+}
+
+@keyframes app-async-task-progress-bar-undetermined-animation {
+  0% {
+    left: 0;
+    right: 100%;
+  }
+  25% {
+    left: 0;
+    right: 50%;
+  }
+  50% {
+    left: 40%;
+    right: 40%;
+  }
+  75% {
+    left: 50%;
+    right: 0;
+  }
+  100% {
+    left: 100%;
+    right: 0;
+  }
+}
+

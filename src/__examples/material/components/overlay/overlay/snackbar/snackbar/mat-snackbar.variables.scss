@@ -1,8 +1,4 @@
 @import '../../../../../styles/mat.variables';
-@import '../../../../buttons/button/mat-button.variables';
-
-
-$mat-snackbar-transition-duration: var(--mat-snackbar-transition-duration, 2500ms);
 
 $mat-snackbar-width: var(--mat-snackbar-width, 344px);
 $mat-snackbar-margin: var(--mat-snackbar-margin, 8px);

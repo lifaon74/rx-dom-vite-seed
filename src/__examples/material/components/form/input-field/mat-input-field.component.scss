@@ -1,0 +1,40 @@
+@import 'mat-input-field.variables';
+
+
+/** STYLE **/
+
+:host {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  //& > .prefix {
+  //  border-top-width: $mat-input-field-border-width;
+  //  border-bottom-width: $mat-input-field-border-width;
+  //  border-style: solid;
+  //  border-color: $mat-input-field-border-color;
+  //}
+
+  border: $mat-input-field-border-width solid $mat-input-field-border-color;
+
+  & > .input {
+    flex-grow: 1;
+
+    & > input {
+      appearance: none;
+      max-width: none;
+      width: 100%;
+      height: #{$mat-input-field-height};
+      border: 0;
+      padding: 0 $mat-input-field-input-horizontal-padding;
+      font-size: 16px;
+      color: $mat-input-field-color;
+      background-color: transparent;
+      text-overflow: ellipsis;
+
+      &:focus {
+        box-shadow: inset 0 0 0 1px $mat-input-field-border-color-focused;
+      }
+    }
+  }
+}

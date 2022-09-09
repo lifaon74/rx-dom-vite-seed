@@ -1,6 +1,11 @@
 $mat-font-family: var(--mat-font-family, (Roboto, Helvetica, Neue, sans-serif));
 
+
+// colors
+
+$mat-color-primary-raw: #3f51b5;
 $mat-color-primary: var(--mat-color-primary, #3f51b5);
-$mat-color-secondary-raw: #FF4081;
+
+$mat-color-secondary-raw: #ff4081;
 $mat-color-secondary: var(--mat-color-secondary, $mat-color-secondary-raw);
 

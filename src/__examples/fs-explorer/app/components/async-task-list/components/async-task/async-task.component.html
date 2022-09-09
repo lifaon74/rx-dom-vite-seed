@@ -1,0 +1,45 @@
+<div class="name-and-actions">
+  <div class="name">
+    {{ $.name$ }}
+  </div>
+
+  <div class="actions">
+    <mat-icon-button
+      class="pause-icon"
+      [title]="'Pause'"
+    >
+      <icon-pause></icon-pause>
+    </mat-icon-button>
+
+    <mat-icon-button
+      class="resume-icon"
+      [title]="'Resume'"
+    >
+      <icon-play></icon-play>
+    </mat-icon-button>
+
+    <mat-icon-button
+      class="remove-icon"
+      [title]="'Remove'"
+    >
+      <icon-close></icon-close>
+    </mat-icon-button>
+  </div>
+</div>
+
+<div
+  class="message"
+  *if="$.hasMessage$"
+>
+  {{ $.message$ }}
+</div>
+
+<div
+  class="progress-bar"
+  [title]="$.progressTitle$"
+>
+  <div
+    class="progress"
+    [style.width]="$.progressPercent$"
+  ></div>
+</div>

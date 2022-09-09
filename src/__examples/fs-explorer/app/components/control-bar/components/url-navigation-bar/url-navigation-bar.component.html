@@ -1,4 +1,11 @@
 
+<button
+  class="swap-view-icon"
+  [title]="'Toggle view\nALT + T'"
+  (click)="$.$onClickSwapViewIcon"
+>
+  <icon-swap-vertical></icon-swap-vertical>
+</button>
 
 <form
   class="url-input"
@@ -14,9 +21,9 @@
 
 <div
   class="url-navigator"
-  tabindex="0"
+  tabindex="-1"
 >
-  <div
+  <button
     class="part origin clickable"
     (click)="$.$onClickOrigin"
   >
@@ -58,22 +65,23 @@
         </div>
       </div>
     </div>
-  </div>
+  </button>
 
   <div class="part pathname">
     <div
       class="part path-segment"
-      *for="let segment of $.urlPathSegments$; index as index$"
+      *for="let segment of $.urlPathSegments$; index$ as index$"
     >
       <div class="part separator">
         /
       </div>
-      <div
+      <button
         class="part segment clickable"
         (click)="() => $.$onClickPathSegment(index$)"
+        [disabled]="segment === ''"
       >
         {{ segment }}
-      </div>
+      </button>
     </div>
   </div>
 
@@ -83,7 +91,7 @@
     </div>
     <div
       class="part search-segment"
-      *for="let segment of $.urlSearchSegments$; index as index$"
+      *for="let segment of $.urlSearchSegments$; index$ as index$"
     >
       <div
         class="part separator"
@@ -118,10 +126,3 @@
 
 <div class="scroll-shadows"></div>
 
-<div
-  class="swap-view-icon"
-  [title]="'Toggle view\nALT + T'"
-  (click)="$.$onClickSwapViewIcon"
->
-  <icon-swap-vertical></icon-swap-vertical>
-</div>

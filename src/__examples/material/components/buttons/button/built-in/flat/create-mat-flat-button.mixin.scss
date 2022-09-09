@@ -1,0 +1,26 @@
+@import '../../../../../styles/mat.functions';
+
+@mixin create-mat-flat-button(
+  $color,
+  $color-raw,
+) {
+  --mat-button-color: white;
+  --mat-button-background-color: #{$color};
+  --mat-button-border-color: #{$color};
+
+  --mat-button-color-hover: white;
+  --mat-button-background-color-hover: #{$color};
+  --mat-button-border-color-hover: #{$color};
+
+  --mat-button-color-focus: white;
+  --mat-button-background-color-focus: #{change-color-lightness($color-raw, -20%)};
+  --mat-button-border-color-focus: #{change-color-lightness($color-raw, -20%)};
+
+  $color-disabled: rgba(black, 0.26);
+  --mat-button-color-disabled:$color-disabled;
+  --mat-button-background-color-disabled: $color-disabled;
+  --mat-button-border-color-disabled: $color-disabled;
+
+  --mat-ripple-color: #{rgba(white, 0.15)};
+}
+

@@ -1,3 +1,9 @@
+import { freeze } from '@lirx/core';
+import { matFormFieldExample } from './form-field/mat-form-field.example';
+import { matInputFieldExample } from './input-field/mat-input-field.example';
+import { matInputTextExample } from './input-text/mat-input-text.example';
+import { numberInputValidator } from './input-validator/built-in/number-input-validator';
+
 // class InputController {
 //   protected readonly _input: HTMLInputElement;
 //
@@ -113,30 +119,6 @@
 //   }
 // }
 
-// function createValidator<GOptions extends object, GValue>(
-//   options: GOptions,
-//   verify: (value: GValue) => boolean,
-//   onInvalid: (options: GOptions) => string,
-// ) {
-//   return (
-//     value: GValue,
-//   ): string | undefined => {
-//     return verify(value)
-//       ? onInvalid(options)
-//       : void 0;
-//   };
-// }
-//
-// function minLengthValidator(
-//   minLength: number,
-//   onInvalid: () => string,
-// ) {
-//   return (
-//     value: string,
-//   ): string | undefined => {
-//     return (value.length < minLength);
-//   };
-// }
 
 /*---------*/
 
@@ -146,15 +128,33 @@
   - must support many parallel errors
  */
 
+/*--------------*/
+
+
+function matInputValidatorExample() {
+  const input = document.createElement('input');
+  document.body.appendChild(input);
+
+  const validator = numberInputValidator({
+    min: -5,
+    max: 5,
+    step: 1,
+  });
+
+  // const validator = numberInputValidator({
+  //   max: 50,
+  //   step: 1,
+  // });
+
+  console.log(validator('5'));
+
+}
 
 /*---------*/
 
 export function matFormExample() {
-  const input = document.createElement('input');
-  document.body.appendChild(input);
-
-  // const pristineController = new InputPristineController(input);
-  //
-  // pristineController.pristine$($log);
-
+  // matInputValidatorExample();
+  // matFormFieldExample();
+  matInputFieldExample();
+  // matInputTextExample();
 }

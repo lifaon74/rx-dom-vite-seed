@@ -8,5 +8,6 @@
   top: $mat-dialog-close-offset;
   right: $mat-dialog-close-offset;
 
+  --mat-icon-button-color-hover: #{$mat-dialog-close-color-hover};
   --mat-icon-button-background-color-hover: transparent;
 }

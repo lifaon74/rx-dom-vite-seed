@@ -1,0 +1,25 @@
+@import '../../../../../styles/mat.functions';
+
+@mixin create-mat-basic-button(
+  $color,
+  $color-raw,
+) {
+  --mat-button-color: #{$color};
+  --mat-button-background-color: transparent;
+  --mat-button-border-color: transparent;
+
+  --mat-button-color-hover: #{$color};
+  --mat-button-background-color-hover: #{change-color-opacity($color-raw, 0.15)};
+  --mat-button-border-color-hover: #{change-color-opacity($color-raw, 0.15)};
+
+  --mat-button-color-focus: #{$color};
+  --mat-button-background-color-focus: #{change-color-opacity($color-raw, 0.20)};
+  --mat-button-border-color-focus: #{change-color-opacity($color-raw, 0.20)};
+
+  --mat-button-color-disabled: #{change-color-opacity($color-raw, 0.26)};
+  --mat-button-background-color-disabled: transparent;
+  --mat-button-border-color-disabled: transparent;
+
+  --mat-ripple-color: #{change-color-opacity($color-raw, 0.15)};
+}
+

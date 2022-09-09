@@ -1,0 +1,173 @@
+import { IMulticastReplayLastSource, IObservable, let$$ } from '@lirx/core';
+import { toObservableStrict, VirtualCustomElementNode } from '@lirx/dom';
+import { MatOverlayManager } from '../../../manager/mat-overlay-manager';
+import {
+  IMatSnackbarComponentConfig,
+  IMatSnackbarComponentHorizontalPosition, IMatSnackbarComponentVerticalPosition, IMatSnackbarComponentWidth,
+  MatSnackbarComponent,
+} from '../snackbar/mat-snackbar.component';
+
+/** TYPES **/
+
+export interface IMatSnackbarAnimatedOptionsOnClickAction {
+  (
+    event: MouseEvent,
+  ): void;
+}
+
+export interface IMatSnackbarAnimatedOptions {
+  manager: MatOverlayManager,
+  message: IObservable<string>;
+  actionText?: string | undefined;
+  horizontalPosition?: IMatSnackbarComponentHorizontalPosition | undefined;
+  verticalPosition?: IMatSnackbarComponentVerticalPosition | undefined;
+  width?: IMatSnackbarComponentWidth | undefined;
+  onClickAction?: IMatSnackbarAnimatedOptionsOnClickAction;
+  animationDuration?: number;
+
+}
+
+export type IMatSnackbarAnimatedState =
+  | 'opening'
+  | 'opened'
+  | 'closing'
+  | 'closed'
+  ;
+
+// https://developer.mozilla.org/en-US/docs/Web/API/Element/animate
+
+/** CLASS **/
+
+export class MatSnackbarAnimated {
+  protected readonly _manager: MatOverlayManager;
+  protected readonly _node: VirtualCustomElementNode<IMatSnackbarComponentConfig>;
+  protected readonly _$state$: IMulticastReplayLastSource<IMatSnackbarAnimatedState>;
+  protected readonly _animation: Animation;
+
+  constructor(
+    {
+      manager,
+      message,
+      actionText,
+      horizontalPosition,
+      verticalPosition,
+      width,
+      onClickAction,
+      animationDuration = 100,
+    }: IMatSnackbarAnimatedOptions,
+  ) {
+    this._manager = manager;
+    this._node = MatSnackbarComponent.create();
+    this._$state$ = let$$<IMatSnackbarAnimatedState>('closed');
+
+    this._animation = new Animation(
+      new KeyframeEffect(
+        this._node.elementNode,
+        getMatSnackbarAnimatedKeyFrames({
+          horizontalPosition,
+          verticalPosition,
+        }),
+        {
+          duration: animationDuration,
+          fill: 'both',
+          composite: 'add',
+        },
+      ),
+    );
+
+    this._animation.onfinish = () => {
+      if (this.state === 'opening') {
+        this._$state$.emit('opened');
+      } else if (this.state === 'closing') {
+        // this._manager.close(this._node);
+        this._$state$.emit('closed');
+      }
+    };
+
+    this._node.inputs.set('message', toObservableStrict()message);
+    this._node.inputs.set('actionText', actionText);
+    this._node.inputs.set('horizontalPosition', horizontalPosition);
+    this._node.inputs.set('verticalPosition', verticalPosition);
+    this._node.inputs.set('width', width);
+
+    if (onClickAction !== void 0) {
+      this._node.outputs.get$('clickAction')(onClickAction);
+    }
+  }
+
+  get state(): IMatSnackbarAnimatedState {
+    return this._$state$.getValue();
+  }
+
+  get state$(): IObservable<IMatSnackbarAnimatedState> {
+    return this._$state$.subscribe;
+  }
+
+  open(): void {
+    if (
+      (this.state == 'closing')
+      || (this.state == 'closed')
+    ) {
+      if (!this._manager.has(this._node)) {
+        this._manager.adopt(this._node);
+      }
+      this._$state$.emit('opening');
+      this._animation.playbackRate = 1;
+      this._animation.play();
+    }
+  }
+
+  close(): void {
+    if (
+      (this.state == 'opening')
+      || (this.state == 'opened')
+    ) {
+      this._$state$.emit('closing');
+      this._animation.playbackRate = -1;
+      this._animation.play();
+    }
+  }
+}
+
+
+/** FUNCTIONS **/
+
+type IGetMatSnackbarAnimatedKeyFramesOptions = Pick<IMatSnackbarAnimatedOptions, 'horizontalPosition' | 'verticalPosition'>;
+
+function getMatSnackbarAnimatedKeyFramesStartTransform(
+  {
+    horizontalPosition = 'left',
+    verticalPosition = 'bottom',
+  }: IGetMatSnackbarAnimatedKeyFramesOptions,
+): string {
+  const matSnackbarHorizontalOffset: string = 'var(--mat-snackbar-horizontal-offset, 24px)';
+  const matSnackbarVerticalOffset: string = 'var(--mat-snackbar-vertical-offset, 24px)';
+
+  if (horizontalPosition === 'left') {
+    return `translateX(calc(-100% - ${matSnackbarHorizontalOffset}))`;
+  } else if (horizontalPosition === 'right') {
+    return `translateX(calc(100% + ${matSnackbarHorizontalOffset}))`;
+  } else {
+    if (verticalPosition === 'bottom') {
+      return `translateY(calc(100% + ${matSnackbarVerticalOffset}))`;
+    } else {
+      return `translateY(calc(-100% - ${matSnackbarVerticalOffset}))`;
+    }
+  }
+}
+
+function getMatSnackbarAnimatedKeyFrames(
+  options: IGetMatSnackbarAnimatedKeyFramesOptions,
+): Keyframe[] {
+  return [
+    {
+      opacity: '0',
+      transform: getMatSnackbarAnimatedKeyFramesStartTransform(options),
+    },
+    {
+      opacity: '1',
+      transform: 'translateX(0)',
+    },
+  ];
+}
+

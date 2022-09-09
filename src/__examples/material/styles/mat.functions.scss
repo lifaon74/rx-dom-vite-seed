@@ -1,0 +1,14 @@
+@use 'sass:color';
+
+// awaiting on css-color-5: https://www.w3.org/TR/css-color-5/#relative-colors
+
+@function change-color-opacity($color, $opacity) {
+  @return rgba($color, $opacity);
+  //@return rgba(from #{$color} r g b / #{$opacity}); // css lvl 5
+}
+
+
+@function change-color-lightness($color, $lightness) {
+  @return color.scale($color, $lightness: $lightness);
+  //@return rgba(from #{$color} r g b / #{$opacity}); // css lvl 5
+}

@@ -1,0 +1,275 @@
+import { $log } from '@lirx/core';
+import {
+  animate2,
+  animateFactory,
+  IOnAnimationEndFunction,
+  IStopAnimationFunction,
+} from '../../../../../../__debug/animations/animate/animate';
+import { invertTimingFunction } from '../../../../../../__debug/animations/timing/built-in/invert-timing-function';
+import { parallelTransitions } from '../../../../../../__debug/animations/transition/group/parallel-transitions';
+import {
+  applyTimingFunctionToTransition,
+} from '../../../../../../__debug/animations/transition/modifiers/apply-timing-function-to-transition';
+import { mapTransition } from '../../../../../../__debug/animations/transition/modifiers/map-transition';
+import { createNumberTransition } from '../../../../../../__debug/animations/transition/number/create-number-transition';
+import {
+  createManualStylePropertyTransition,
+
+} from '../../../../../../__debug/animations/transition/style-property/create-manual-style-property-transition';
+import {
+  createManualStylePropertyTransitionWithComputedInitialValue,
+} from '../../../../../../__debug/animations/transition/style-property/create-manual-style-property-transition-with-computed-initial-value';
+import {
+  createTargetStylePropertyTransition,
+} from '../../../../../../__debug/animations/transition/style-property/create-target-style-property-transition';
+import { ITransitionFunction } from '../../../../../../__debug/animations/transition/transition-function.type';
+import { MatOverlayManager } from '../../manager/mat-overlay-manager';
+import { AnimatedOverlayController } from '../helpers/animation/animated-overlay-controller';
+import { MatSnackbarAnimated } from './controllers/mat-snackbar-animated';
+import { MatSnackbarQueueManager } from './controllers/mat-snackbar-queue-manager';
+import { MatSnackbarComponent } from './snackbar/mat-snackbar.component';
+
+/*----------------------------*/
+
+// interface IData {
+//   readonly close$: IObservable<any>;
+//   readonly $onClickCancelButton: IObserver<MouseEvent>;
+// }
+//
+// export interface IMyModalComponentConfig {
+//   element: HTMLElement;
+//   data: IData;
+// }
+//
+// const MyModalComponent = createComponent<IMyModalComponentConfig>({
+//   name: 'my-modal',
+//   template: compileReactiveHTMLAsComponentTemplate({
+//     html: `
+//     <mat-dialog-classic
+//       $[close]="$.close$"
+//     >
+//       <rx-slot name="title">
+//          My modal
+//       </rx-slot>
+//
+//       <rx-slot name="content">
+//         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas tincidunt cursus nisi, eleifend vestibulum risus lobortis sagittis. In vehicula magna quis venenatis congue. Integer turpis est, fermentum vitae tortor sed, interdum gravida eros. Curabitur et vestibulum ex. Mauris lobortis mauris magna, ac gravida sapien porttitor eget. Aliquam vestibulum mauris a dui gravida, vel bibendum dolor posuere. Suspendisse vitae tempus turpis, eget elementum erat. Vivamus pretium at lacus a varius. Proin vel arcu at turpis luctus mollis sed ut risus. Maecenas vitae congue nisl. Pellentesque eu accumsan metus. Phasellus ultrices eros ut ipsum pharetra aliquam. Vestibulum erat mauris, varius at bibendum eget, pharetra in eros. Nunc accumsan enim eget turpis consequat vestibulum.
+//         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas tincidunt cursus nisi, eleifend vestibulum risus lobortis sagittis. In vehicula magna quis venenatis congue. Integer turpis est, fermentum vitae tortor sed, interdum gravida eros. Curabitur et vestibulum ex. Mauris lobortis mauris magna, ac gravida sapien porttitor eget. Aliquam vestibulum mauris a dui gravida, vel bibendum dolor posuere. Suspendisse vitae tempus turpis, eget elementum erat. Vivamus pretium at lacus a varius. Proin vel arcu at turpis luctus mollis sed ut risus. Maecenas vitae congue nisl. Pellentesque eu accumsan metus. Phasellus ultrices eros ut ipsum pharetra aliquam. Vestibulum erat mauris, varius at bibendum eget, pharetra in eros. Nunc accumsan enim eget turpis consequat vestibulum.
+//         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas tincidunt cursus nisi, eleifend vestibulum risus lobortis sagittis. In vehicula magna quis venenatis congue. Integer turpis est, fermentum vitae tortor sed, interdum gravida eros. Curabitur et vestibulum ex. Mauris lobortis mauris magna, ac gravida sapien porttitor eget. Aliquam vestibulum mauris a dui gravida, vel bibendum dolor posuere. Suspendisse vitae tempus turpis, eget elementum erat. Vivamus pretium at lacus a varius. Proin vel arcu at turpis luctus mollis sed ut risus. Maecenas vitae congue nisl. Pellentesque eu accumsan metus. Phasellus ultrices eros ut ipsum pharetra aliquam. Vestibulum erat mauris, varius at bibendum eget, pharetra in eros. Nunc accumsan enim eget turpis consequat vestibulum.
+//       </rx-slot>
+//
+//       <rx-slot name="actions">
+//         <mat-button (click)="$.$onClickCancelButton">
+//           Cancel
+//         </mat-button>
+//         <mat-button>
+//           Go
+//         </mat-button>
+//       </rx-slot>
+//     </mat-dialog-classic>
+//   `,
+//     customElements: [
+//       MatDialogClassicComponent,
+//       MatButtonComponent,
+//     ],
+//   }),
+//   init: (node): IData => {
+//     const { emit: $onClickCancelButton, subscribe: onClickCancelButton$ } = createMulticastSource<MouseEvent>();
+//     const close$ = onClickCancelButton$;
+//
+//     return {
+//       close$,
+//       $onClickCancelButton,
+//     };
+//   },
+// });
+
+function matSnackbarExample0(): void {
+
+  const manager = MatOverlayManager.create();
+
+  const openButton = document.createElement('button');
+  openButton.innerText = 'open';
+  document.body.appendChild(openButton);
+
+  const closeButton = document.createElement('button');
+  closeButton.innerText = 'close';
+  document.body.appendChild(closeButton);
+
+  const node = MatSnackbarComponent.create();
+  node.inputs.set('message', 'test message');
+
+  /*---*/
+  const closedOpacity: string = '0';
+  const closedTransform: string = `translateX(calc(100% + var(--mat-snackbar-horizontal-offset, 24px)))`;
+  node.elementNode.style.opacity = closedOpacity;
+  node.elementNode.style.transform = closedTransform;
+  // console.log(CSSStyleValue.parse('transform', `translateX(calc(100% + var(--mat-snackbar-horizontal-offset, 24px)))`));
+
+  // console.log(node.elementNode.style.transform);
+  // console.log(getComputedStyle(node.elementNode).transform);
+  // console.log(getComputedStyle(node.elementNode).opacity);
+
+  const openAnimation = (
+    onEnd: IOnAnimationEndFunction,
+  ): IStopAnimationFunction => {
+    const element: HTMLElement = node.elementNode;
+    return animateFactory(
+      2000, () => {
+        const opacityTransition = createManualStylePropertyTransitionWithComputedInitialValue(
+          element,
+          'opacity',
+          (initialValue: string): ITransitionFunction<string> => {
+            return mapTransition(createNumberTransition(Number(initialValue), 1), String);
+          },
+        );
+
+        console.log();
+
+        // const transformTransition = createManualStylePropertyTransitionWithComputedInitialValue(
+        //   element,
+        //   'opacity',
+        //   (initialValue: string): ITransitionFunction<string> => {
+        //     return mapTransition(createNumberTransition(Number(initialValue), 1), String);
+        //   },
+        // );
+
+        // const transformTransition = createTargetStylePropertyTransition(
+        //   element,
+        //   'transform',
+        //   'translateX(0)',
+        // );
+
+        return parallelTransitions([
+          opacityTransition,
+          // transformTransition,
+        ]);
+      },
+      onEnd,
+    );
+  };
+
+  // const openAnimation = (
+  //   onEnd: IOnAnimationEndFunction,
+  // ): IStopAnimationFunction => {
+  //   const element: HTMLElement = node.elementNode;
+  //   return animateFactory(
+  //     2000, () => {
+  //       // const opacityTransition = createManualStylePropertyTransitionWithComputedInitialValue(
+  //       //   element,
+  //       //   'opacity',
+  //       //   (initialValue: string): ITransitionFunction<string> => {
+  //       //     return mapTransition(createNumberTransition(Number(initialValue), 1), String);
+  //       //   },
+  //       // );
+  //
+  //       const opacityTransition = createTargetStylePropertyTransition(
+  //         element,
+  //         'opacity',
+  //         '1',
+  //       );
+  //
+  //       const transformTransition = createTargetStylePropertyTransition(
+  //         element,
+  //         'transform',
+  //         'translateX(0)',
+  //       );
+  //
+  //       return parallelTransitions([
+  //         opacityTransition,
+  //         transformTransition,
+  //       ]);
+  //     },
+  //     onEnd,
+  //   );
+  // };
+
+  const closeAnimation = (
+    onEnd: IOnAnimationEndFunction,
+  ): IStopAnimationFunction => {
+    const element: HTMLElement = node.elementNode;
+
+    const backgroundColorTransition = createTargetStylePropertyTransition(
+      element,
+      'opacity',
+      '0',
+    );
+
+    const transition = parallelTransitions([
+      backgroundColorTransition,
+    ]);
+
+    return animate2(2000, transition, onEnd);
+  };
+
+  const snackbar = new AnimatedOverlayController({
+    manager,
+    node,
+    openAnimation,
+    closeAnimation,
+  });
+
+  snackbar.state$($log);
+
+  openButton.onclick = () => snackbar.open();
+  closeButton.onclick = () => snackbar.close();
+
+}
+
+function matSnackbarExample1(): void {
+  const manager = MatOverlayManager.create();
+
+  const openButton = document.createElement('button');
+  openButton.innerText = 'open';
+  document.body.appendChild(openButton);
+
+  const closeButton = document.createElement('button');
+  closeButton.innerText = 'close';
+  document.body.appendChild(closeButton);
+
+  const snackbar = new MatSnackbarAnimated({
+    manager,
+    message: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas tincidunt',
+    horizontalPosition: 'left',
+    verticalPosition: 'bottom',
+  });
+
+  openButton.onclick = () => snackbar.open();
+  closeButton.onclick = () => snackbar.close();
+
+}
+
+function matSnackbarExample2(): void {
+  const manager = MatOverlayManager.create();
+  const matSnackbarQueueManager = new MatSnackbarQueueManager({ manager });
+
+  const openButton = document.createElement('button');
+  openButton.innerText = 'open';
+  document.body.appendChild(openButton);
+
+  const open = () => {
+    const openPromise = matSnackbarQueueManager.open({
+      message: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas tincidunt',
+      actionText: 'click me',
+      duration: 1000,
+      onClickAction: () => {
+        openPromise.then((close) => close());
+      },
+    });
+  };
+
+  openButton.onclick = open;
+
+  open();
+
+  // const modal = manager.open(MyModalComponent);
+  // window.onclick = () => modal.detach();
+}
+
+/*----------------------------*/
+
+export function matSnackbarExample(): void {
+  matSnackbarExample0();
+  // matSnackbarExample1();
+  // matSnackbarExample2();
+}

@@ -1,0 +1,139 @@
+import { IMulticastReplayLastSource, IObservable, isAbortError, let$$, noop } from '@lirx/core';
+import { IGenericVirtualCustomElementNode } from '@lirx/dom';
+import { animate } from '../../../../../../../__debug/animations/animate/animate';
+import { ITransitionProgress, IVoidTransitionFunction } from '../../../../../../../__debug/animations/transition/transition-function.type';
+import { MatOverlayManager } from '../../../manager/mat-overlay-manager';
+
+/** TYPES **/
+
+export interface IAnimatedOverlayControllerOptions {
+  manager: MatOverlayManager;
+  node: IGenericVirtualCustomElementNode;
+  transition: IVoidTransitionFunction;
+  animationDuration: number;
+}
+
+export type IAnimatedOverlayControllerState =
+  | 'opening'
+  | 'opened'
+  | 'closing'
+  | 'closed'
+  ;
+
+const throwIfNotAnAbortError = (error: any): void => {
+  if (!isAbortError(error)) {
+    throw error;
+  }
+};
+
+/** CLASS **/
+
+export class AnimatedOverlayController {
+  protected readonly _manager: MatOverlayManager;
+  protected readonly _node: IGenericVirtualCustomElementNode;
+  protected readonly _transition: IVoidTransitionFunction;
+  protected readonly _animationDuration: number;
+
+  protected readonly _$state$: IMulticastReplayLastSource<IAnimatedOverlayControllerState>;
+
+  protected _animationAbortController: AbortController;
+  protected _progress: ITransitionProgress;
+
+  constructor(
+    {
+      manager,
+      node,
+      transition,
+      animationDuration,
+    }: IAnimatedOverlayControllerOptions,
+  ) {
+    this._manager = manager;
+    this._node = node;
+    this._transition = transition;
+    this._animationDuration = animationDuration;
+
+    this._$state$ = let$$<IAnimatedOverlayControllerState>('closed');
+
+    this._animationAbortController = new AbortController();
+    this._progress = 1;
+  }
+
+  get state(): IAnimatedOverlayControllerState {
+    return this._$state$.getValue();
+  }
+
+  get state$(): IObservable<IAnimatedOverlayControllerState> {
+    return this._$state$.subscribe;
+  }
+
+  open(): Promise<void> {
+    if (
+      (this.state == 'closing')
+      || (this.state == 'closed')
+    ) {
+      if (!this._manager.has(this._node)) {
+        this._manager.adopt(this._node);
+      }
+      this._$state$.emit('opening');
+
+      return this._animate(false)
+        .then(
+          (): void => {
+            this._$state$.emit('opened');
+          },
+          throwIfNotAnAbortError,
+        );
+    }
+  }
+
+  close(): void {
+    if (
+      (this.state == 'opening')
+      || (this.state == 'opened')
+    ) {
+      this._$state$.emit('closing');
+
+      this._animate(true)
+        .then(
+          (): void => {
+            this._manager.close(this._node);
+            this._$state$.emit('closed');
+          },
+          throwIfNotAnAbortError,
+        );
+    }
+  }
+
+  protected _animate(
+    reverse: boolean,
+  ): Promise<void> {
+    this._animationAbortController.abort();
+    this._animationAbortController = new AbortController();
+
+    const transition = (
+      progress: ITransitionProgress,
+    ): void => {
+      this._progress = progress;
+      return this._transition(
+        reverse
+          ? (1 - progress)
+          : progress,
+      );
+    };
+
+    const duration: number = this._animationDuration;
+
+    const currentTime: number = (this._progress === 1)
+      ? 0
+      : (1 - this._progress) * duration;
+
+    const signal: AbortSignal = this._animationAbortController.signal;
+
+    return animate({
+      transition,
+      duration,
+      currentTime,
+      signal,
+    });
+  }
+}

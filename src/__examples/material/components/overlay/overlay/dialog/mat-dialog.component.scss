@@ -23,26 +23,4 @@
     overflow: auto;
     color: $mat-dialog-color;
   }
-
-  &.mat-with-animation {
-    opacity: 0;
-    transition: opacity $mat-dialog-transition-duration;
-
-    & > .content {
-      transform: scale(0.75);
-      transition: transform $mat-dialog-transition-duration;
-    }
-
-    &.mat-open {
-      opacity: 1;
-
-      & > .content {
-        transform: scale(1);
-      }
-    }
-
-    &.mat-close {
-      pointer-events: none;
-    }
-  }
 }

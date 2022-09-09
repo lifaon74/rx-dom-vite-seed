@@ -66,7 +66,7 @@ export function createRipple(
         // styleDeclaration.setProperty('opacity', '0.5');
         styleDeclaration.setProperty('transform', 'scale(0)');
         styleDeclaration.setProperty('opacity', '0');
-        styleDeclaration.setProperty('transition', `transform ${openDuration}ms ${curve}, opacity ${openDuration}ms ${curve}`);
+        styleDeclaration.setProperty('transition', `transform ${openDuration}ms ${curve}, opacity ${Math.floor(openDuration / 2)}ms ${curve}`);
 
         const _resolve = (): void => {
           unsubscribe();

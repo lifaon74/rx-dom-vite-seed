@@ -1,4 +1,4 @@
-import { filter$$, IObserver } from '@lirx/core';
+import { fromSelfEventTarget, IObserver } from '@lirx/core';
 import {
   compileReactiveHTMLAsComponentTemplate,
   compileStyleAsComponentStyle,
@@ -35,6 +35,8 @@ export interface IMatDialogComponentConfig {
   data: IData;
 }
 
+export type IMatDialogVirtualCustomElementNode = VirtualCustomElementNode<IMatDialogComponentConfig>;
+
 export const MatDialogComponent = createComponent<IMatDialogComponentConfig>({
   name: 'mat-dialog',
   template: compileReactiveHTMLAsComponentTemplate({
@@ -57,9 +59,7 @@ export const MatDialogComponent = createComponent<IMatDialogComponentConfig>({
       }
     };
 
-    const clickBackground$ = filter$$(node.on$<MouseEvent>('click'), (event: MouseEvent): boolean => {
-      return event.target === node.elementNode;
-    });
+    const clickBackground$ = fromSelfEventTarget<'click', MouseEvent>(node.elementNode, 'click');
 
     clickBackground$($onClickBackdrop);
 

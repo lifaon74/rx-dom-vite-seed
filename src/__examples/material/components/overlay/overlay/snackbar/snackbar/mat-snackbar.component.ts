@@ -1,4 +1,4 @@
-import { createMulticastSource, first$$, function$$, IObservable, IObserver, map$$, switchMap$$, noop } from '@lirx/core';
+import { function$$, IObservable, IObserver, map$$ } from '@lirx/core';
 import {
   compileReactiveHTMLAsComponentTemplate,
   compileStyleAsComponentStyle,
@@ -6,8 +6,6 @@ import {
   VirtualCustomElementNode,
 } from '@lirx/dom';
 import { MatBasicButtonSecondaryComponent } from '../../../../buttons/button/built-in/basic/secondary/mat-basic-button-secondary.component';
-import { closeMatOverlayWithAnimation } from '../../helpers/close-mat-overlay-with-animation';
-import { openMatOverlayWithAnimation } from '../../helpers/open-mat-overlay-with-animation';
 
 // @ts-ignore
 import html from './mat-snackbar.component.html?raw';
@@ -58,6 +56,8 @@ export interface IMatSnackbarComponentConfig {
   data: IData;
 }
 
+export type IMatSnackbarVirtualCustomElementNode = VirtualCustomElementNode<IMatSnackbarComponentConfig>;
+
 export const MatSnackbarComponent = createComponent<IMatSnackbarComponentConfig>({
   name: 'mat-snackbar',
   template: compileReactiveHTMLAsComponentTemplate({
@@ -104,7 +104,7 @@ export const MatSnackbarComponent = createComponent<IMatSnackbarComponentConfig>
     // POSITIONS & WIDTH
     const horizontalPositionNormalized$ = map$$(horizontalPosition$, (value: IMatSnackbarComponentHorizontalPosition | undefined): IMatSnackbarComponentHorizontalPosition => {
       return (value === void 0)
-        ? 'left'
+        ? 'right'
         : value;
     });
 
@@ -131,25 +131,6 @@ export const MatSnackbarComponent = createComponent<IMatSnackbarComponentConfig>
       },
     );
     node.setReactiveClassNamesList(classList$);
-
-    // // OPEN / CLOSE
-    // const { emit: $onCloseTriggered, subscribe: onCloseTriggered$ } = createMulticastSource<void>();
-    //
-    // const open$ = openMatOverlayWithAnimation(node);
-    //
-    // const onClose$ = switchMap$$(
-    //   first$$(onCloseTriggered$),
-    //   (): IObservable<void> => {
-    //     return closeMatOverlayWithAnimation(node);
-    //   },
-    // );
-    //
-    // open$(noop);
-    //
-    // onClose$((): void => {
-    //   node.detach();
-    //   // node.outputs.set('close', void 0);
-    // });
 
     return {
       message$,

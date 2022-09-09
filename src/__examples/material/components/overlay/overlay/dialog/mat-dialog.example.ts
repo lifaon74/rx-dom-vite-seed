@@ -24,7 +24,7 @@ const MyModalComponent = createComponent<IMyModalComponentConfig>({
       $[close]="$.close$"
     >
       <rx-slot name="title">
-         My modal
+        My modal
       </rx-slot>
       
       <rx-slot name="content">

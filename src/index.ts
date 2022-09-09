@@ -4,7 +4,6 @@ import { examples } from './__examples/examples';
 
 function main(): void {
   // debug();
-  // debugSuperCodec();
   examples();
 }
 

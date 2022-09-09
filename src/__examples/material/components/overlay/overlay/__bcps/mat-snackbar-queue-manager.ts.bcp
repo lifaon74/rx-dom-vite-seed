@@ -1,0 +1,101 @@
+import {
+  $log,
+  IMapFilterMapFunctionReturn,
+  IObservable,
+  MAP_FILTER_DISCARD,
+  mapFilter$$,
+  toPromise,
+} from '@lirx/core';
+import { MatOverlayManager } from '../../../manager/mat-overlay-manager';
+import { IMatSnackbarAnimatedOptions, IMatSnackbarAnimatedState, MatSnackbarAnimated } from './mat-snackbar-animated';
+
+/** TYPES **/
+
+export interface IMatSnackbarQueueManagerOptions {
+  manager: MatOverlayManager,
+}
+
+/* OPEN */
+
+export interface IMatSnackbarQueueManagerOpenOptions extends Omit<IMatSnackbarAnimatedOptions, 'manager'> {
+
+}
+
+// export interface IMatSnackbarQueueManagerOpenResultCloseFunction {
+//   (): void;
+// }
+
+export interface IMatSnackbarQueueManagerOpenResult extends Pick<MatSnackbarAnimated, 'state$' | 'close'> {
+}
+
+/** CLASS **/
+
+export class MatSnackbarQueueManager {
+  protected readonly _manager: MatOverlayManager;
+  protected _closeCurrent: () => Promise<void>;
+
+  constructor(
+    {
+      manager,
+    }: IMatSnackbarQueueManagerOptions,
+  ) {
+    this._manager = manager;
+    this._closeCurrent = () => Promise.resolve();
+  }
+
+  open(
+    options: IMatSnackbarQueueManagerOpenOptions,
+  ): IMatSnackbarQueueManagerOpenResult {
+    const snackbar = new MatSnackbarAnimated({
+      manager: this._manager,
+      ...options,
+    });
+
+    let closed: boolean = false;
+
+    const state$ = snackbar.state$;
+    state$($log);
+
+    const close = (): void => {
+      if (!closed) {
+        closed = true;
+        snackbar.close();
+      }
+    };
+
+    const openPromise = this._closeCurrent().then((): void => {
+      snackbar.open();
+    });
+
+    this._closeCurrent = (): Promise<void> => {
+      return openPromise
+        .then(() => {
+          close();
+          return untilClosed(state$);
+        });
+    };
+
+    return {
+      state$,
+      close,
+    };
+  }
+}
+
+/** FUNCTIONS **/
+
+export function untilClosed$$(
+  state$: IObservable<IMatSnackbarAnimatedState>,
+): IObservable<void> {
+  return mapFilter$$(state$, (state: IMatSnackbarAnimatedState): IMapFilterMapFunctionReturn<void> => {
+    return (state === 'closed')
+      ? void 0
+      : MAP_FILTER_DISCARD;
+  });
+}
+
+export function untilClosed(
+  state$: IObservable<IMatSnackbarAnimatedState>,
+): Promise<void> {
+  return toPromise(untilClosed$$(state$));
+}

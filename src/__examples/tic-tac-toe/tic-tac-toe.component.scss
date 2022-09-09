@@ -1,0 +1,29 @@
+
+:host {
+  display: block;
+  font-size: 0;
+  padding: 15px;
+
+  $cell-size: 50px;
+  $cell-border: 1px solid black;
+
+  & > .row {
+
+    & > .column {
+      display: inline-block;
+      width: $cell-size;
+      height: $cell-size;
+      box-sizing: content-box;
+
+      &:not(:last-child) {
+        border-right: $cell-border;
+      }
+    }
+
+    &:not(:last-child) {
+      & > .column {
+        border-bottom: $cell-border;
+      }
+    }
+  }
+}

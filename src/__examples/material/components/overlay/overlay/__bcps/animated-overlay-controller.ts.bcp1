@@ -1,0 +1,138 @@
+import { IMulticastReplayLastSource, IObservable, let$$ } from '@lirx/core';
+import { IGenericVirtualCustomElementNode } from '@lirx/dom';
+import { MatOverlayManager } from '../../../manager/mat-overlay-manager';
+
+/** TYPES **/
+
+export interface ISimpleAnimationPlayFunction {
+  (): Promise<void>; // resolved when finished
+}
+
+export interface ISimpleAnimationStopFunction {
+  (): void;
+}
+
+export interface ISimpleAnimation {
+  play: ISimpleAnimationPlayFunction;
+  stop: ISimpleAnimationStopFunction;
+}
+
+
+export function createSimpleAnimationFromAnimation(
+  animation: Animation,
+): ISimpleAnimation {
+
+  const play = (): Promise<void> => {
+    animation.play();
+    return animation.finished.then(() => {});
+  };
+
+  const stop = (): void => {
+    animation.cancel();
+    animation.currentTime = 0;
+    // animation.pause();
+  };
+
+  return {
+    play,
+    stop,
+  };
+}
+
+/*------------*/
+
+
+/** TYPES **/
+
+
+
+export interface IAnimatedOverlayControllerOptions {
+  manager: MatOverlayManager;
+  node: IGenericVirtualCustomElementNode;
+  openAnimation: ISimpleAnimation;
+  closeAnimation: ISimpleAnimation;
+}
+
+export type IAnimatedOverlayControllerState =
+  | 'opening'
+  | 'opened'
+  | 'closing'
+  | 'closed'
+  ;
+
+
+
+/** CLASS **/
+
+export class AnimatedOverlayController {
+  protected readonly _manager: MatOverlayManager;
+  protected readonly _node: IGenericVirtualCustomElementNode;
+  protected readonly _openAnimation: ISimpleAnimation;
+  protected readonly _closeAnimation: ISimpleAnimation;
+
+  protected readonly _$state$: IMulticastReplayLastSource<IAnimatedOverlayControllerState>;
+
+  constructor(
+    {
+      manager,
+      node,
+      openAnimation,
+      closeAnimation,
+    }: IAnimatedOverlayControllerOptions,
+  ) {
+    this._manager = manager;
+    this._node = node;
+    this._$state$ = let$$<IAnimatedOverlayControllerState>('closed');
+
+    this._openAnimation = openAnimation;
+    this._closeAnimation = closeAnimation;
+
+    // const onAnimationFinish = () => {
+    //
+    // };
+    //
+    // openAnimations.map((animation: ) => {
+    //
+    // });
+    // this._openAnimation.onfinish = () => {
+    //   if (this.state === 'opening') {
+    //     this._$state$.emit('opened');
+    //   }
+    // };
+  }
+
+  get state(): IAnimatedOverlayControllerState {
+    return this._$state$.getValue();
+  }
+
+  get state$(): IObservable<IAnimatedOverlayControllerState> {
+    return this._$state$.subscribe;
+  }
+
+  open(): void {
+    if (
+      (this.state == 'closing')
+      || (this.state == 'closed')
+    ) {
+      if (!this._manager.has(this._node)) {
+        this._manager.adopt(this._node);
+      }
+      this._$state$.emit('opening');
+      this._closeAnimation.stop();
+      this._openAnimation.play()
+        .then(() => this._$state$.emit('opened'));
+    }
+  }
+
+  close(): void {
+    if (
+      (this.state == 'opening')
+      || (this.state == 'opened')
+    ) {
+      this._$state$.emit('closing');
+      this._openAnimation.stop();
+      this._closeAnimation.play()
+        .then(() => this._$state$.emit('closed'));
+    }
+  }
+}

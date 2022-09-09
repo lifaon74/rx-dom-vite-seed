@@ -99,7 +99,7 @@ export const AppURLNavigationBarComponent = createComponent<IAppURLNavigationBar
     const getURL = node.inputs.getSource('url').getValue;
     const $url = node.outputs.$set('url');
 
-    node.outputs.get$('url')($log);
+    // node.outputs.get$('url')($log);
 
     // VIEW
     const viewKey: string = 'url-navigation-bar-view';

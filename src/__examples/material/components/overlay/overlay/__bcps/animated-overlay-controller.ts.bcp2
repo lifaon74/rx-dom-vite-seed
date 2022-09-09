@@ -1,0 +1,105 @@
+import { IMulticastReplayLastSource, IObservable, let$$, noop } from '@lirx/core';
+import { IGenericVirtualCustomElementNode } from '@lirx/dom';
+import { IOnAnimationEndFunction, IStopAnimationFunction } from '../../../../../../../__debug/animations/animate/animate';
+import { MatOverlayManager } from '../../../manager/mat-overlay-manager';
+
+/** TYPES **/
+
+export interface ISimpleAnimation {
+  (
+    onEnd: IOnAnimationEndFunction,
+  ): IStopAnimationFunction;
+}
+
+/*------------*/
+
+/** TYPES **/
+
+export interface IAnimatedOverlayControllerOptions {
+  manager: MatOverlayManager;
+  node: IGenericVirtualCustomElementNode;
+  openAnimation: ISimpleAnimation;
+  closeAnimation: ISimpleAnimation;
+}
+
+export type IAnimatedOverlayControllerState =
+  | 'opening'
+  | 'opened'
+  | 'closing'
+  | 'closed'
+  ;
+
+/** CLASS **/
+
+export class AnimatedOverlayController {
+  protected readonly _manager: MatOverlayManager;
+  protected readonly _node: IGenericVirtualCustomElementNode;
+  protected readonly _openAnimation: ISimpleAnimation;
+  protected readonly _closeAnimation: ISimpleAnimation;
+
+  protected readonly _$state$: IMulticastReplayLastSource<IAnimatedOverlayControllerState>;
+
+  protected _stopOpenAnimation: IStopAnimationFunction;
+  protected _stopCloseAnimation: IStopAnimationFunction;
+
+  constructor(
+    {
+      manager,
+      node,
+      openAnimation,
+      closeAnimation,
+    }: IAnimatedOverlayControllerOptions,
+  ) {
+    this._manager = manager;
+    this._node = node;
+    this._openAnimation = openAnimation;
+    this._closeAnimation = closeAnimation;
+
+    this._$state$ = let$$<IAnimatedOverlayControllerState>('closed');
+
+    this._stopOpenAnimation = noop;
+    this._stopCloseAnimation = noop;
+  }
+
+  get state(): IAnimatedOverlayControllerState {
+    return this._$state$.getValue();
+  }
+
+  get state$(): IObservable<IAnimatedOverlayControllerState> {
+    return this._$state$.subscribe;
+  }
+
+  open(): void {
+    if (
+      (this.state == 'closing')
+      || (this.state == 'closed')
+    ) {
+      if (!this._manager.has(this._node)) {
+        this._manager.adopt(this._node);
+      }
+      this._$state$.emit('opening');
+      this._stopCloseAnimation();
+      this._stopOpenAnimation = this._openAnimation((stopped: boolean): void => {
+        if (!stopped) {
+          this._$state$.emit('opened');
+        }
+      });
+    }
+  }
+
+  close(): void {
+    if (
+      (this.state == 'opening')
+      || (this.state == 'opened')
+    ) {
+      this._$state$.emit('closing');
+      this._stopOpenAnimation();
+      this._stopCloseAnimation = this._closeAnimation((stopped: boolean): void => {
+        if (!stopped) {
+          this._manager.close(this._node);
+          this._$state$.emit('closed');
+        }
+      });
+    }
+  }
+}
