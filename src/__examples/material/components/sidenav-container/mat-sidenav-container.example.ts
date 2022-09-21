@@ -1,5 +1,5 @@
 import { bootstrap } from '@lirx/dom';
-import { MatSidenavContainerComponent } from './mat-sidenav-container.component';
+import { MatSidenavContainerComponent } from '@lirx/dom-material';
 
 /** BOOTSTRAP FUNCTION **/
 

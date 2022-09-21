@@ -1,5 +1,5 @@
 import { bootstrap, VirtualTextNode } from '@lirx/dom';
-import { MatBadgeComponent } from './mat-badge.component';
+import { MatBadgeComponent } from '@lirx/dom-material';
 
 /** BOOTSTRAP FUNCTION **/
 
@@ -12,7 +12,7 @@ export function matBadgeExample() {
   badge.inputs.set('content', '10');
   badge.setStyleProperty('font-size', '40px');
   badge.setStyleProperty('background-color', 'red');
-  badge.setClass('mat-dot', true);
+  // badge.setClass('mat-dot', true);
 
   document.body.style.padding = '40px';
 }

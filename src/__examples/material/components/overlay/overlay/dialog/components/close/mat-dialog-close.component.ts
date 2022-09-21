@@ -1,6 +1,6 @@
 import { compileReactiveHTMLAsComponentTemplate, compileStyleAsComponentStyle, createComponent } from '@lirx/dom';
 import { IconCloseComponent } from '@lirx/mdi';
-import { MatIconButtonComponent } from '../../../../../buttons/icon/mat-icon-button.component';
+import { MatIconButtonComponent } from '@lirx/dom-material';
 
 // @ts-ignore
 import html from './mat-dialog-close.component.html?raw';

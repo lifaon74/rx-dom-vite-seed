@@ -1,4 +1,4 @@
-import { IMulticastReplayLastSource, IObservable, let$$ } from '@lirx/core';
+import { createMulticastReplayLastSource, IMulticastReplayLastSource, IObservable, let$$ } from '@lirx/core';
 import { animate } from '../../../../../../__debug/animations/animate/animate';
 import { ITransitionProgress, IVoidTransitionFunction } from '../../../../../../__debug/animations/transition/transition-function.type';
 
@@ -37,7 +37,7 @@ export class OpenAnimationController {
     this._transition = transition;
     this._animationDuration = animationDuration;
 
-    this._$state$ = let$$<IOpenCloseAnimationControllerState>('closed');
+    this._$state$ = createMulticastReplayLastSource<IOpenCloseAnimationControllerState>('closed');
 
     this._animationAbortController = new AbortController();
     this._progress = 1;

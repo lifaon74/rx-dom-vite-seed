@@ -5,7 +5,7 @@ import {
   createComponent,
   VirtualCustomElementNode,
 } from '@lirx/dom';
-import { NODE_REFERENCE_MODIFIER } from '../../../../../../modifiers/node-reference.modifier';
+import { NODE_REFERENCE_MODIFIER } from '@lirx/dom-material';
 import { throwIfNotAnAbortError } from '../../../helpers/throw-if-not-an-abort-error';
 import { MatDialogContainerComponent } from '../../components/container/mat-dialog-container.component';
 import { MatDialogAnimated } from '../../controllers/mat-dialog-animated';
@@ -57,7 +57,7 @@ export const MatDialogClassicComponent = createComponent<IMatDialogClassicCompon
     'close',
   ],
   init: (node: VirtualCustomElementNode<IMatDialogClassicComponentConfig>): IData => {
-    const { emit: $matDialogRef, subscribe: matDialogRef$ } = let$$<IMatDialogVirtualCustomElementNode>();
+    const [$matDialogRef, matDialogRef$] = let$$<IMatDialogVirtualCustomElementNode>();
     const { emit: $onUserClose, subscribe: onUserClose$ } = createMulticastSource<IMatDialogComponentUserCloseType>();
     const { emit: $onClickCloseIcon, subscribe: onClickCloseIcon$ } = createMulticastSource<MouseEvent>();
 

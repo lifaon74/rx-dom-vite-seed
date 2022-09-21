@@ -1,5 +1,5 @@
 import { bootstrap } from '@lirx/dom';
-import { MatRippleComponent } from './mat-ripple.component';
+import { MatRippleComponent } from '@lirx/dom-material';
 
 export function matRippleExample(): void {
   const rippleNode = bootstrap(MatRippleComponent);

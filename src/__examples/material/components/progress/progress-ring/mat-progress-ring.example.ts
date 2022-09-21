@@ -1,6 +1,7 @@
 import { bootstrap } from '@lirx/dom';
-import { createProgressAnimation } from '../progress-bar/misc/create-progress-animation';
-import { MatProgressRingComponent } from './mat-progress-ring.component';
+import { MatProgressRingComponent } from '@lirx/dom-material';
+import { createProgressAnimation } from '../create-progress-animation';
+
 
 /** BOOTSTRAP FUNCTION **/
 

@@ -1,6 +1,6 @@
 import { createMulticastSource, IObservable, IObserver } from '@lirx/core';
 import { compileReactiveHTMLAsComponentTemplate, createComponent } from '@lirx/dom';
-import { MatButtonComponent } from '../../../buttons/button/mat-button.component';
+import { MatButtonComponent } from '@lirx/dom-material';
 import { MatOverlayManager } from '../../manager/mat-overlay-manager';
 import { MatDialogClassicComponent } from './built-in/classic/mat-dialog-classic.component';
 

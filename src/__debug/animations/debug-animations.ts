@@ -29,7 +29,7 @@ function createDummyElement(): HTMLElement {
   `;
   element.style.overflow = 'hidden';
 
-  document.body.apptargetChild(element);
+  document.body.appendChild(element);
   return element;
 }
 

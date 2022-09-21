@@ -1,15 +1,12 @@
 import { distinct$$, fromEventTarget, IObservable, IObserver, let$$, map$$, merge, not$$, reference, throttleTime$$ } from '@lirx/core';
 import { compileReactiveHTMLAsComponentTemplate, compileStyleAsComponentStyle, createComponent, VirtualCustomElementNode } from '@lirx/dom';
 import { IconMenuComponent } from '@lirx/mdi';
-import { MatButtonComponent } from '../../../material/components/buttons/button/mat-button.component';
-import { MatIconButtonComponent } from '../../../material/components/buttons/icon/mat-icon-button.component';
 import {
   IMatSidenavComponentMode,
   IMatSidenavComponentUserCloseType,
-  MatSidenavContainerComponent,
-} from '../../../material/components/sidenav-container/mat-sidenav-container.component';
-import { MatToolbarContainerComponent } from '../../../material/components/toolbar-container/mat-toolbar-container.component';
-import { MatToolbarComponent } from '../../../material/components/toolbar-container/toolbar/mat-toolbar.component';
+  MatButtonComponent, MatIconButtonComponent,
+  MatSidenavContainerComponent, MatToolbarComponent, MatToolbarContainerComponent,
+} from '@lirx/dom-material';
 
 // @ts-ignore
 import html from './main.component.html?raw';
@@ -60,11 +57,11 @@ export const AppMainComponent = createComponent<IAppMainComponentConfig>({
       ]),
     );
 
-    const {
-      emit: $sidenavOpened,
-      subscribe: sidenavOpened$,
-      getValue: getSidenavOpened,
-    } = let$$(false);
+    const [
+      $sidenavOpened,
+      sidenavOpened$,
+      getSidenavOpened,
+    ] = let$$(false);
 
     const onUserCloseSidenav = (): void => {
       $sidenavOpened(false);

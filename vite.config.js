@@ -1,4 +1,10 @@
 import { aotPlugin } from '@lirx/dom-aot-plugin';
+import { join } from 'path';
+import { fileURLToPath } from 'url';
+
+const DIRNAME = fileURLToPath(new URL('.', import.meta.url));
+const NODE_MODULE_PATH = join(DIRNAME, 'node_modules');
+
 
 /**
  * @type {import('vite').UserConfig}
@@ -27,7 +33,7 @@ const config = {
       },
       mangle: {
         eval: true,
-      }
+      },
     },
   },
   plugins: [
@@ -55,6 +61,19 @@ const config = {
       '@lirx/core',
       '@lirx/dom',
       '@lirx/mdi',
+      '@lirx/dom-material',
+    ],
+  },
+  resolve: {
+    alias: [
+      {
+        // this is required for the SCSS modules
+        // https://github.com/vitejs/vite/issues/382
+        find: /^~(.*)$/,
+        replacement: (value) => {
+          return value.replace(/^~(.*)$/, `${NODE_MODULE_PATH}/$1`);
+        },
+      },
     ],
   },
 };

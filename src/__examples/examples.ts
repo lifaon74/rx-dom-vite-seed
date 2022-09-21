@@ -12,7 +12,7 @@ export function examples(): void {
   // mailClientExample();
   // matIconsDemoExample();
   // routerExample();
-  // materialExample();
-  ticTacToeExample();
+  materialExample();
+  // ticTacToeExample();
   // fsExplorerExample();
 }

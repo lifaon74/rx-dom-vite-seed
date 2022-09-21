@@ -34,7 +34,7 @@ export const AppMainComponent = createComponent<IAppMainComponentConfig>({
     customElements: [
       AppControlBarComponent,
       AppFilesListComponent,
-      AppAsyncTaskListComponent, // TODO
+      // AppAsyncTaskListComponent, // TODO
     ],
   }),
   styles: [compileStyleAsComponentStyle(style)],

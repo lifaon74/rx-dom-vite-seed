@@ -7,7 +7,7 @@ import {
   VirtualCustomElementNode,
 } from '@lirx/dom';
 import { IconCloseComponent, IconPauseComponent, IconPlayComponent } from '@lirx/mdi';
-import { MatIconButtonComponent } from '../../../../../../material/components/buttons/icon/mat-icon-button.component';
+import { MatIconButtonComponent } from '@lirx/dom-material';
 
 // @ts-ignore
 import html from './async-task.component.html?raw';

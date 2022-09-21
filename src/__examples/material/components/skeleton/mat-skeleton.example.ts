@@ -1,5 +1,5 @@
 import { bootstrap } from '@lirx/dom';
-import { MatSkeletonComponent } from './mat-skeleton.component';
+import { MatSkeletonComponent } from '@lirx/dom-material';
 
 /** BOOTSTRAP FUNCTION **/
 

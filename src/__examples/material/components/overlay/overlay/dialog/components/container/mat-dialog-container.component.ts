@@ -18,7 +18,7 @@ import {
   ISetStyleProperty,
   VirtualCustomElementNode,
 } from '@lirx/dom';
-import { NODE_REFERENCE_MODIFIER } from '../../../../../../modifiers/node-reference.modifier';
+import { NODE_REFERENCE_MODIFIER } from '@lirx/dom-material';
 import { MatDialogActionsComponent } from '../actions/mat-dialog-actions.component';
 import { MatDialogCloseComponent } from '../close/mat-dialog-close.component';
 import { MatDialogContentComponent } from '../content/mat-dialog-content.component';
@@ -70,8 +70,8 @@ export const MatDialogContainerComponent = createComponent<IMatDialogContainerCo
 
     const $onClickCloseIcon = node.outputs.$set('clickCloseIcon');
 
-    const { emit: $matDialogTitleRef, subscribe: matDialogTitleRef$ } = let$$<IGenericVirtualCustomElementNode>();
-    const { emit: $matDialogActionsRef, subscribe: matDialogActionsRef$ } = let$$<IGenericVirtualCustomElementNode>();
+    const [$matDialogTitleRef, matDialogTitleRef$] = let$$<IGenericVirtualCustomElementNode>();
+    const [$matDialogActionsRef, matDialogActionsRef$] = let$$<IGenericVirtualCustomElementNode>();
 
     const getElementHeight$$ = pipe$$$([
       switchMap$$$((node: IGenericVirtualCustomElementNode): IObservable<ResizeObserverEntry> => {

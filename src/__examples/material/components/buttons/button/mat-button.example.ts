@@ -1,9 +1,10 @@
 import { bootstrap, VirtualTextNode } from '@lirx/dom';
-import { MatBasicButtonPrimaryComponent } from './built-in/basic/primary/mat-basic-button-primary.component';
-import { MatBasicButtonSecondaryComponent } from './built-in/basic/secondary/mat-basic-button-secondary.component';
-import { MatFlatButtonPrimaryComponent } from './built-in/flat/primary/mat-flat-button-primary.component';
-import { MatFlatButtonSecondaryComponent } from './built-in/flat/secondary/mat-flat-button-secondary.component';
-import { MatButtonComponent } from './mat-button.component';
+import {
+  MatBasicButtonPrimaryComponent,
+  MatBasicButtonSecondaryComponent,
+  MatButtonComponent, MatFlatButtonPrimaryComponent,
+  MatFlatButtonSecondaryComponent,
+} from '@lirx/dom-material';
 
 
 

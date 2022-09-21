@@ -118,7 +118,11 @@ export function googleDriveGetFileDetails(
 ): Promise<IGoogleDriveAPIFile> {
   return googleDriveGetFile(options)
     .then((response: Response): Promise<IGoogleDriveAPIFile> => {
-      return response.json();
+      if (response.ok) {
+        return response.json();
+      } else {
+        throw new Error(`Unable to get file details`);
+      }
     });
 }
 
@@ -135,7 +139,12 @@ export function googleDriveGetFileSize(
     fields: 'size',
   })
     .then((file: IGoogleDriveAPIFile): number => {
-      return Number(file.size);
+      const size: number = Number(file.size);
+      if (Number.isSafeInteger(size)) {
+        return size;
+      } else {
+        throw new Error(`Unable to retrieve the size of this file`);
+      }
     });
 }
 

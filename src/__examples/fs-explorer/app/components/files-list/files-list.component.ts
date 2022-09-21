@@ -2,6 +2,7 @@ import {
   $log,
   combineLatest,
   combineLatestSpread,
+  createMulticastReplayLastSource,
   debounceFrame$$$,
   filter$$,
   first$$,
@@ -37,8 +38,8 @@ import {
   VirtualCustomElementNode,
   VirtualElementNode,
 } from '@lirx/dom';
+import { NODE_REFERENCE_MODIFIER } from '@lirx/dom-material';
 import { IFileSystemEntryWithMetadata, IFileSystemTypesSet } from '@uni-fs/core';
-import { NODE_REFERENCE_MODIFIER } from '../../../../material/modifiers/node-reference.modifier';
 import { GOOGLE_API_CONFIGURATION } from '../../../api/google/google-api-configuration.constant';
 import { chainCompareFunctions } from '../../../misc/comparison/chain-compare-functions';
 import { compareStringsInsensitive } from '../../../misc/comparison/compare-strings';
@@ -46,14 +47,13 @@ import { generateFilePreviewURL } from '../../../misc/get-file-preview-url-from-
 import { setSymmetricDifference } from '../../../misc/set-operations';
 import { IGoogleDriveFileSystemMetadata } from '../../../uni-fs/google-drive/core/metadata/google-drive-file-system.metadata.type';
 import { createGoogleDriveFileSystem } from '../../../uni-fs/google-drive/create-google-drive-file-system';
-
-// TODO
-const fs = createGoogleDriveFileSystem(GOOGLE_API_CONFIGURATION);
-
 // @ts-ignore
 import html from './files-list.component.html?raw';
 // @ts-ignore
 import style from './files-list.component.scss?inline';
+
+// TODO
+const fs = createGoogleDriveFileSystem(GOOGLE_API_CONFIGURATION);
 
 export type IAppFilesListCardComponentView =
   | 'card'
@@ -164,7 +164,7 @@ export const AppFilesListComponent = createComponent<IAppFilesListComponentConfi
       },
     );
 
-    const { emit: $filesContainer, subscribe: filesContainer$ } = let$$<VirtualElementNode<HTMLElement>>();
+    const [$filesContainer, filesContainer$] = let$$<VirtualElementNode<HTMLElement>>();
 
     // FILE CONTAINER
 
@@ -190,7 +190,7 @@ export const AppFilesListComponent = createComponent<IAppFilesListComponentConfi
         return files.map((file: IFileEntry): IFileEntryExtended => {
           return {
             ...file,
-            $reference$: let$$<VirtualElementNode<HTMLElement>>(),
+            $reference$: createMulticastReplayLastSource<VirtualElementNode<HTMLElement>>(),
           };
         });
       }),
@@ -310,9 +310,9 @@ function createFileSelector(
   container: HTMLElement,
   files: readonly IFileIdWithElement[],
 ): ICreateFileSelectorResult {
-  const $pointerSelectArea$ = let$$<IPointerSelectAreaOrNull>(null);
-  const $selectedFiles$ = let$$<ISelectedFiles>(new Set<string>());
-  const $currentFileIndex$ = let$$<number>(-1);
+  const $pointerSelectArea$ = createMulticastReplayLastSource<IPointerSelectAreaOrNull>(null);
+  const $selectedFiles$ = createMulticastReplayLastSource<ISelectedFiles>(new Set<string>());
+  const $currentFileIndex$ = createMulticastReplayLastSource<number>(-1);
 
   // KEYBOARD
   const unsubscribeOfKeyBoardFileSelector = createKeyBoardFileSelector({
@@ -489,8 +489,7 @@ function createClickFileFileSelector(
         unsubscribeOfPointerUpUntilDrag();
         const selectedFiles: ISelectedFiles = getSelectedFiles();
 
-
-        fs.read(new URL(fileId), new Uint8Array(1e6), { start: 0, end: 5})($log); // TODO
+        fs.read(new URL(fileId), new Uint8Array(1e6), { start: 0, end: 5 })($log); // TODO
 
         if (selectedFiles.has(fileId)) {
           _unsubscribeOfPointerUpUntilDrag = pointerUpUntilDrag$((event: PointerEvent): void => {

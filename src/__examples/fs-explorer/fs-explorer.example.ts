@@ -65,7 +65,7 @@ export async function debugGoogleDriveFS3() {
   const fs = createGoogleDriveFileSystem(GOOGLE_API_CONFIGURATION);
 
   // console.log(await toPromiseAll(fs.children(new URL('google-drive://'))));
-  console.log(await toPromiseAll(fs.childrenWithMetadata(new URL('google-drive://'))));
+  console.log(await toPromiseAll(fs.list(new URL('google-drive://'))));
 }
 
 export async function fsExplorerExample() {

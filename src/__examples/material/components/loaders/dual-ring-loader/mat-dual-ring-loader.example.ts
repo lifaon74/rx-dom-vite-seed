@@ -1,5 +1,5 @@
 import { bootstrap } from '@lirx/dom';
-import { MatDualRingLoaderComponent } from './mat-dual-ring-loader.component';
+import { MatDualRingLoaderComponent } from '@lirx/dom-material';
 
 
 /** BOOTSTRAP FUNCTION **/

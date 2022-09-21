@@ -7,7 +7,7 @@ import {
   IconMagnifyComponent,
   IconViewGridComponent,
 } from '@lirx/mdi';
-import { MatIconButtonComponent } from '../../../../material/components/buttons/icon/mat-icon-button.component';
+import { MatIconButtonComponent } from '@lirx/dom-material';
 import { AppURLNavigationBarComponent } from './components/url-navigation-bar/url-navigation-bar.component';
 
 // @ts-ignore

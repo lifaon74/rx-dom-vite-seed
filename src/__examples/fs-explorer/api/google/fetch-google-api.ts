@@ -49,7 +49,16 @@ export function fetchJSONGoogleAPI<GData>(
 ): Promise<GData> {
   return fetchGoogleAPI(options)
     .then((response: Response): Promise<GData> => {
-      return response.json();
+      if (response.ok) {
+        return response.json();
+      } else {
+        throw new Error(`Google API error`);
+        // return response.json()
+        //   .then((data: any) => {
+        //     console.log(data);
+        //     throw new Error(`Network error`);
+        //   });
+      }
     });
 }
 

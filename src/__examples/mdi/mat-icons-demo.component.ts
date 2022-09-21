@@ -1,4 +1,5 @@
 import {
+  createMulticastReplayLastSource,
   debounceTime$$,
   fromPromiseFactory,
   functionI$$,
@@ -23,9 +24,8 @@ import {
   VirtualDOMNode,
 } from '@lirx/dom';
 import { IMatIconsListItem } from '@lirx/mdi';
-import { MatDualRingLoaderComponent } from '../material/components/loaders/dual-ring-loader/mat-dual-ring-loader.component';
-import { INPUT_VALUE_MODIFIER } from '../material/modifiers/input-value.modifier';
-import { NODE_REFERENCE_MODIFIER } from '../material/modifiers/node-reference.modifier';
+import { INPUT_VALUE_MODIFIER, MatDualRingLoaderComponent, NODE_REFERENCE_MODIFIER } from '@lirx/dom-material';
+
 
 // @ts-ignore
 import html from './mat-icons-demo.component.html?raw';
@@ -66,7 +66,7 @@ export const MatIconsDemoComponent = createComponent<IMatIconsDemoComponentConfi
   }),
   styles: [compileStyleAsComponentStyle(style)],
   init: (): IData => {
-    const $inputValue$ = let$$<string>('');
+    const $inputValue$ = createMulticastReplayLastSource<string>('');
 
     const { subscribe: inputValue$ } = $inputValue$;
 

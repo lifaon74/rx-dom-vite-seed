@@ -14,14 +14,16 @@ import { matSkeletonExample } from './components/skeleton/mat-skeleton.example';
  * https://material.angular.io/components/snack-bar/overview
  */
 export function materialExample(): void {
+  // matBadgeExample();
   // matRippleExample();
   // matButtonExample();
+  // matDualRingLoaderExample();
   // matProgressBarExample();
   // matProgressRingExample();
   // matSidenavContainerExample();
-  // matDualRingLoaderExample();
+  // matSkeletonExample();
+
+  // IN PROGRESS
   // matFormExample();
   matOverlayExample();
-  // matBadgeExample();
-  // matSkeletonExample();
 }

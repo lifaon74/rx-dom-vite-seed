@@ -1,5 +1,4 @@
 import {
-  $log,
   combineLatestSpread,
   createErrorNotification,
   createNextNotification,
@@ -16,20 +15,22 @@ import {
   readObservableValue,
   shareRL$$,
   single,
-  switchMap$$, toTypedEventTarget,
+  switchMap$$,
 } from '@lirx/core';
 import {
   compileReactiveHTMLAsComponentTemplate,
   compileStyleAsComponentStyle,
   createComponent,
-  VirtualCustomElementNode, virtualDOMNodeQuerySelectorOrThrow, VirtualReactiveElementNode,
+  VirtualCustomElementNode,
+  virtualDOMNodeQuerySelectorOrThrow,
+  VirtualReactiveElementNode,
 } from '@lirx/dom';
-import { IconMenuSwapComponent, IconSwapVerticalComponent } from '@lirx/mdi';
+import { ELEMENT_REFERENCE_MODIFIER } from '@lirx/dom-material';
+import { IconSwapVerticalComponent } from '@lirx/mdi';
 import {
   LocalStorageKeyValueDatabase,
   SHARED_LOCAL_STORAGE_KEY_VALUE_DATABASE,
 } from '../../../../../../../helpers/key-value-database/local-storage-key-value-database';
-import { ELEMENT_REFERENCE_MODIFIER } from '../../../../../../material/modifiers/node-reference.modifier';
 
 // @ts-ignore
 import html from './url-navigation-bar.component.html?raw';
@@ -106,7 +107,7 @@ export const AppURLNavigationBarComponent = createComponent<IAppURLNavigationBar
 
     const db: LocalStorageKeyValueDatabase<boolean> = SHARED_LOCAL_STORAGE_KEY_VALUE_DATABASE as LocalStorageKeyValueDatabase<boolean>;
 
-    const { emit: $isNavigatorView, subscribe: isNavigatorView$, getValue: getIsNavigatorView } = let$$<boolean>(db.get(viewKey) ?? false);
+    const [$isNavigatorView, isNavigatorView$, getIsNavigatorView] = let$$<boolean>(db.get(viewKey) ?? false);
 
     node.onConnected$(isNavigatorView$)((enabled: boolean): void => {
       db.set(viewKey, enabled);
@@ -133,10 +134,9 @@ export const AppURLNavigationBarComponent = createComponent<IAppURLNavigationBar
       }
     });
 
-
     // INPUT
 
-    const { emit: $inputRef, subscribe: inputRef$ } = let$$<HTMLInputElement>();
+    const [$inputRef, inputRef$] = let$$<HTMLInputElement>();
 
     const defaultInputValue$ = map$$(url$, (url: URL): string => url.href);
 
@@ -248,7 +248,6 @@ export const AppURLNavigationBarComponent = createComponent<IAppURLNavigationBar
     };
   },
 });
-
 
 /** FUNCTIONS **/
 
