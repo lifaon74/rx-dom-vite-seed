@@ -1,6 +1,5 @@
-import { createMulticastReplayLastSource, IMulticastReplayLastSource, IObservable, let$$ } from '@lirx/core';
-import { animate } from '../../../../../../__debug/animations/animate/animate';
-import { ITransitionProgress, IVoidTransitionFunction } from '../../../../../../__debug/animations/transition/transition-function.type';
+import { animate, IAnimateResult, ITransitionProgress, IVoidTransitionFunction } from '@lirx/animations';
+import { createMulticastReplayLastSource, IMulticastReplayLastSource, IObservable } from '@lirx/core';
 
 /** TYPES **/
 
@@ -26,7 +25,7 @@ export class OpenAnimationController {
 
   protected _animationAbortController: AbortController;
   protected _progress: ITransitionProgress;
-  protected _animatePromise: Promise<void>;
+  protected _animatePromise: Promise<ITransitionProgress>;
 
   constructor(
     {
@@ -41,7 +40,7 @@ export class OpenAnimationController {
 
     this._animationAbortController = new AbortController();
     this._progress = 1;
-    this._animatePromise = Promise.resolve();
+    this._animatePromise = Promise.resolve(1);
   }
 
   get transition(): IVoidTransitionFunction {
@@ -60,7 +59,7 @@ export class OpenAnimationController {
     return this._$state$.subscribe;
   }
 
-  open(): Promise<void> {
+  open(): Promise<ITransitionProgress> {
     if (
       (this.state == 'closing')
       || (this.state == 'closed')
@@ -68,14 +67,17 @@ export class OpenAnimationController {
       this._$state$.emit('opening');
 
       this._animatePromise = this._animate(false)
-        .then((): void => {
-          this._$state$.emit('opened');
+        .then((progress: ITransitionProgress): ITransitionProgress => {
+          if (progress === 1) {
+            this._$state$.emit('opened');
+          }
+          return progress;
         });
     }
     return this._animatePromise;
   }
 
-  close(): Promise<void> {
+  close(): Promise<ITransitionProgress> {
     if (
       (this.state == 'opening')
       || (this.state == 'opened')
@@ -83,8 +85,11 @@ export class OpenAnimationController {
       this._$state$.emit('closing');
 
       this._animatePromise = this._animate(true)
-        .then((): void => {
-          this._$state$.emit('closed');
+        .then((progress: ITransitionProgress): ITransitionProgress => {
+          if (progress === 1) {
+            this._$state$.emit('closed');
+          }
+          return progress;
         });
     }
     return this._animatePromise;
@@ -92,7 +97,7 @@ export class OpenAnimationController {
 
   protected _animate(
     reverse: boolean,
-  ): Promise<void> {
+  ): Promise<IAnimateResult> {
     this._animationAbortController.abort();
     this._animationAbortController = new AbortController();
 

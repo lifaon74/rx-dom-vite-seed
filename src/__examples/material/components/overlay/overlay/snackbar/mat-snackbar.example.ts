@@ -39,7 +39,7 @@ function matSnackbarExample2(): void {
     const openPromise = matSnackbarQueueManager.open({
       message: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas tincidunt',
       actionText: 'click me',
-      duration: 1000,
+      displayDuration: 1000,
       onClickAction: () => {
         openPromise.then((close) => close());
       },

@@ -31,6 +31,8 @@ import style from './mat-dialog-container.component.scss?inline';
 
 /**
  * COMPONENT: 'mat-dialog-container'
+ *
+ * Represents a classic dialog with a title, content and actions
  */
 
 interface IData {

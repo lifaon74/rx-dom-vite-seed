@@ -1,41 +1,32 @@
 import { IObservable, IUnsubscribe, mergeUnsubscribeFunctions, noop, single } from '@lirx/core';
 import { IObservableLike, toObservable, VirtualCustomElementNode } from '@lirx/dom';
-import { parallelTransitions } from '../../../../../../../__debug/animations/transition/group/parallel-transitions';
-import { mapTransition } from '../../../../../../../__debug/animations/transition/modifiers/map-transition';
-import { createNumberTransition } from '../../../../../../../__debug/animations/transition/number/create-number-transition';
-import {
-  createManualStylePropertyTransition,
-} from '../../../../../../../__debug/animations/transition/style-property/create-manual-style-property-transition';
-import { ITransitionFunction, IVoidTransitionFunction } from '../../../../../../../__debug/animations/transition/transition-function.type';
+import { ITransitionProgress } from '@lirx/animations';
 import { MatOverlayManager } from '../../../manager/mat-overlay-manager';
-import { IOpenCloseAnimationControllerOptions, OpenAnimationController } from '../../helpers/open-animation-controller';
 import {
   IMatSnackbarComponentConfig,
   IMatSnackbarComponentHorizontalPosition,
-  IMatSnackbarComponentVerticalPosition, IMatSnackbarComponentWidth,
-  IMatSnackbarVirtualCustomElementNode, MatSnackbarComponent,
+  IMatSnackbarComponentVerticalPosition,
+  IMatSnackbarComponentWidth,
+  MatSnackbarComponent,
 } from '../snackbar/mat-snackbar.component';
+import { IMatSnackbarAnimatedOptions, MatSnackbarAnimated } from './mat-snackbar-animated';
 
 /** TYPES **/
 
-export interface IMatSnackbarAnimatedOptions extends //
-  Omit<IOpenCloseAnimationControllerOptions, 'transition' | 'animationDuration'>,
-  Partial<Pick<IOpenCloseAnimationControllerOptions, 'animationDuration'>>,
-  Omit<IGetMatSnackbarAnimationTransitionOptions, 'element'>
-//
-{
+export interface IMatSnackbarControllerOptions extends IMatSnackbarAnimatedOptions {
   manager: MatOverlayManager;
-  node: IMatSnackbarVirtualCustomElementNode;
 }
 
-export interface IMatSnackbarAnimatedOptionsOnClickAction {
+/* CREATE */
+
+export interface IMatSnackbarControllerOptionsOnClickAction {
   (
     event: MouseEvent,
   ): void;
 }
 
 export interface ICreateMatSnackbarAnimatedOptions extends //
-  Omit<IMatSnackbarAnimatedOptions, 'node'>
+  Omit<IMatSnackbarControllerOptions, 'node'>
 //
 {
   message: IObservableLike<string>;
@@ -43,12 +34,12 @@ export interface ICreateMatSnackbarAnimatedOptions extends //
   horizontalPosition?: IMatSnackbarComponentHorizontalPosition | undefined;
   verticalPosition?: IMatSnackbarComponentVerticalPosition | undefined;
   width?: IMatSnackbarComponentWidth | undefined;
-  onClickAction?: IMatSnackbarAnimatedOptionsOnClickAction;
+  onClickAction?: IMatSnackbarControllerOptionsOnClickAction;
 }
 
 /** CLASS **/
 
-export class MatSnackbarController extends OpenAnimationController {
+export class MatSnackbarController extends MatSnackbarAnimated {
   static create(
     {
       message,
@@ -90,110 +81,40 @@ export class MatSnackbarController extends OpenAnimationController {
   }
 
   protected readonly _manager: MatOverlayManager;
-  protected readonly _node: IMatSnackbarVirtualCustomElementNode;
 
   constructor(
     {
       manager,
-      node,
-      animationDuration = 100,
-      ...option
-    }: IMatSnackbarAnimatedOptions,
+      ...options
+    }: IMatSnackbarControllerOptions,
   ) {
-    const transition: IVoidTransitionFunction = getMatSnackbarAnimationTransition({
-      ...option,
-      element: node.elementNode,
-    });
-
-    super({
-      ...option,
-      transition,
-      animationDuration,
-    });
-
+    super(options);
     this._manager = manager;
-    this._node = node;
   }
 
-  override open(): Promise<void> {
+  override open(): Promise<ITransitionProgress> {
     if (!this._manager.has(this._node)) {
       this._manager.adopt(this._node);
     }
     return super.open();
   }
 
-  override close(): Promise<void> {
+  override close(): Promise<ITransitionProgress> {
     return super.close()
-      .then(() => {
-        this._manager.close(this._node);
+      .then((progress: ITransitionProgress): ITransitionProgress => {
+        if (
+          (progress === 1)
+          && this._manager.has(this._node)
+        ) {
+          this._manager.close(this._node);
+        }
+        return progress;
       });
   }
 
 }
 
 /** FUNCTIONS **/
-
-/* TRANSITION */
-
-interface IGetMatSnackbarAnimationTransitionOptions extends IGetMatSnackbarAnimationTransformTransitionOptions {
-  element: HTMLElement;
-}
-
-function getMatSnackbarAnimationTransition(
-  {
-    element,
-    ...options
-  }: IGetMatSnackbarAnimationTransitionOptions,
-): IVoidTransitionFunction {
-
-  const opacityTransition = createManualStylePropertyTransition(
-    element,
-    'opacity',
-    mapTransition(createNumberTransition(0, 1), String),
-  );
-
-  const transformTransition = createManualStylePropertyTransition(
-    element,
-    'transform',
-    getMatSnackbarAnimationTransformTransition(options),
-  );
-
-  const transition = parallelTransitions([
-    opacityTransition,
-    transformTransition,
-  ]);
-
-  element.style.willChange = 'transform, opacity';
-
-  opacityTransition(0);
-  transformTransition(0);
-
-  return transition;
-}
-
-interface IGetMatSnackbarAnimationTransformTransitionOptions {
-  horizontalPosition?: IMatSnackbarComponentHorizontalPosition | undefined;
-  verticalPosition?: IMatSnackbarComponentVerticalPosition | undefined;
-}
-
-function getMatSnackbarAnimationTransformTransition(
-  {
-    horizontalPosition = 'right',
-    verticalPosition = 'bottom',
-  }: IGetMatSnackbarAnimationTransformTransitionOptions,
-): ITransitionFunction<string> {
-  if (horizontalPosition === 'left') {
-    return mapTransition(createNumberTransition(-120, 0), _ => `translateX(${_}%)`);
-  } else if (horizontalPosition === 'right') {
-    return mapTransition(createNumberTransition(120, 0), _ => `translateX(${_}%)`);
-  } else {
-    if (verticalPosition === 'bottom') {
-      return mapTransition(createNumberTransition(120, 0), _ => `translateY(${_}%)`);
-    } else {
-      return mapTransition(createNumberTransition(-120, 0), _ => `translateY(${_}%)`);
-    }
-  }
-}
 
 /* OTHERS */
 

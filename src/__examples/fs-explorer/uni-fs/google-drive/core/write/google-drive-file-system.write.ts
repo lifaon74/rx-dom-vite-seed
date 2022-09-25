@@ -1,4 +1,4 @@
-import { Path } from '../path/dist';
+import { Path } from '@lifaon/path';
 import { IObservable } from '@lirx/core';
 import {
   ensureURLIsSupportedAndCastToPathObservable,

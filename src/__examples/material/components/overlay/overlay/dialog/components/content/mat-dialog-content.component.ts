@@ -7,6 +7,8 @@ import style from './mat-dialog-content.component.scss?inline';
 
 /**
  * COMPONENT: 'mat-dialog-content'
+ *
+ * Represents the "content" of a dialog
  */
 
 export interface IMatDialogContentComponentConfig {

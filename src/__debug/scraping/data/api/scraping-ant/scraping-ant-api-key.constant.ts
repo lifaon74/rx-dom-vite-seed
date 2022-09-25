@@ -1,0 +1,1 @@
+export const SCRAPPING_ANT_API_KEY = '67b9a377c58c4c4ea9929f0d42980f52';

@@ -6,10 +6,13 @@ import {
   VirtualCustomElementNode,
 } from '@lirx/dom';
 import { NODE_REFERENCE_MODIFIER } from '@lirx/dom-material';
-import { throwIfNotAnAbortError } from '../../../helpers/throw-if-not-an-abort-error';
 import { MatDialogContainerComponent } from '../../components/container/mat-dialog-container.component';
+import {
+  IMatDialogComponentUserCloseType,
+  IMatDialogVirtualCustomElementNode,
+  MatDialogComponent,
+} from '../../components/dialog/mat-dialog.component';
 import { MatDialogAnimated } from '../../controllers/mat-dialog-animated';
-import { IMatDialogComponentUserCloseType, IMatDialogVirtualCustomElementNode, MatDialogComponent } from '../../mat-dialog.component';
 
 // @ts-ignore
 import html from './mat-dialog-classic.component.html?raw';
@@ -57,6 +60,7 @@ export const MatDialogClassicComponent = createComponent<IMatDialogClassicCompon
     'close',
   ],
   init: (node: VirtualCustomElementNode<IMatDialogClassicComponentConfig>): IData => {
+    const close$ = node.inputs.get$('close');
     const [$matDialogRef, matDialogRef$] = let$$<IMatDialogVirtualCustomElementNode>();
     const { emit: $onUserClose, subscribe: onUserClose$ } = createMulticastSource<IMatDialogComponentUserCloseType>();
     const { emit: $onClickCloseIcon, subscribe: onClickCloseIcon$ } = createMulticastSource<MouseEvent>();
@@ -65,26 +69,28 @@ export const MatDialogClassicComponent = createComponent<IMatDialogClassicCompon
       merge([
         onUserClose$,
         onClickCloseIcon$,
-        node.inputs.get$('close'),
+        close$,
       ]),
     );
 
-    matDialogRef$((matDialogNode: IMatDialogVirtualCustomElementNode) => {
+    const unsubscribeOfMatDialogRef = matDialogRef$((matDialogNode: IMatDialogVirtualCustomElementNode): void => {
+      unsubscribeOfMatDialogRef();
+
       const controller = new MatDialogAnimated({
         node: matDialogNode,
       });
 
-      controller.open().catch(throwIfNotAnAbortError);
+      controller.open();
 
-      onCloseTriggered$((): void => {
+      const unsubscribeOfOnCloseTriggered = onCloseTriggered$((): void => {
+        unsubscribeOfOnCloseTriggered();
         matDialogNode.elementNode.style.pointerEvents = 'none';
 
         controller.close()
           .then(() => {
             node.parentNode!.detach();
             node.outputs.set('close', void 0);
-          })
-          .catch(throwIfNotAnAbortError);
+          });
       });
     });
 

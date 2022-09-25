@@ -7,6 +7,8 @@ import style from './mat-dialog-actions.component.scss?inline';
 
 /**
  * COMPONENT: 'mat-dialog-actions'
+ *
+ * Represents the "actions" area of a dialog (footer area, usually containing some buttons)
  */
 
 export interface IMatDialogActionsComponentConfig {

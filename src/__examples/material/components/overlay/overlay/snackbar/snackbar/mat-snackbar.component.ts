@@ -5,7 +5,7 @@ import {
   createComponent,
   VirtualCustomElementNode,
 } from '@lirx/dom';
-import { MatBasicButtonSecondaryComponent } from '../../../../buttons/button/built-in/basic/secondary/mat-basic-button-secondary.component';
+import { MatBasicButtonSecondaryComponent } from '@lirx/dom-material';
 
 // @ts-ignore
 import html from './mat-snackbar.component.html?raw';
@@ -104,19 +104,19 @@ export const MatSnackbarComponent = createComponent<IMatSnackbarComponentConfig>
     // POSITIONS & WIDTH
     const horizontalPositionNormalized$ = map$$(horizontalPosition$, (value: IMatSnackbarComponentHorizontalPosition | undefined): IMatSnackbarComponentHorizontalPosition => {
       return (value === void 0)
-        ? 'right'
+        ? MAT_SNACKBAR_COMPONENT_DEFAULT_HORIZONTAL_POSITION
         : value;
     });
 
     const verticalPositionNormalized$ = map$$(verticalPosition$, (value: IMatSnackbarComponentVerticalPosition | undefined): IMatSnackbarComponentVerticalPosition => {
       return (value === void 0)
-        ? 'bottom'
+        ? MAT_SNACKBAR_COMPONENT_DEFAULT_VERTICAL_POSITION
         : value;
     });
 
     const widthNormalized$ = map$$(width$, (value: IMatSnackbarComponentWidth | undefined): IMatSnackbarComponentWidth => {
       return (value === void 0)
-        ? 'static'
+        ? MAT_SNACKBAR_COMPONENT_DEFAULT_WIDTH
         : value;
     });
 
@@ -140,3 +140,10 @@ export const MatSnackbarComponent = createComponent<IMatSnackbarComponentConfig>
     };
   },
 });
+
+
+/** CONSTANTS **/
+
+export const MAT_SNACKBAR_COMPONENT_DEFAULT_HORIZONTAL_POSITION: IMatSnackbarComponentHorizontalPosition = 'right'
+export const MAT_SNACKBAR_COMPONENT_DEFAULT_VERTICAL_POSITION: IMatSnackbarComponentVerticalPosition = 'bottom'
+export const MAT_SNACKBAR_COMPONENT_DEFAULT_WIDTH: IMatSnackbarComponentWidth = 'static'

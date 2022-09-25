@@ -1,0 +1,15 @@
+@import 'mat-menu-item-icon.variables';
+
+
+/** STYLE **/
+
+:host {
+  display: inline-block;
+  font-size: 0;
+
+  & > svg {
+    fill: #{$mat-menu-item-icon-color};
+    width: #{$mat-menu-item-icon-size};
+    height: #{$mat-menu-item-icon-size};
+  }
+}

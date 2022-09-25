@@ -5,6 +5,7 @@ import {
   VirtualCustomElementNode,
   VirtualRootNode,
 } from '@lirx/dom';
+import { setOptionallyGlobalMatOverlayManager } from './functions/global-mat-overlay-manager';
 
 // @ts-ignore
 import style from './mat-overlay-manager.scss?inline';
@@ -16,7 +17,7 @@ export class MatOverlayManager extends VirtualRootNode<HTMLElement> {
   static create(): MatOverlayManager {
     const matOverlayManagerElement = document.createElement('mat-overlay-manager');
     document.body.appendChild(matOverlayManagerElement);
-    return new MatOverlayManager(matOverlayManagerElement);
+    return setOptionallyGlobalMatOverlayManager(new MatOverlayManager(matOverlayManagerElement));
   }
 
   constructor(
@@ -59,7 +60,11 @@ export class MatOverlayManager extends VirtualRootNode<HTMLElement> {
     node: IGenericVirtualCustomElementNode,
   ): void {
     if (this.has(node)) {
-      node.detach();
+      if (node.inputs.has('close')) {
+        (node.inputs as any).set('close','manager');
+      } else {
+        node.detach();
+      }
     } else {
       throw new Error(`Not a node of this MatOverlayManager`);
     }

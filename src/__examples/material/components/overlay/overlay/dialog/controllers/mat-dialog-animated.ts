@@ -1,13 +1,12 @@
 import { querySelectorOrThrow } from '@lirx/dom';
-import { parallelTransitions } from '../../../../../../../__debug/animations/transition/group/parallel-transitions';
-import { mapTransition } from '../../../../../../../__debug/animations/transition/modifiers/map-transition';
-import { createNumberTransition } from '../../../../../../../__debug/animations/transition/number/create-number-transition';
 import {
-  createManualStylePropertyTransition,
-} from '../../../../../../../__debug/animations/transition/style-property/create-manual-style-property-transition';
-import { IVoidTransitionFunction } from '../../../../../../../__debug/animations/transition/transition-function.type';
+  createManualStylePropertyTransition, createNumberTransition,
+  IVoidTransitionFunction,
+  mapTransition,
+  parallelTransitions,
+} from '@lirx/animations';
 import { IOpenCloseAnimationControllerOptions, OpenAnimationController } from '../../helpers/open-animation-controller';
-import { IMatDialogVirtualCustomElementNode } from '../mat-dialog.component';
+import { IMatDialogVirtualCustomElementNode } from '../components/dialog/mat-dialog.component';
 
 /** TYPES **/
 
@@ -78,8 +77,7 @@ function getMatDialogAnimationTransition(
   element.style.willChange = 'opacity';
   contentElement.style.willChange = 'transform';
 
-  opacityTransition(0);
-  transformTransition(0);
+  transition(0);
 
   return transition;
 }

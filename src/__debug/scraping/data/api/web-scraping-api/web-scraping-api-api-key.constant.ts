@@ -1,0 +1,1 @@
+export const WEB_SCRAPPING_API_API_KEY = 'ub4pE2hrt4PwtxI0sCaCJ62Og24aDTe8';

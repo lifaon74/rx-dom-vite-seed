@@ -1,13 +1,11 @@
-import { animate2 } from './animate/animate';
-import { createStylePropertyTransition } from './transition/style-property/create-style-property-transition';
-import { easeInOutTimingFunction } from './timing/built-in/cubic-bezier-timing-function';
-import { invertTimingFunction } from './timing/built-in/invert-timing-function';
-import { createCSSNumericValueTransition } from './transition/css-style-value/create-css-numeric-value-transition';
-import { parallelTransitions } from './transition/group/parallel-transitions';
-import { sequentialTransitions } from './transition/group/sequential-transitions';
-import { applyTimingFunctionToTransition } from './transition/modifiers/apply-timing-function-to-transition';
-import { mapTransition } from './transition/modifiers/map-transition';
-import { createManualStylePropertyTransition } from './transition/style-property/create-manual-style-property-transition';
+import {
+  animate,
+  applyTimingFunctionToTransition, createCSSNumericValueTransition, createManualStylePropertyTransition,
+  createStylePropertyTransition,
+  easeInOutTimingFunction, getCSS, invertTimingFunction,
+  mapTransition, parallelTransitions,
+  sequentialTransitions,
+} from '@lirx/animations';
 
 /* NUMBER */
 
@@ -34,7 +32,6 @@ function createDummyElement(): HTMLElement {
 }
 
 /*----------------*/
-
 
 /*---*/
 
@@ -83,7 +80,7 @@ function debugAnimations1() {
     element,
     'transform',
     mapTransition(
-      createCSSNumericValueTransition(CSS.px(100), CSS.px(300)),
+      createCSSNumericValueTransition(getCSS().px(100), getCSS().px(300)),
       _ => `translateX(${_})`,
     ),
   );
@@ -188,11 +185,14 @@ function debugAnimations1() {
   // const css = CSSStyleValue.parse('transform', 'translate3d(10px,10px,0) scale(0.5)');
 
   const origin = () => {
-    animate2(2000, (progress: number) => {
-      backgroundColorTransition(progress);
-      // translateTransition(progress);
-      // parallel(progress);
-      // sequential(progress);
+    animate({
+      duration: 2000,
+      transition: (progress: number) => {
+        backgroundColorTransition(progress);
+        // translateTransition(progress);
+        // parallel(progress);
+        // sequential(progress);
+      },
     });
   };
 

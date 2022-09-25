@@ -1,0 +1,18 @@
+@import 'mat-overlay-box.variables';
+
+/** STYLE **/
+
+:host {
+  display: block;
+  position: absolute;
+  pointer-events: auto;
+
+  padding: #{$mat-overlay-box-vertical-padding} #{$mat-overlay-box-horizontal-padding};
+  max-width: 200px;
+
+  background-color: #{$mat-overlay-box-background-color};
+  border-radius: 5px;
+  overflow: auto;
+
+  box-shadow: 0 2px 7px 0 rgba(black, 0.15);
+}

@@ -10,6 +10,8 @@ import style from './mat-dialog-close.component.scss?inline';
 
 /**
  * COMPONENT: 'mat-dialog-close'
+ *
+ * Represents the close icon of a dialog
  */
 
 export interface IMatDialogCloseComponentConfig {

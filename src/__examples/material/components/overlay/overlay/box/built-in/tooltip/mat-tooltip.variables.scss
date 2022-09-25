@@ -1,0 +1,6 @@
+@import '../../../../../../styles/mat.variables';
+
+$mat-tooltip-color: var(--mat-tooltip-color, #444);
+$mat-tooltip-font-family: var(--mat-tooltip-font-family, $mat-font-family);
+$mat-tooltip-font-size: var(--mat-tooltip-font-size, 14px);
+

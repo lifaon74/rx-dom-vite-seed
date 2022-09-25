@@ -62,6 +62,7 @@ const config = {
       '@lirx/dom',
       '@lirx/mdi',
       '@lirx/dom-material',
+      '@lirx/animations',
     ],
   },
   resolve: {

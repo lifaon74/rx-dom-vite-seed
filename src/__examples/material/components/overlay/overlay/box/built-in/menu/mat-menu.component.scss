@@ -1,0 +1,15 @@
+
+/** STYLE **/
+
+:host {
+  display: block;
+  position: absolute;
+  inset: 0;
+  user-select: none;
+  pointer-events: auto;
+
+  & > mat-overlay-box-sticky {
+    padding: 0;
+    max-width: 280px;
+  }
+}

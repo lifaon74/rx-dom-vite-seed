@@ -1,6 +1,6 @@
+import { ITransitionProgress } from '@lirx/animations';
 import { MatOverlayManager } from '../../../manager/mat-overlay-manager';
-import { MatSnackbarController } from './mat-snackbar-controller';
-import { IMatSnackbarAnimatedOptions } from './mat-snackbar-animated2';
+import { ICreateMatSnackbarAnimatedOptions, MatSnackbarController } from './mat-snackbar-controller';
 
 /** TYPES **/
 
@@ -10,8 +10,8 @@ export interface IMatSnackbarQueueManagerOptions {
 
 /* OPEN */
 
-export interface IMatSnackbarQueueManagerOpenOptions extends Omit<IMatSnackbarAnimatedOptions, 'manager'> {
-  duration?: number;
+export interface IMatSnackbarQueueManagerOpenOptions extends Omit<ICreateMatSnackbarAnimatedOptions, 'manager'> {
+  displayDuration?: number;
 }
 
 export interface IMatSnackbarQueueManagerCloseFunction {
@@ -35,7 +35,7 @@ export class MatSnackbarQueueManager {
 
   open(
     {
-      duration,
+      displayDuration,
       ...options
     }: IMatSnackbarQueueManagerOpenOptions,
   ): Promise<IMatSnackbarQueueManagerCloseFunction> {
@@ -44,22 +44,33 @@ export class MatSnackbarQueueManager {
         return close();
       })
       .then((): Promise<IMatSnackbarQueueManagerCloseFunction> => {
-        const snackbar = MatSnackbarController.create({
+        const snackbarController = MatSnackbarController.create({
           manager: this._manager,
           ...options,
         });
 
-        return snackbar.open()
+        return snackbarController.open()
           .then(() => {
+            let timer: any;
+
             const close = (): Promise<void> => {
-              return snackbar.close();
+              if (timer !== void 0) {
+                clearTimeout(timer);
+                timer = void 0;
+              }
+              return snackbarController.close()
+                .then((progress: ITransitionProgress): void => {
+                  if (progress !== 1) {
+                    throw new Error(`Unfinished close`);
+                  }
+                });
             };
 
             if (
-              (duration !== void 0)
-              && (duration > 0)
+              (displayDuration !== void 0)
+              && (displayDuration > 0)
             ) {
-              setTimeout(close, duration);
+              timer = setTimeout(close, displayDuration);
             }
 
             return close;
@@ -68,35 +79,3 @@ export class MatSnackbarQueueManager {
 
   }
 }
-
-// /** FUNCTIONS **/
-//
-// export function untilState$$(
-//   state$: IObservable<IMatSnackbarAnimatedState>,
-//   expectedState: IMatSnackbarAnimatedState,
-// ): IObservable<void> {
-//   return mapFilter$$(state$, (state: IMatSnackbarAnimatedState): IMapFilterMapFunctionReturn<void> => {
-//     return (state === expectedState)
-//       ? void 0
-//       : MAP_FILTER_DISCARD;
-//   });
-// }
-//
-// export function untilState(
-//   state$: IObservable<IMatSnackbarAnimatedState>,
-//   expectedState: IMatSnackbarAnimatedState,
-// ): Promise<void> {
-//   return toPromise(untilState$$(state$, expectedState));
-// }
-//
-// export function untilOpened(
-//   state$: IObservable<IMatSnackbarAnimatedState>,
-// ): Promise<void> {
-//   return untilState(state$, 'opened');
-// }
-//
-// export function untilClosed(
-//   state$: IObservable<IMatSnackbarAnimatedState>,
-// ): Promise<void> {
-//   return untilState(state$, 'closed');
-// }

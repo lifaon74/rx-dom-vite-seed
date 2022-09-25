@@ -7,6 +7,8 @@ import style from './mat-dialog-title.component.scss?inline';
 
 /**
  * COMPONENT: 'mat-dialog-title'
+ *
+ * Represents the "title" of a dialog (header area)
  */
 
 export interface IMatDialogTitleComponentConfig {
