@@ -1,4 +1,4 @@
-import { jbson_decode_from_uin8_array, jbson_encode_to_uin8_array } from '../../../../jbson/dist';
+import { jbson_decode_from_uin8_array, jbson_encode_to_uin8_array } from '@lifaon/jbson';
 import { JSON_SAMPLE_01 } from './samples/01';
 
 function debugJBSONV2_1(): void {

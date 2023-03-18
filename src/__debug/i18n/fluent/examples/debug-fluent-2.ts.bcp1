@@ -1,0 +1,149 @@
+import {
+  $log,
+  fromPromiseFactory,
+  function$$,
+  IObservable,
+  let$$,
+  map$$,
+  notificationsToLastValueObservable,
+  pipe$$,
+  reactiveFunction,
+  switchMap$$$,
+} from '@lirx/core';
+import { ILocalesInput } from '../../intl/locale/locales-input.type';
+import { ICreateFluentDefaultCallFunctionEntries } from '../built-in/call-function/built-in/create-fluent-default-call-function-entries';
+import { createFluentDefaultCallFunctions } from '../built-in/call-function/built-in/create-fluent-default-call-functions';
+import { IFluentGetVariableEntry } from '../built-in/get-variable/fluent-get-variable-function.type';
+import { createFluentMessageOptions } from '../built-in/message/create-fluent-message-options';
+import { IFluentRenderMessageFunction } from '../built-in/message/render/fluent-render-message-function.type';
+
+export interface ILocaleMatcherMatchFunctionOptions {
+  algorithm: 'lookup' | 'best fit';
+}
+
+export interface ILocaleMatcherMatchFunction {
+  (
+    requestedLocales: string[],
+    availableLocales: string[],
+    defaultLocale: string,
+    options?: ILocaleMatcherMatchFunctionOptions,
+  ): string;
+}
+
+const localeMatcher$: IObservable<ILocaleMatcherMatchFunction> = notificationsToLastValueObservable(
+  fromPromiseFactory((): Promise<ILocaleMatcherMatchFunction> => {
+    // @ts-ignore
+    return import('https://cdn.skypack.dev/@formatjs/intl-localematcher')
+      .then((_: any): ILocaleMatcherMatchFunction => _.match);
+  }),
+);
+
+const [$locales, locales$] = let$$<ILocalesInput>(navigator.languages);
+
+function localeMatcherObservable(
+  locales$: IObservable<ILocalesInput>,
+  availableLocales: readonly string[],
+  defaultLocale: string = availableLocales[0],
+  options?: ILocaleMatcherMatchFunctionOptions,
+): IObservable<string> {
+  return reactiveFunction(
+    [locales$, localeMatcher$],
+    (locales: ILocalesInput, match: ILocaleMatcherMatchFunction) => {
+      const _locales: string[] = (typeof locales === 'string')
+        ? [locales]
+        : locales as string[];
+
+      return match(
+        _locales,
+        availableLocales as string[],
+        defaultLocale,
+        options,
+      );
+    },
+  );
+}
+
+/*----*/
+
+export function debugFluent2(): void {
+  const [$userName, userName$] = let$$('Anne');
+  const [$photoCount, photoCount$] = let$$(5);
+  const [$userGender, userGender$] = let$$<string>('female');
+
+  const availableTranslationsLocale$ = localeMatcherObservable(
+    locales$,
+    ['en', 'fr'],
+  );
+
+  const translations$ = pipe$$(availableTranslationsLocale$, [
+    switchMap$$$((locale: string) => {
+      return notificationsToLastValueObservable(
+        fromPromiseFactory((): Promise<IFluentRenderMessageFunction> => {
+          return import(`./samples/01/sample-01.${locale}.ts`).then(_ => _.default).catch(_ => console.log(_));
+          // return loadFluentResource(new URL(`./samples/01/sample-01.${locale}.ftl`, import.meta.url));
+        }),
+      );
+    }),
+  ]);
+
+  const $options = map$$(locales$, (locales: ILocalesInput): ICreateFluentDefaultCallFunctionEntries => {
+    return createFluentDefaultCallFunctions({
+      locales,
+    });
+  });
+
+  const variables$ = function$$(
+    [
+      userName$,
+      photoCount$,
+      userGender$,
+    ],
+    (
+      userName: string,
+      photoCount: number,
+      userGender: string,
+    ): Iterable<IFluentGetVariableEntry> => {
+      return Object.entries({
+        userName,
+        photoCount,
+        userGender,
+      });
+    },
+  );
+
+  const translated$ = function$$(
+    [
+      translations$,
+      $options,
+      variables$,
+    ],
+    (
+      translations: IFluentRenderMessageFunction,
+      options: ICreateFluentDefaultCallFunctionEntries,
+      variables: Iterable<IFluentGetVariableEntry>,
+    ) => {
+      return translations(
+        'shared-photos',
+        createFluentMessageOptions({
+          ...options,
+          variables,
+        }),
+      );
+    },
+  );
+
+  translated$($log);
+
+  setTimeout(() => {
+    $photoCount(1);
+
+    setTimeout(() => {
+      $userName('Paul');
+      $userGender('male');
+
+      setTimeout(() => {
+        $locales(['fr']);
+      }, 200);
+    }, 200);
+  }, 1000);
+}

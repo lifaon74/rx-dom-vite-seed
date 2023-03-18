@@ -4,6 +4,16 @@ import { MatSnackbarQueueManager } from './controllers/mat-snackbar-queue-manage
 
 /*----------------------------*/
 
+function getRandomText(): string {
+  const texts = [
+    `Cordially convinced did incommode existence put out suffering certainly.`,
+    `Besides another and saw ferrars limited ten say unknown.`,
+    `Να ατ προσωπικών χρειάζεται κατανοήσει.`,
+    `Ecstatic advanced and procured civility not absolute put continue. Overcame breeding or my concerns removing desirous so absolute. My melancholy unpleasing imprudence considered in advantages so impression. Almost unable put piqued talked likely houses her met. Met any nor may through resolve entered. An mr cause tried oh do shade happy.`,
+  ];
+  return texts[Math.floor(Math.random() * texts.length)];
+}
+
 function matSnackbarExample1(): void {
   const manager = MatOverlayManager.create();
 
@@ -37,7 +47,7 @@ function matSnackbarExample2(): void {
 
   const open = () => {
     const openPromise = matSnackbarQueueManager.open({
-      message: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas tincidunt',
+      message: getRandomText(),
       actionText: 'click me',
       displayDuration: 1000,
       onClickAction: () => {

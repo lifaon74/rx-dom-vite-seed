@@ -1,0 +1,105 @@
+import { SelectExpression } from '@fluent/syntax';
+import { Identifier, NumberLiteral, Variant } from '@fluent/syntax/esm/ast';
+import { ILines, indentLines } from '@lirx/dom';
+import { isIdentifierNode, isNumberLiteralNode } from '../../fluent';
+import { transpileFluentInlineExpressionNodeToJSLines } from '../inline-expression/transpile-fluent-inline-expression-node-to-js-lines';
+import { transpileFluentPatternNodeToJSLines } from '../pattern/transpile-fluent-pattern-node-to-js-lines';
+import { FUNCTION_REFERENCES_NAME } from '../shared/function-references-name.constants';
+
+export interface ITranspileFluentSelectExpressionNodeToJSLinesOptions {
+  selectExpressionNode: SelectExpression;
+}
+
+export function transpileFluentSelectExpressionNodeToJSLines(
+  {
+    selectExpressionNode,
+    ...options
+  }: ITranspileFluentSelectExpressionNodeToJSLinesOptions,
+): ILines {
+  return [
+    `(`,
+    ...indentLines([
+      `(value) => {`,
+      ...indentLines([
+        `switch (value) {`,
+        ...indentLines(
+          selectExpressionNode.variants.flatMap((variant: Variant): ILines => {
+            return transpileFluentSelectExpressionVariantNodeToJSLines({
+              ...options,
+              variantNode: variant,
+            });
+          }),
+        ),
+        `}`,
+      ]),
+      `}`,
+    ]),
+    `)(`,
+    ...indentLines(
+      transpileFluentInlineExpressionNodeToJSLines({
+        ...options,
+        inlineExpressionNode: selectExpressionNode.selector,
+      }),
+    ),
+    `)`,
+  ];
+}
+
+/*---*/
+
+export interface ITranspileFluentSelectExpressionVariantNodeToJSLinesOptions {
+  variantNode: Variant;
+}
+
+export function transpileFluentSelectExpressionVariantNodeToJSLines(
+  {
+    variantNode,
+    ...options
+  }: ITranspileFluentSelectExpressionVariantNodeToJSLinesOptions,
+): ILines {
+  return [
+    ...transpileFluentSelectExpressionVariantKeyNodeToJSLines({
+      ...options,
+      variantKeyNode: variantNode.key,
+    }),
+    ...(
+      variantNode.default
+        ? ['default:']
+        : []
+    ),
+    ...indentLines([
+      `return (`,
+      ...indentLines(
+        transpileFluentPatternNodeToJSLines({
+          ...options,
+          patternNode: variantNode.value,
+        }),
+      ),
+      `)`,
+    ]),
+  ];
+}
+
+export interface ITranspileFluentSelectExpressionVariantKeyNodeToJSLinesOptions {
+  variantKeyNode: Identifier | NumberLiteral;
+}
+
+export function transpileFluentSelectExpressionVariantKeyNodeToJSLines(
+  {
+    variantKeyNode,
+    ...options
+  }: ITranspileFluentSelectExpressionVariantKeyNodeToJSLinesOptions,
+): ILines {
+  if (isIdentifierNode(variantKeyNode)) {
+    return [
+      `case ${JSON.stringify(variantKeyNode.name)}:`,
+    ];
+  } else if (isNumberLiteralNode(variantKeyNode)) {
+    return [
+      `case ${variantKeyNode.value}:`,
+    ];
+  } else {
+    throw new Error(`Unknown Node: ${(variantKeyNode as any).type}`);
+  }
+}
+

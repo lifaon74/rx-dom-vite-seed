@@ -1,7 +1,10 @@
 import {
-  createMulticastSource,
-  first$$, fromEventTarget,
-  fromSelfEventTarget, IMapFilterMapFunctionReturn,
+  filter$$,
+  first$$,
+  focusLeaveElementObservable,
+  fromEventTarget,
+  fromSelfEventTarget,
+  IMapFilterMapFunctionReturn,
   IObservable,
   IObserver,
   let$$,
@@ -18,8 +21,8 @@ import {
 } from '@lirx/dom';
 import { NODE_REFERENCE_MODIFIER } from '@lirx/dom-material';
 import {
-  filter$$
-} from '../../../../../../../../../../lirx/core/dist/src/observable/pipes/built-in/without-notifications/observer-pipe-related/filter/filter-observable.shortcut';
+  elementOrVirtualReactiveElementNodeToElement,
+} from '../../../../../../functions/element-or-virtual-reactive-element-node-to-element';
 import {
   IMatOverlayBoxStickyElement,
   IMatOverlayBoxStickyVirtualCustomElementNode,
@@ -94,28 +97,48 @@ export const MatMenuComponent = createComponent<IMatMenuComponentConfig>({
 
     const onKeyDown$ = fromEventTarget<'keydown', KeyboardEvent>(element, 'keydown');
 
-    const onFocusOut$ = fromEventTarget<'focusout', Event>(element, 'focusout');
-
-
+    const onFocusOut$ = focusLeaveElementObservable(element);
 
     /* NAVIGATE */
 
-    const $arrowUp = filter$$(onKeyDown$, (event: KeyboardEvent): boolean => (event.key === 'ArrowUp'));
     const $arrowDown = filter$$(onKeyDown$, (event: KeyboardEvent): boolean => (event.key === 'ArrowDown'));
+    const $arrowUp = filter$$(onKeyDown$, (event: KeyboardEvent): boolean => (event.key === 'ArrowUp'));
 
-    // $arrowDown(() => {
-    //   console.log('down');
-    //   const activeElement = document.activeElement;
-    //   if (
-    //     (activeElement !== null)
-    //     && element.contains()
-    //   ) {
-    //
-    //   }
-    // });
+    const getInputElement = (): HTMLElement => {
+      return elementOrVirtualReactiveElementNodeToElement(node.inputs.get('element'));
+    };
 
-    // TODO navigate with arrow down and up
-    // TODO support focusout
+    const focusInputElement = (): void => {
+      getInputElement().focus();
+    };
+
+    const focusNextElement = (
+      step: 1 | -1,
+    ): void => {
+      const activeElement: Element | null = document.activeElement;
+      const focusableElements: HTMLElement[] = Array.from(element.querySelectorAll<HTMLElement>(`:scope > mat-overlay-box-sticky > [tabindex]:not([tabindex="-1"])`));
+      const focusedElementIndex: number = focusableElements.findIndex((element: HTMLElement) => (element === activeElement));
+
+      const nextIndex: number = getNextIndex(
+        focusedElementIndex,
+        focusableElements.length,
+        step,
+      );
+
+      if (nextIndex === -1) {
+        focusInputElement();
+      } else {
+        focusableElements[nextIndex].focus();
+      }
+    };
+
+    $arrowDown(() => {
+      focusNextElement(+1);
+    });
+
+    $arrowUp(() => {
+      focusNextElement(-1);
+    });
 
     /* CLOSE */
 
@@ -150,10 +173,11 @@ export const MatMenuComponent = createComponent<IMatMenuComponentConfig>({
       const unsubscribeOfClose = onCloseTriggered$((): void => {
         unsubscribeOfClose();
         element.style.pointerEvents = 'none';
+        focusInputElement();
 
         controller.close()
           .then(() => {
-            node.detach();
+            node.parentNode!.detach();
             node.outputs.set('close', void 0);
           });
       });
@@ -177,5 +201,25 @@ export const MatMenuComponent = createComponent<IMatMenuComponentConfig>({
     };
   },
 });
+
+/** FUNCTIONS **/
+
+function getNextIndex(
+  index: number,
+  length: number,
+  step: number, // [-length, length]
+): number {
+  if (length === 0) {
+    return -1;
+  } else {
+    if (index === -1) {
+      return (step > 0)
+        ? 0
+        : (length - 1);
+    } else {
+      return ((index + step + length) % length);
+    }
+  }
+}
 
 

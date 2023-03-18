@@ -1,11 +1,18 @@
-import { IObservable } from '@lirx/core';
 import {
-  compileReactiveHTMLAsComponentTemplate,
-  compileStyleAsComponentStyle,
-  createComponent, IComponent,
-  ICreateComponentOptions,
-  VirtualCustomElementNode,
-} from '@lirx/dom';
+  createMulticastReplayLastSource,
+  distinct$$$,
+  distinctObservable,
+  idle,
+  IObservable,
+  MAP_FILTER_DISCARD,
+  mapFilter$$$,
+  mapObservable,
+  merge,
+  pipe$$,
+  createObjectPropertyObservable,
+  switchMap$$,
+} from '@lirx/core';
+import { compileReactiveHTMLAsComponentTemplate, compileStyleAsComponentStyle, createComponent, VirtualCustomElementNode } from '@lirx/dom';
 
 // @ts-ignore
 import html from './mat-input-field.component.html?raw';
@@ -22,9 +29,9 @@ interface IData {
 
 interface IMatInputFieldComponentConfig {
   element: HTMLElement;
-  // inputs: [
-  //   ['disabled', boolean],
-  // ];
+  inputs: [
+    ['disabled', boolean],
+  ];
   data: IData;
 }
 
@@ -32,19 +39,37 @@ export const MatInputFieldComponent = createComponent<IMatInputFieldComponentCon
   name: 'mat-input-field',
   template: compileReactiveHTMLAsComponentTemplate({
     html,
-    customElements: [
-    ],
+    customElements: [],
   }),
   styles: [
     compileStyleAsComponentStyle(style),
   ],
-  // inputs: [
-  //   ['disabled', false],
-  // ],
+  inputs: [
+    ['disabled', false],
+  ],
   init: (node: VirtualCustomElementNode<IMatInputFieldComponentConfig>): IData => {
+    const input$ = pipe$$(idle(), [
+      mapFilter$$$<any, HTMLInputElement>(() => {
+        const input: HTMLInputElement | null = node.elementNode.querySelector('input');
+        return (input === null)
+          ? MAP_FILTER_DISCARD
+          : input;
+      }),
+      distinct$$$<HTMLInputElement>(),
+    ]);
 
-    return {
-    };
+    const inputDisabled$ = switchMap$$(input$, (input: HTMLInputElement): IObservable<boolean> => {
+      return createObjectPropertyObservable(input, 'disabled');
+    });
+
+    const disabled$ = merge([
+      node.inputs.get$('disabled'),
+      inputDisabled$,
+    ]);
+
+    node.setReactiveClass('disabled', disabled$);
+
+    return {};
   },
 });
 

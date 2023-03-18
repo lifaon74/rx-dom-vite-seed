@@ -1,6 +1,7 @@
-import { IObservable, IUnsubscribe, mergeUnsubscribeFunctions, noop, single } from '@lirx/core';
-import { IObservableLike, toObservable, VirtualCustomElementNode } from '@lirx/dom';
 import { ITransitionProgress } from '@lirx/animations';
+import { IObservable, IObservableLike, IUnsubscribe, mergeUnsubscribeFunctions, single, toObservable } from '@lirx/core';
+import { VirtualCustomElementNode } from '@lirx/dom';
+import { noop } from '@lirx/utils';
 import { MatOverlayManager } from '../../../manager/mat-overlay-manager';
 import {
   IMatSnackbarComponentConfig,

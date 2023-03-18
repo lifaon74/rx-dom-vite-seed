@@ -1,0 +1,210 @@
+import {
+  createMulticastSource, distinctObservable,
+  first$$, focusLeaveElementObservable, fromEventTarget,
+  fromSelfEventTarget, IMapFilterDiscard, IMapFilterMapFunctionReturn,
+  IObservable,
+  IObserver, isFocusedElementObservable,
+  let$$,
+  map$$,
+  MAP_FILTER_DISCARD,
+  mapFilter$$, mapFilterObservable, mapObservable,
+  merge, reference,
+} from '@lirx/core';
+import {
+  compileReactiveHTMLAsComponentTemplate,
+  compileStyleAsComponentStyle,
+  createComponent,
+  VirtualCustomElementNode,
+} from '@lirx/dom';
+import { NODE_REFERENCE_MODIFIER } from '@lirx/dom-material';
+import {
+  filter$$,
+} from '../../../../../../../../../../lirx/core/dist/src/observable/pipes/built-in/without-notifications/observer-pipe-related/filter/filter-observable.shortcut';
+import {
+  elementOrVirtualReactiveElementNodeToElement,
+} from '../../../../../../functions/element-or-virtual-reactive-element-node-to-element';
+import {
+  IMatOverlayBoxStickyElement,
+  IMatOverlayBoxStickyVirtualCustomElementNode,
+  MatOverlayBoxStickyComponent,
+} from '../../components/sticky/mat-overlay-box-sticky.component';
+import { MatOverlayBoxAnimated } from '../../controllers/mat-overlay-box-animated';
+
+// @ts-ignore
+import html from './mat-menu.component.html?raw';
+// @ts-ignore
+import style from './mat-menu.component.scss?inline';
+
+/**
+ * COMPONENT: 'mat-menu'
+ */
+
+export type IMatMenuComponentElement = IMatOverlayBoxStickyElement;
+
+export type IMatMenuComponentUserCloseType =
+  | 'backdrop'
+  | 'escape'
+  | 'focusout'
+  ;
+
+interface IData {
+  readonly $matOverlayBoxStickyRef: IObserver<IMatOverlayBoxStickyVirtualCustomElementNode>;
+  readonly element$: IObservable<IMatMenuComponentElement>;
+}
+
+interface IMatMenuComponentConfig {
+  element: HTMLElement;
+  inputs: [
+    ['element', IMatMenuComponentElement],
+    ['close', void],
+  ];
+  outputs: [
+    ['close', void],
+  ];
+  data: IData;
+}
+
+export type IMatMenuVirtualCustomElementNode = VirtualCustomElementNode<IMatMenuComponentConfig>;
+
+export const MatMenuComponent = createComponent<IMatMenuComponentConfig>({
+  name: 'mat-menu',
+  template: compileReactiveHTMLAsComponentTemplate({
+    html,
+    customElements: [
+      MatOverlayBoxStickyComponent,
+    ],
+    modifiers: [
+      NODE_REFERENCE_MODIFIER,
+    ],
+  }),
+  styles: [compileStyleAsComponentStyle(style)],
+  inputs: [
+    ['element'],
+    ['close'],
+  ],
+  outputs: [
+    'close',
+  ],
+  init: (node: IMatMenuVirtualCustomElementNode): IData => {
+    const element: HTMLElement = node.elementNode;
+
+    const element$ = node.inputs.get$('element');
+    const close$ = node.inputs.get$('close');
+
+    const [$matOverlayBoxStickyRef, matOverlayBoxStickyRef$] = let$$<IMatOverlayBoxStickyVirtualCustomElementNode>();
+
+    const onClickBackground$ = fromSelfEventTarget<'click', MouseEvent>(element, 'click');
+
+    const onKeyDown$ = fromEventTarget<'keydown', KeyboardEvent>(element, 'keydown');
+
+    const onFocusOut$ = focusLeaveElementObservable(element);
+
+    /* NAVIGATE */
+
+    const $arrowDown = filter$$(onKeyDown$, (event: KeyboardEvent): boolean => (event.key === 'ArrowDown'));
+    const $arrowUp = filter$$(onKeyDown$, (event: KeyboardEvent): boolean => (event.key === 'ArrowUp'));
+
+    const getFocusableElements = (): HTMLElement[] => {
+      return Array.from(element.querySelectorAll<HTMLElement>(`:scope > mat-overlay-box-sticky > [tabindex]:not([tabindex="-1"])`));
+    };
+
+    const focusElement = (
+      element: HTMLElement | null,
+    ): void => {
+      if (element === null) {
+        elementOrVirtualReactiveElementNodeToElement(node.inputs.get('element')).focus();
+      } else {
+        element.focus();
+      }
+    };
+
+    $arrowDown(() => {
+      const activeElement = document.activeElement;
+      const focusableElements: HTMLElement[] = getFocusableElements();
+      const focusedElementIndex: number = focusableElements.findIndex((element: HTMLElement) => (element === activeElement));
+
+      const nextFocusedIndex: number = ((focusedElementIndex + 1) < focusableElements.length)
+        ? (focusedElementIndex + 1)
+        : -1;
+
+      focusElement((nextFocusedIndex === -1) ? null : focusableElements[nextFocusedIndex]);
+    });
+
+    $arrowUp(() => {
+      const activeElement = document.activeElement;
+      const focusableElements: HTMLElement[] = getFocusableElements();
+      let focusedElementIndex: number = focusableElements.findIndex((element: HTMLElement) => (element === activeElement));
+
+      if (focusedElementIndex === -1) {
+        focusedElementIndex = focusableElements.length;
+      }
+
+      const previousFocusedIndex: number = (focusedElementIndex > 0)
+        ? (focusedElementIndex - 1)
+        : -1;
+
+      focusElement((previousFocusedIndex === -1) ? null : focusableElements[previousFocusedIndex]);
+    });
+
+    /* CLOSE */
+
+    const userCloseBackground$ = map$$(onClickBackground$, (): IMatMenuComponentUserCloseType => 'backdrop');
+
+    const userCloseWithEscape$ = mapFilter$$(onKeyDown$, (event: KeyboardEvent): IMapFilterMapFunctionReturn<IMatMenuComponentUserCloseType> => {
+      return (event.key === 'Escape')
+        ? 'escape'
+        : MAP_FILTER_DISCARD;
+    });
+
+    const userCloseWithFocusOut$ = map$$(onFocusOut$, (): IMatMenuComponentUserCloseType => 'focusout');
+
+    const onCloseTriggered$ = first$$(
+      merge([
+        userCloseBackground$,
+        userCloseWithEscape$,
+        userCloseWithFocusOut$,
+        close$,
+      ]),
+    );
+
+    const unsubscribeOfMatOverlayBoxStickyRef = matOverlayBoxStickyRef$((matOverlayBoxStickyNode: IMatOverlayBoxStickyVirtualCustomElementNode): void => {
+      unsubscribeOfMatOverlayBoxStickyRef();
+
+      const controller = new MatOverlayBoxAnimated({
+        node: matOverlayBoxStickyNode,
+      });
+
+      controller.open();
+
+      const unsubscribeOfClose = onCloseTriggered$((): void => {
+        unsubscribeOfClose();
+        element.style.pointerEvents = 'none';
+
+        controller.close()
+          .then(() => {
+            node.detach();
+            node.outputs.set('close', void 0);
+          });
+      });
+    });
+
+    /* INITIAL FOCUS */
+
+    element.tabIndex = 0;
+
+    node.isConnected$((opened: boolean): void => {
+      if (opened) {
+        queueMicrotask(() => {
+          element.focus();
+        });
+      }
+    });
+
+    return {
+      $matOverlayBoxStickyRef,
+      element$,
+    };
+  },
+});
+
+

@@ -12,7 +12,7 @@ const NODE_MODULE_PATH = join(DIRNAME, 'node_modules');
 const config = {
   build: {
     target: 'esnext',
-    minify: 'terser',
+    // minify: 'terser',
     polyfillModulePreload: false,
     terserOptions: {
       toplevel: true,
@@ -58,7 +58,10 @@ const config = {
   },
   optimizeDeps: {
     include: [
+      '@lirx/promise',
+      '@lirx/utils',
       '@lirx/core',
+      '@lirx/store',
       '@lirx/dom',
       '@lirx/mdi',
       '@lirx/dom-material',

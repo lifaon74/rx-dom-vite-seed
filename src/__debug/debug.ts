@@ -4,9 +4,12 @@ import { debugAnimation } from './debug-animation';
 import { debugLiRXDOM } from './debug-lirx-dom';
 import { debugIndexedDB } from './indexed-db/debug-indexed-db';
 import { debugJBSONV2 } from './jbson-v2/debug-jbson-v2';
+import { debugI18n } from './i18n/debug-i18n';
+import { debugLiRXCache } from './lirx-cache/debug-lirx-cache';
 import { debugObjectProxy } from './object-proxy/debug-object-proxy';
+import { debugObservableProxy } from './object-proxy/debug-observable-proxy';
 import { debugObservables } from './observables/debug-observables';
-import { rxDomExternalComponentExample } from './rx-dom-external-component/rx-dom-external-component.example';
+import { debugStore } from './store/debug-store';
 
 export function debug(): void {
   // debugLiRXDOM();
@@ -16,6 +19,9 @@ export function debug(): void {
   // debugIndexedDB();
   // debugObservables();
   // debugObjectProxy();
+  // debugObservableProxy();
   // debugAnimation();
-  rxDomExternalComponentExample();
+  debugI18n();
+  // debugLiRXCache();
+  // debugStore();
 }

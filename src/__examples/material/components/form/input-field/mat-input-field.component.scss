@@ -6,16 +6,11 @@
 :host {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-
-  //& > .prefix {
-  //  border-top-width: $mat-input-field-border-width;
-  //  border-bottom-width: $mat-input-field-border-width;
-  //  border-style: solid;
-  //  border-color: $mat-input-field-border-color;
-  //}
-
+  align-items: stretch;
+  background-color: $mat-input-field-background-color;
   border: $mat-input-field-border-width solid $mat-input-field-border-color;
+  border-radius: 4px;
+  overflow: hidden;
 
   & > .input {
     flex-grow: 1;
@@ -31,9 +26,63 @@
       color: $mat-input-field-color;
       background-color: transparent;
       text-overflow: ellipsis;
+    }
+  }
 
-      &:focus {
-        box-shadow: inset 0 0 0 1px $mat-input-field-border-color-focused;
+  & > * {
+    &:not(:last-child) {
+      border-right: $mat-input-field-child-border-width solid $mat-input-field-border-color;
+    }
+  }
+
+  &:not(.disabled) {
+    & > * {
+      &:focus-within {
+        &:not(:last-child) {
+          border-right-color: $mat-input-field-border-color-focused;
+        }
+
+        &:not(:first-child) {
+          box-shadow: calc(#{$mat-input-field-child-border-width} * -1) 0 0 0 $mat-input-field-border-color-focused;
+        }
+      }
+    }
+
+    //& > * {
+    //  &:focus-within {
+    //    $left-border: inset 2px 0 0 -1px $mat-input-field-border-color-focused;
+    //    $right-border: inset -2px 0 0 -1px $mat-input-field-border-color-focused;
+    //
+    //    &:first-child {
+    //      &:not(:last-child) {
+    //        box-shadow: $right-border;
+    //      }
+    //    }
+    //
+    //    &:not(:first-child) {
+    //      &:last-child {
+    //        box-shadow: $left-border;
+    //      }
+    //
+    //      &:not(:last-child) {
+    //        box-shadow: $left-border, $right-border;
+    //      }
+    //    }
+    //  }
+    //}
+
+    &:focus-within {
+      border-color: $mat-input-field-border-color-focused;
+    }
+  }
+
+  &.disabled {
+    background-color: $mat-input-field-background-color-disabled;
+    border-color: $mat-input-field-background-color-disabled;
+
+    & > * {
+      &:not(:last-child) {
+        border-right-color: $mat-input-field-background-color-disabled;
       }
     }
   }

@@ -1,0 +1,306 @@
+import {
+  $log,
+  createMulticastReplayLastSource,
+  createMulticastReplaySource,
+  createUnicastSource,
+  debug$$,
+  defer,
+  IDefaultNotificationsUnion,
+  IMulticastReplayLastSource,
+  IMulticastReplaySource,
+  IObservable,
+  mapObservable,
+  pipe$$,
+  pipeObservable,
+  raceWithNotifications,
+  shareObservablePipe,
+  singleN,
+  singleWithNotifications,
+  switchMapObservable,
+  then$$$,
+  thenObservablePipe,
+  throwError,
+  createUnicastReplaySource,
+  fulfilledObservablePipe,
+  rejectedObservablePipe,
+  sourceObservablePipe,
+} from '@lirx/core';
+import { IObserver, ISource, ISourceObservableOptions, IUnsubscribe } from '../../../../lirx/core/dist';
+
+/*----------------*/
+
+export type IStore<GData> = IMulticastReplayLastSource<GData>;
+
+export function createStore<GData>(): IStore<GData> {
+  return createMulticastReplayLastSource<GData>();
+}
+
+export interface ISelectFunction<GData, GValue> {
+  (
+    data: GData,
+  ): GValue;
+}
+
+export function select<GData, GValue>(
+  store: IStore<GData>,
+  selectFunction: ISelectFunction<GData, GValue>,
+): IObservable<GValue> {
+  return mapObservable(store.subscribe, selectFunction);
+}
+
+// export function selectA<GData, GValue>(
+//   store: IStore<GData>,
+//   selectFunction: ISelectFunction<GData, GValue>,
+// ): IObservable<GValue> {
+//   return switchMapObservable(store.subscribe, (data: GData): GValue => {
+//     selectFunction;
+//   });
+// }
+
+/*--------*/
+
+interface IStoreData {
+  a: string;
+  async: {
+    b: number;
+  } | undefined;
+}
+
+const store = createStore<IStoreData>();
+
+const a$ = select(store, _ => _.a);
+
+
+/*----------------*/
+
+export interface IResetFunction {
+  (): void;
+}
+
+export type ICacheObservableWithNotificationsResult<GValue> = [
+  subscribe: IObservable<IDefaultNotificationsUnion<GValue>>,
+  reset: IResetFunction,
+];
+
+function cacheObservableWithNotifications<GValue>(
+  subscribe: IObservable<IDefaultNotificationsUnion<GValue>>,
+): ICacheObservableWithNotificationsResult<GValue> {
+  let value$: IObservable<IDefaultNotificationsUnion<GValue>> | undefined;
+
+  const { emit: $reset, subscribe: reset$ } = createUnicastSource<void>();
+
+  const getData$ = pipeObservable(subscribe, [
+    thenObservablePipe(
+      (value: GValue): IObservable<IDefaultNotificationsUnion<GValue>> => {
+        value$ = singleWithNotifications(value);
+        return value$;
+      },
+      (error: unknown): IObservable<IDefaultNotificationsUnion<GValue>> => {
+        value$ = void 0;
+        return throwError(error);
+      },
+    ),
+    shareObservablePipe<IDefaultNotificationsUnion<GValue>>(),
+  ]);
+
+  const errorOnReset$ = switchMapObservable(reset$, (): IObservable<IDefaultNotificationsUnion<GValue>> => {
+    return throwError(new Error(`Got a reset`));
+  });
+
+  const racing$ = pipeObservable(
+    raceWithNotifications([
+      getData$,
+      errorOnReset$,
+    ]),
+    [
+      // shareObservablePipe<IDefaultNotificationsUnion<GValue>>(),
+    ],
+  );
+
+  return [
+    defer((): IObservable<IDefaultNotificationsUnion<GValue>> => {
+      console.log('sub to', (value$ === void 0));
+      return (value$ === void 0)
+        ? racing$
+        : value$;
+    }),
+    (): void => {
+      value$ = void 0;
+      $reset();
+    },
+  ];
+}
+
+// function cacheObservableWithNotifications<GValue>(
+//   subscribe: IObservable<IDefaultNotificationsUnion<GValue>>,
+// ): ICacheObservableWithNotificationsResult<GValue> {
+//   let value$: IObservable<IDefaultNotificationsUnion<GValue>> | undefined;
+//
+//   const { emit: $reset, subscribe: reset$ } = createUnicastSource<void>();
+//
+//   // const source: IMulticastReplaySource<IDefaultNotificationsUnion<GValue>> = createMulticastReplaySource<IDefaultNotificationsUnion<GValue>>();
+//   const source = createUnicastReplaySource<IDefaultNotificationsUnion<GValue>>();
+//
+//   const getData$ = pipeObservable(subscribe, [
+//     fulfilledObservablePipe(
+//       (value: GValue): IObservable<IDefaultNotificationsUnion<GValue>> => {
+//         value$ = singleWithNotifications(value);
+//         return value$;
+//       },
+//     ),
+//   ]);
+//
+//   const errorOnReset$ = switchMapObservable(reset$, (): IObservable<IDefaultNotificationsUnion<GValue>> => {
+//     return throwError(new Error(`Got a reset`));
+//   });
+//
+//   const racing$ = pipeObservable(
+//     raceWithNotifications([
+//       getData$,
+//       errorOnReset$,
+//     ]),
+//     [
+//       sourceObservablePipe<IDefaultNotificationsUnion<GValue>>({
+//         getSource: () => source,
+//       }),
+//       rejectedObservablePipe<GValue, IDefaultNotificationsUnion<GValue>>((error: unknown): IObservable<IDefaultNotificationsUnion<GValue>> => {
+//         console.log('rejected');
+//         value$ = void 0;
+//         source.reset();
+//         return throwError(error);
+//       }),
+//       shareObservablePipe<IDefaultNotificationsUnion<GValue>>(),
+//     ],
+//   );
+//
+//   return [
+//     defer((): IObservable<IDefaultNotificationsUnion<GValue>> => {
+//       return (value$ === void 0)
+//         ? racing$
+//         : value$;
+//     }),
+//     (): void => {
+//       value$ = void 0;
+//       source.reset();
+//       $reset();
+//     },
+//   ];
+// }
+
+// function cacheObservableWithNotifications<GValue>(
+//   subscribe: IObservable<IDefaultNotificationsUnion<GValue>>,
+// ): ICacheObservableWithNotificationsResult<GValue> {
+//   let value$: IObservable<IDefaultNotificationsUnion<GValue>> | undefined;
+//
+//   const { emit: $reset, subscribe: reset$ } = createUnicastSource<void>();
+//
+//   const source: IMulticastReplaySource<IDefaultNotificationsUnion<GValue>> = createMulticastReplaySource<IDefaultNotificationsUnion<GValue>>();
+//
+//   const getData$ = pipeObservable(subscribe, [
+//     thenObservablePipe(
+//       (value: GValue): IObservable<IDefaultNotificationsUnion<GValue>> => {
+//         value$ = singleWithNotifications(value);
+//         return value$;
+//       },
+//       (error: any): IObservable<IDefaultNotificationsUnion<GValue>> => {
+//         queueMicrotask(() => {
+//           value$ = void 0;
+//           source.reset();
+//         });
+//         return throwError(error);
+//       },
+//     ),
+//     shareObservablePipe<IDefaultNotificationsUnion<GValue>>({
+//       getSource: () => source,
+//     }),
+//   ]);
+//
+//   const errorOnReset$ = switchMapObservable(reset$, () => {
+//     return throwError(new Error(`Got a reset`));
+//   });
+//
+//   const racing$ = raceWithNotifications([
+//     getData$,
+//     errorOnReset$,
+//   ]);
+//
+//   return [
+//     defer(() => {
+//       return (value$ === void 0)
+//         ? racing$
+//         : value$;
+//     }),
+//     (): void => {
+//       value$ = void 0;
+//       source.reset();
+//       $reset();
+//     },
+//   ];
+// }
+
+/*----------------*/
+
+function debugLiRXCache1() {
+  type GValue = number;
+
+  const getObservable = (): IObservable<IDefaultNotificationsUnion<GValue>> => {
+
+    let data$: IObservable<IDefaultNotificationsUnion<GValue>> | undefined;
+    const request$: IObservable<IDefaultNotificationsUnion<GValue>> = singleN(2);
+
+    const req$ = pipe$$(request$, [
+      then$$$(
+        (data: GValue): IObservable<IDefaultNotificationsUnion<GValue>> => {
+          data$ = singleN(data);
+          return data$;
+        },
+        (error: any): IObservable<IDefaultNotificationsUnion<GValue>> => {
+          data$ = void 0;
+          return throwError(error);
+        },
+      ),
+    ]);
+
+    return defer(() => {
+      return (data$ === void 0)
+        ? req$
+        : data$;
+    });
+  };
+}
+
+function debugLiRXCache2() {
+  let step: number = 0;
+
+  const src$ = defer((): IObservable<IDefaultNotificationsUnion<string>> => {
+    step++;
+    if (step === 1) {
+      return singleN('step-1');
+    } else if (step === 2) {
+      return throwError('step-2');
+    } else {
+      return singleN('step-3');
+    }
+  });
+  const obs$ = debug$$(src$, 'src');
+  // const reset$ = timeout(1000);
+
+  const [cached$, reset] = cacheObservableWithNotifications(obs$);
+
+  cached$($log);
+  // cached$($log);
+  reset();
+  console.log('reset');
+  cached$($log);
+  // cached$($log);
+  // setTimeout(() => {
+  //   cached$($log);
+  // }, 1500);
+}
+
+/*----------------*/
+
+export function debugLiRXCache() {
+  // debugLiRXCache1();
+  debugLiRXCache2();
+}

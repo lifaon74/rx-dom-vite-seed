@@ -1,0 +1,332 @@
+import { createMulticastReplaySource, IMulticastReplaySource, IObservable, IUnsubscribe, of } from '@lirx/core';
+import {
+  $log,
+  createUnicastSource,
+  debug$$,
+  defer,
+  futureUnsubscribe,
+  IDefaultInNotificationsUnion,
+  IDefaultNotificationsUnion, IObserver,
+  IRunning,
+  merge,
+  rejectedObservable,
+  singleN,
+  switchMap$$,
+  throwError,
+  timeout,
+} from '../../../../lirx/core/dist';
+
+/*----------------*/
+
+// export interface ICacheObservableOptions {
+//   reset$: IObservable<void>,
+//   subscribe$: IObservable<void>,
+//   unsubscribe$: IObservable<void>,
+// }
+//
+// export interface ICacheObservableReturn<GValue> {
+//   subscribe: IObservable<GValue>;
+//   reset: () => void,
+//   start: () => void,
+//   strop: () => void,
+// }
+//
+// export function cacheObservable<GValue>(
+//   subscribe: IObservable<GValue>,
+// ): ICacheObservableReturn<GValue> {
+//   const source: IMulticastReplaySource<GValue> = createMulticastReplaySource<GValue>();
+//
+//   const reset = (): void => {
+//
+//   };
+//
+//
+//   const _subscribe = (emit: IObserver<GValue>): IUnsubscribe => {
+//     let running: boolean = true;
+//     observersCounts++;
+//
+//     const unsubscribeSource: IUnsubscribe = source.subscribe(emit);
+//
+//     if (observersCounts === 1) {
+//       unsubscribe = subscribe((value: GValue): void => {
+//         source.emit(value);
+//       });
+//
+//       unsubscribeOfResetCache = reset$((): void => {
+//         source.reset();
+//       });
+//     }
+//
+//     return (): void => {
+//       if (running) {
+//         running = false;
+//         unsubscribeSource();
+//         observersCounts--;
+//         if (observersCounts === 0) {
+//           unsubscribe();
+//           unsubscribeOfResetCache();
+//         }
+//       }
+//     };
+//   };
+// }
+
+// export function cacheObservable<GValue>(
+//   subscribe: IObservable<GValue>,
+//   resetCache$: IObservable<void>,
+// ): IObservable<GValue> {
+//   let unsubscribe: IUnsubscribe;
+//   let unsubscribeOfResetCache: IUnsubscribe;
+//   let observersCounts: number = 0;
+//   const source: IMulticastReplaySource<GValue> = createMulticastReplaySource<GValue>();
+//
+//   return (emit: IObserver<GValue>): IUnsubscribe => {
+//     let running: boolean = true;
+//     observersCounts++;
+//
+//     const unsubscribeSource: IUnsubscribe = source.subscribe(emit);
+//
+//     if (observersCounts === 1) {
+//       unsubscribe = subscribe((value: GValue): void => {
+//         source.emit(value);
+//       });
+//
+//       unsubscribeOfResetCache = resetCache$((): void => {
+//         source.reset();
+//       });
+//     }
+//
+//     return (): void => {
+//       if (running) {
+//         running = false;
+//         unsubscribeSource();
+//         observersCounts--;
+//         if (observersCounts === 0) {
+//           unsubscribe();
+//           unsubscribeOfResetCache();
+//         }
+//       }
+//     };
+//   };
+// }
+
+// export interface ICacheObservableOptions {
+//   hardReset?: boolean;
+// }
+//
+// export function cacheObservable<GValue>(
+//   subscribe: IObservable<GValue>,
+//   resetCache$: IObservable<void>,
+//   {
+//     hardReset = true,
+//   }: ICacheObservableOptions = {},
+// ): IObservable<GValue> {
+//   let unsubscribe: IUnsubscribe;
+//   let unsubscribeOfResetCache: IUnsubscribe;
+//   let observersCounts: number = 0;
+//   const source: IMulticastReplaySource<GValue> = createMulticastReplaySource<GValue>();
+//
+//   return (emit: IObserver<GValue>): IUnsubscribe => {
+//     let running: boolean = true;
+//     observersCounts++;
+//
+//     const unsubscribeSource: IUnsubscribe = source.subscribe(emit);
+//
+//     if (observersCounts === 1) {
+//       unsubscribe = subscribe((value: GValue): void => {
+//         source.emit(value);
+//       });
+//
+//       unsubscribeOfResetCache = resetCache$((): void => {
+//         source.reset();
+//
+//         // if (hardReset) {
+//         //   observersCounts = 0;
+//         //   unsubscribe();
+//         //   unsubscribeOfResetCache();
+//         // }
+//       });
+//     }
+//
+//     return (): void => {
+//       if (running) {
+//         running = false;
+//         unsubscribeSource();
+//         observersCounts--;
+//         if (observersCounts === 0) {
+//           unsubscribe();
+//           unsubscribeOfResetCache();
+//         }
+//       }
+//     };
+//   };
+// }
+
+// export function cacheObservableWithNotifications<GValue>(
+//   subscribe: IObservable<IDefaultInNotificationsUnion<GValue>>,
+//   resetCache$?: IObservable<void>,
+// ): IObservable<IDefaultNotificationsUnion<GValue>> {
+//   const { emit: $error, subscribe: error$ } = createUnicastSource<void>();
+//
+//   const _resetCache$: IObservable<void> = (resetCache$ === void 0)
+//     ? error$
+//     : merge([
+//       error$,
+//       resetCache$,
+//     ]);
+//
+//   return rejectedObservable<GValue, IDefaultNotificationsUnion<GValue>>(
+//     cacheObservable<IDefaultInNotificationsUnion<GValue>>(
+//       subscribe,
+//       _resetCache$,
+//     ),
+//     (error: unknown): IObservable<IDefaultNotificationsUnion<GValue>> => {
+//       $error();
+//       return throwError(error);
+//     },
+//   );
+// }
+
+// export type ICacheObservableNotifications =
+//   | IErrorNotification
+//   | IGenericNotification
+//   ;
+//
+// export function cacheObservableWithNotifications<GNotifications extends ICacheObservableNotifications>(
+//   subscribe: IObservable<GNotifications>,
+//   resetCache$?: IObservable<void>,
+// ): IObservable<GNotifications> {
+//   const { emit: $error, subscribe: error$ } = createUnicastSource<void>();
+//
+//   const _resetCache$: IObservable<void> = (resetCache$ === void 0)
+//     ? error$
+//     : merge([
+//       error$,
+//       resetCache$,
+//     ]);
+//
+//   return tapObservable<GNotifications>(
+//     cacheObservable<GNotifications>(
+//       subscribe,
+//       _resetCache$,
+//     ),
+//     (notification: GNotifications) => {
+//       if (isErrorNotification(notification)) {
+//         $error();
+//       }
+//     },
+//   );
+// }
+
+export function cacheObservableWithNotifications<GValue>(
+  subscribe: IObservable<IDefaultInNotificationsUnion<GValue>>,
+  reset$: IObservable<void>,
+): IObservable<IDefaultNotificationsUnion<GValue>> {
+  let unsubscribe: IUnsubscribe;
+  let unsubscribeOfResetCache: IUnsubscribe;
+  let observersCounts: number = 0;
+  const source: IMulticastReplaySource<GValue> = createMulticastReplaySource<GValue>();
+
+  return (emit: IObserver<IDefaultNotificationsUnion<GValue>>): IUnsubscribe => {
+    let running: boolean = true;
+    observersCounts++;
+
+    const unsubscribeSource: IUnsubscribe = source.subscribe(emit);
+
+    if (observersCounts === 1) {
+      unsubscribe = subscribe((value: GValue): void => {
+        source.emit(value);
+      });
+
+      unsubscribeOfResetCache = reset$((): void => {
+        source.reset();
+      });
+    }
+
+    return (): void => {
+      if (running) {
+        running = false;
+        unsubscribeSource();
+        observersCounts--;
+        if (observersCounts === 0) {
+          unsubscribe();
+          unsubscribeOfResetCache();
+        }
+      }
+    };
+  };
+
+  // const { emit: $error, subscribe: error$ } = createUnicastSource<void>();
+  //
+  // const _resetCache$: IObservable<void> = (resetCache$ === void 0)
+  //   ? error$
+  //   : merge([
+  //     error$,
+  //     resetCache$,
+  //   ]);
+  //
+  // return rejectedObservable<GValue, IDefaultNotificationsUnion<GValue>>(
+  //   cacheObservable<IDefaultInNotificationsUnion<GValue>>(
+  //     subscribe,
+  //     _resetCache$,
+  //   ),
+  //   (error: unknown): IObservable<IDefaultNotificationsUnion<GValue>> => {
+  //     $error();
+  //     return throwError(error);
+  //   },
+  // );
+}
+
+/*----------------*/
+
+function debugLiRXCache1() {
+  // const src$ = merge([
+  //     of(0, 1, 2),
+  //     switchMap$$(timeout(2000), () => of(3, 4, 5)),
+  //   ])
+  // ;
+  // const obs$ = debug$$(src$, 'src');
+  // const reset$ = timeout(1000);
+  //
+  // const cached$ = cacheObservable(obs$, reset$);
+  //
+  // cached$($log);
+  // cached$($log);
+  //
+  // setTimeout(() => {
+  //   cached$($log);
+  // }, 2500);
+}
+
+function debugLiRXCache2() {
+  let step: number = 0;
+
+  const src$ = defer((): IObservable<IDefaultNotificationsUnion<string>> => {
+    step++;
+    if (step === 1) {
+      return singleN('step-1');
+    } else if (step === 2) {
+      return throwError('step-2');
+    } else {
+      return singleN('step-3');
+    }
+  });
+  const obs$ = debug$$(src$, 'src');
+  const reset$ = timeout(1000);
+
+  const cached$ = cacheObservableWithNotifications(obs$, reset$);
+
+  cached$($log);
+  cached$($log);
+
+  // setTimeout(() => {
+  //   cached$($log);
+  // }, 1500);
+}
+
+/*----------------*/
+
+export function debugLiRXCache() {
+  // debugLiRXCache1();
+  debugLiRXCache2();
+}

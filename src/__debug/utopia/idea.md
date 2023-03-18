@@ -5,6 +5,11 @@
 
 ---
 
+### Outils
+
+- FaunaDB: db graphql distribuée https://fauna.com/
+- deno deploy: https://deno.com/deploy/docs/examples
+
 ### Compte citoyen
 
 Partie la plus sensible et qui doit être la mieux gérée !
@@ -40,17 +45,7 @@ Comme toutes les clefs, elles sont sensibles, mais peuvent être sauvegardées s
 
 Elles peuvent être révoquées par "level-1", ou "level-2"
 
-
-- publique: disponible sur le serveur
-- privée: la plus sensible et qui doit être gardée avec une extreme attention par l'utilisateur (ex offline: papier, carte rfid, etc...)
-
-Une paire de clefs "level-1" (pour signer -> ECDSA)
-
-- publique: disponible sur le serveur, représente l'identifiant de l'utilisateur
-- privée: sensible et qui doit être gardée avec une attention par l'utilisateur (ex: sur l'ordinateur)
-
-
-[//]: # (L'utilisateur peut créer plusieurs autres clefs signées par sa clef primaire.)
+---
 
 Questions:
 

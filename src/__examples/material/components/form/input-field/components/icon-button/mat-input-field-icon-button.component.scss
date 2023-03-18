@@ -1,0 +1,93 @@
+@import 'mat-input-field-icon-button.variables';
+
+/** STYLE **/
+
+:host {
+  display: block;
+  appearance: none;
+  padding: 0;
+  cursor: pointer;
+  position: relative;
+
+  border: 0;
+  overflow: hidden;
+
+  color: $mat-input-field-icon-button-color;
+  background-color: $mat-input-field-icon-button-background-color;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+
+  $mat-input-field-icon-button-padding: calc((#{$mat-input-field-height} - #{$mat-input-field-icon-button-icon-size}) * 0.5);
+
+  & > mat-ripple {
+    & > .content {
+      display: inline-flex;
+      align-items: center;
+      gap: $mat-input-field-icon-button-padding;
+      padding: $mat-input-field-icon-button-padding;
+
+      & > svg {
+        fill: #{$mat-input-field-icon-button-color};
+        width: #{$mat-input-field-icon-button-icon-size};
+        height: #{$mat-input-field-icon-button-icon-size};
+      }
+    }
+  }
+
+
+  &:not(:disabled) {
+    transition: color $mat-input-field-icon-button-transition-duration,
+    background-color $mat-input-field-icon-button-transition-duration;
+
+    & > mat-ripple {
+      & > .content {
+        & > svg {
+          transition: fill $mat-input-field-icon-button-transition-duration;
+        }
+      }
+    }
+
+    &:focus-visible {
+      color: $mat-input-field-icon-button-color-focused;
+      background-color: $mat-input-field-icon-button-background-color-focused;
+
+      & > mat-ripple {
+        & > .content {
+          & > svg {
+            fill: #{$mat-input-field-icon-button-color-focused};
+          }
+        }
+      }
+    }
+
+    @media (hover: hover) {
+      &:hover {
+        color: $mat-input-field-icon-button-color-hover;
+        background-color: $mat-input-field-icon-button-background-color-hover;
+
+        & > mat-ripple {
+          & > .content {
+            & > svg {
+              fill: #{$mat-input-field-icon-button-color-hover};
+            }
+          }
+        }
+      }
+    }
+  }
+
+  &:disabled {
+    transition: all 0ms;
+    cursor: default;
+    color: $mat-input-field-icon-button-color-disabled;
+    background-color: $mat-input-field-icon-button-background-color-disabled;
+
+    & > mat-ripple {
+      & > .content {
+        & > svg {
+          fill: #{$mat-input-field-icon-button-color-disabled};
+        }
+      }
+    }
+  }
+}

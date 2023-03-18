@@ -2,6 +2,7 @@ import { matBadgeExample } from './components/badge/mat-badge.example';
 import { matButtonExample } from './components/buttons/button/mat-button.example';
 import { matRippleExample } from './components/buttons/ripple/mat-ripple.example';
 import { matFormExample } from './components/form/mat-form.example';
+import { matGridExample } from './components/grid/mat-grid.example';
 import { matDualRingLoaderExample } from './components/loaders/dual-ring-loader/mat-dual-ring-loader.example';
 import { matOverlayExample } from './components/overlay/mat-overlay.example';
 import { matProgressBarExample } from './components/progress/progress-bar/mat-progress-bar.example';
@@ -25,5 +26,6 @@ export function materialExample(): void {
 
   // IN PROGRESS
   // matFormExample();
-  matOverlayExample();
+  // matOverlayExample();
+  matGridExample();
 }

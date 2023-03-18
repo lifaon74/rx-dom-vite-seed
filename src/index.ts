@@ -7,5 +7,5 @@ function main(): void {
   examples();
 }
 
-window.onload = main;
+main();
 

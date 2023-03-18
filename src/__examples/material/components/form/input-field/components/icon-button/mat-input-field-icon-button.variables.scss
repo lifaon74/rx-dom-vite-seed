@@ -1,0 +1,19 @@
+@import '~@lirx/dom-material/src/components/buttons/button/mat-button.variables';
+@import '../../mat-input-field.variables';
+
+$mat-input-field-icon-button-transition-duration: var(--mat-input-field-icon-button-transition-duration, 250ms);
+
+$mat-input-field-icon-button-icon-size: var(--mat-input-field-icon-button-icon-size, 24px);
+
+$mat-input-field-icon-button-color: var(--mat-input-field-icon-button-color, $mat-input-field-color);
+$mat-input-field-icon-button-background-color: var(--mat-input-field-icon-button-background-color, transparent);
+
+$mat-input-field-icon-button-color-hover: var(--mat-input-field-icon-button-color-hover, $mat-input-field-icon-button-color);
+$mat-input-field-icon-button-background-color-hover: var(--mat-input-field-icon-button-background-color-hover, rgba(0 0 0 / 0.03));
+
+$mat-input-field-icon-button-color-focused: var(--mat-input-field-icon-button-color-focused, $mat-input-field-icon-button-color);
+$mat-input-field-icon-button-background-color-focused: var(--mat-input-field-icon-button-background-color-focused, rgba(0 0 0 / 0.04));
+
+$mat-input-field-icon-button-color-disabled: var(--mat-input-field-icon-button-color-disabled, $mat-input-field-icon-button-color);
+$mat-input-field-icon-button-background-color-disabled: var(--mat-input-field-icon-button-background-color-disabled, transparent);
+

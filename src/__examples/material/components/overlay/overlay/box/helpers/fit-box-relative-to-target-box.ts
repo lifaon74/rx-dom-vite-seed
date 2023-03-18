@@ -1,4 +1,4 @@
-import { math_clamp } from '@lirx/animations';
+import { math_clamp } from '@lifaon/math';
 import { IPositionAndSize2D } from '../types/2d/position-and-size/position-and-size-2d.type';
 import { ISize2D } from '../types/2d/size/size-2d.type';
 

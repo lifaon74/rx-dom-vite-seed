@@ -13,12 +13,12 @@ interface IData {
   readonly element$: IObservable<HTMLElement>;
 }
 
-interface IMatTooltipExampleComponentConfig {
+interface IMatMenuExampleComponentConfig {
   element: HTMLElement;
   data: IData;
 }
 
-const MatTooltipExampleComponent = createComponent<IMatTooltipExampleComponentConfig>({
+const MatMenuExampleComponent = createComponent<IMatMenuExampleComponentConfig>({
   name: 'mat-menu-example',
   template: compileReactiveHTMLAsComponentTemplate({
     html: `
@@ -43,14 +43,34 @@ const MatTooltipExampleComponent = createComponent<IMatTooltipExampleComponentCo
           </mat-menu-item-text>
         </mat-menu-item>
         
-<!--         <mat-menu-item>-->
-<!--          <mat-menu-item-icon>-->
-<!--            <icon-close></icon-close>-->
-<!--          </mat-menu-item-icon>-->
-<!--          <mat-menu-item-text>-->
-<!--            aaaaaaaaaaaa aaaaaaaaaaa aaaaaaaaaaaa aaaaaaaaaaaaaaaaaa-->
-<!--          </mat-menu-item-text>-->
-<!--        </mat-menu-item>-->
+<!--        TODO-->
+<!--        <mat-sub-menu-item>-->
+<!--          <rx-slot name="item">-->
+<!--            <mat-menu-item-icon>-->
+<!--              <icon-close></icon-close>-->
+<!--            </mat-menu-item-icon>-->
+<!--            <mat-menu-item-text>-->
+<!--              Remove-->
+<!--            </mat-menu-item-text>-->
+<!--          </rx-slot>-->
+<!--         <rx-slot name="sub-menu">-->
+<!--            <mat-menu-item-icon>-->
+<!--              <icon-close></icon-close>-->
+<!--            </mat-menu-item-icon>-->
+<!--            <mat-menu-item-text>-->
+<!--              Remove-->
+<!--            </mat-menu-item-text>-->
+<!--          </rx-slot>-->
+<!--        </mat-sub-menu-item>-->
+        
+        <mat-menu-item>
+          <mat-menu-item-icon>
+            <icon-close></icon-close>
+          </mat-menu-item-icon>
+          <mat-menu-item-text>
+            aaaaaaaaaaaa aaaaaaaaaaa aaaaaaaaaaaa aaaaaaaaaaaaaaaaaa
+          </mat-menu-item-text>
+        </mat-menu-item>
       </mat-menu>
     `,
     customElements: [
@@ -90,9 +110,9 @@ export function matMenuExample(): void {
 
   button.onclick = () => {
     // button.style.marginTop = ((button.style.marginTop ? parseFloat(button.style.marginTop) : 0) + 50).toString(10) + 'px';
-    manager.open(MatTooltipExampleComponent);
+    manager.open(MatMenuExampleComponent);
   };
 
   const manager = MatOverlayManager.create();
-  manager.open(MatTooltipExampleComponent);
+  manager.open(MatMenuExampleComponent);
 }

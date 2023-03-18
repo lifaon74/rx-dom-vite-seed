@@ -4,10 +4,15 @@ import {
   compileStyleAsComponentStyle,
   createComponent,
   VirtualCustomElementNode,
-  VirtualReactiveElementNode,
 } from '@lirx/dom';
+import {
+  elementOrVirtualReactiveElementNodeToElement,
+  IElementOrVirtualReactiveElementNode,
+} from '../../../../../../functions/element-or-virtual-reactive-element-node-to-element';
 import { applyCSSPositionAndSize2D } from '../../types/2d/position-and-size/css/apply-css-position-and-size-2d';
 import { ICSSPositionAndSize2D } from '../../types/2d/position-and-size/css/css-position-and-size-2d.type';
+// @ts-ignore
+import style from '../box/mat-overlay-box.component.scss?inline';
 
 import {
   getCSSPositionAndSize2DObservableForMatOverlayBoxSticky,
@@ -15,17 +20,12 @@ import {
 
 // @ts-ignore
 import html from './mat-overlay-box-sticky.component.html?raw';
-// @ts-ignore
-import style from '../box/mat-overlay-box.component.scss?inline';
 
 /**
  * COMPONENT: 'mat-overlay-box-sticky'
  */
 
-export type IMatOverlayBoxStickyElement =
-  | HTMLElement
-  | VirtualReactiveElementNode<HTMLElement>
-  ;
+export type IMatOverlayBoxStickyElement = IElementOrVirtualReactiveElementNode<HTMLElement>;
 
 interface IMatOverlayBoxStickyComponentConfig {
   element: HTMLElement;
@@ -48,11 +48,7 @@ export const MatOverlayBoxStickyComponent = createComponent<IMatOverlayBoxSticky
   init: (node: VirtualCustomElementNode<IMatOverlayBoxStickyComponentConfig>): void => {
     const element$ = node.inputs.get$('element');
 
-    const targetElement$ = map$$(element$, (value: IMatOverlayBoxStickyElement): HTMLElement => {
-      return (value instanceof HTMLElement)
-        ? value
-        : value.elementNode;
-    });
+    const targetElement$ = map$$(element$, elementOrVirtualReactiveElementNodeToElement);
 
     const config$ = switchMap$$(
       targetElement$,

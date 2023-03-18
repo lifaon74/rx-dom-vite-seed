@@ -1,7 +1,6 @@
-import { debounceTime$$$, distinct$$$, IUnsubscribe, mouseEnterObservable, pipe$$ } from '@lirx/core';
+import { debounceTime$$$, distinct$$$, IObservableLike, isMouseOverElementObservable, IUnsubscribeOfObservable, pipe$$ } from '@lirx/core';
 import {
   createVirtualDOMNodeModifier,
-  IObservableLike,
   IVirtualCustomElementNodeSlotTemplate,
   IVirtualDOMNodeModifier,
   toObservableThrowIfUndefined,
@@ -14,15 +13,14 @@ import { getGlobalMatOverlayManager } from '../../../manager/functions/global-ma
 import { MatOverlayManager } from '../../../manager/mat-overlay-manager';
 import { IMatTooltipVirtualCustomElementNode, MatTooltipComponent } from '../built-in/tooltip/mat-tooltip.component';
 
-// TODO add support for observables ?
 export type IMatTooltipModifierInput =
   | [IObservableLike<'string'>]
-  | IVirtualCustomElementNodeSlotTemplate
+  | IVirtualCustomElementNodeSlotTemplate<object>
   ;
 
 function convertMatTooltipModifierInputToTemplate(
   input: IMatTooltipModifierInput,
-): IVirtualCustomElementNodeSlotTemplate {
+): IVirtualCustomElementNodeSlotTemplate<object> {
   if (Array.isArray(input)) {
     return (
       parentNode: VirtualDOMNode,
@@ -51,18 +49,18 @@ export function createMatTooltipModifier(
   ): VirtualDOMNode => {
     if (node instanceof VirtualReactiveElementNode) {
 
-      const template: IVirtualCustomElementNodeSlotTemplate = convertMatTooltipModifierInputToTemplate(input);
+      const template: IVirtualCustomElementNodeSlotTemplate<object> = convertMatTooltipModifierInputToTemplate(input);
       const element: HTMLElement = node.elementNode;
 
       const ariaUUID: string = uuid();
       node.setAttribute('aria-describedby', ariaUUID);
 
-      const display$ = pipe$$(mouseEnterObservable(element), [
+      const display$ = pipe$$(isMouseOverElementObservable(element), [
         debounceTime$$$<boolean>(500),
         distinct$$$<boolean>(),
       ]);
 
-      let _unsubscribe: IUnsubscribe | undefined;
+      let _unsubscribe: IUnsubscribeOfObservable | undefined;
       let overlay: IMatTooltipVirtualCustomElementNode | undefined;
 
       const close = () => {

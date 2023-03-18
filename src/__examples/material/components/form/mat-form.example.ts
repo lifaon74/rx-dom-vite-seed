@@ -1,5 +1,4 @@
 import { freeze } from '@lirx/core';
-import { matFormFieldExample } from './form-field/mat-form-field.example';
 import { matInputFieldExample } from './input-field/mat-input-field.example';
 import { matInputTextExample } from './input-text/mat-input-text.example';
 import { numberInputValidator } from './input-validator/built-in/number-input-validator';

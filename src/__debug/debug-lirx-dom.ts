@@ -1,4 +1,4 @@
-import { fromEventTarget, interval, IObservable, logState$$, map$$, merge, scan$$, single } from '@lirx/core';
+import { fromEventTarget, interval, IObservable, debug$$, map$$, merge, scan$$, single } from '@lirx/core';
 import {
   compileReactiveHTMLAsComponentTemplate, createComponent,
   IComponentTemplate,
@@ -8,40 +8,40 @@ import {
   VirtualDOMNode, VirtualReactiveElementNode, VirtualReactiveForLoopNode, VirtualReactiveIfNode, VirtualReactiveTextNode,
   VirtualRootNode, VirtualTextNode,
 } from '@lirx/dom';
-import { NODE_REFERENCE_MODIFIER } from '../__examples/material/modifiers/node-reference.modifier';
-import { debugReactiveDOMCompiler } from './aot/debug-reactive-dom-compiler';
+import { ELEMENT_REFERENCE_MODIFIER } from '@lirx/dom-material';
+
 
 const ROOT = VirtualRootNode.body;
 
 function createTextObservable(
   name: string,
 ): IObservable<string> {
-  return logState$$(map$$(interval(100), () => new Date().toISOString()), name);
+  return debug$$(map$$(interval(100), () => new Date().toISOString()), name);
 }
 
 function createConditionObservable(
   name: string,
 ): IObservable<boolean> {
-  return logState$$(scan$$(interval(1000), (enabled: boolean) => !enabled, false), name);
+  return debug$$(scan$$(interval(1000), (enabled: boolean) => !enabled, false), name);
   // return merge([false, map$$(timeout(1000), (enabled: boolean) => !enabled, false), name);
 }
 
 function createClassNamesListObservable(
   name: string,
 ): IObservable<Set<string>> {
-  return logState$$(map$$(scan$$(interval(1000), (enabled: boolean) => !enabled, false), (enabled: boolean) => new Set(enabled ? ['a', 'b'] : [])), name);
+  return debug$$(map$$(scan$$(interval(1000), (enabled: boolean) => !enabled, false), (enabled: boolean) => new Set(enabled ? ['a', 'b'] : [])), name);
 }
 
 function createStylePropertyObservable(
   name: string,
 ): IObservable<ISetStyleProperty> {
-  return logState$$(map$$(scan$$(interval(100), (size: number) => (size + 1) % 20, 0), (size: number) => ({ value: `${size}px` })), name);
+  return debug$$(map$$(scan$$(interval(100), (size: number) => (size + 1) % 20, 0), (size: number) => ({ value: `${size}px` })), name);
 }
 
 function createStylePropertiesMapObservable(
   name: string,
 ): IObservable<Map<string, ISetStyleProperty>> {
-  return logState$$(map$$(scan$$(interval(1000), (enabled: boolean) => !enabled, false), (enabled: boolean) => new Map(enabled ? [['background-color', { value: 'red' }]] : [])), name);
+  return debug$$(map$$(scan$$(interval(1000), (enabled: boolean) => !enabled, false), (enabled: boolean) => new Map(enabled ? [['background-color', { value: 'red' }]] : [])), name);
 }
 
 interface GItem {
@@ -61,7 +61,7 @@ function createItemsObservable(
   // const mapFunction = () => items.slice(0, Math.floor(Math.random() * items.length));
   const mapFunction = () => items.slice().sort(() => Math.random() < 0.5 ? -1 : 1);
 
-  return logState$$(map$$(merge([fromEventTarget(window, 'click'), single(void 0)]), mapFunction), name);
+  return debug$$(map$$(merge([fromEventTarget(window, 'click'), single(void 0)]), mapFunction), name);
 }
 
 function createDummyTemplateFunction(
@@ -114,7 +114,7 @@ function testReactiveIfNode(): void {
   buttonNode.attach(ROOT);
 
   const click$ = buttonNode.on$<MouseEvent>('click');
-  const enabled$ = logState$$(merge([single(false), scan$$(click$, (enabled: boolean) => !enabled, false)]), 'enabled');
+  const enabled$ = debug$$(merge([single(false), scan$$(click$, (enabled: boolean) => !enabled, false)]), 'enabled');
 
   const conditionalNode = new VirtualReactiveIfNode(
     enabled$,
@@ -137,7 +137,7 @@ function testReactiveForLoopNode(): void {
       parentNode: VirtualDOMNode,
       {
         item,
-        index,
+        index$,
       },
     ): void => {
       const div = VirtualReactiveElementNode.createHTML('div');
@@ -145,7 +145,7 @@ function testReactiveForLoopNode(): void {
       div.setAttribute('name', item.name);
 
       new VirtualTextNode(`${item.name} - `).attach(div);
-      new VirtualReactiveTextNode(map$$(index, String)).attach(div);
+      new VirtualReactiveTextNode(map$$(index$, String)).attach(div);
     },
   );
   forLoopNode.attach(ROOT);
@@ -227,7 +227,7 @@ OR node.isConnected$(node.sources.get$('name'))($value);
 function debugVirtualNode(): void {
   const container = VirtualReactiveElementNode.createHTML('div');
 
-  const date$ = logState$$(map$$(interval(1000), () => new Date().toISOString()), 'date');
+  const date$ = debug$$(map$$(interval(1000), () => new Date().toISOString()), 'date');
   // const n3 = new VirtualTextNode('hello world !');
   const reactiveTextNode = new VirtualReactiveTextNode(date$);
 
@@ -261,7 +261,7 @@ function createSimpleMatButton() {
       const disabled$ = node.inputs.get$('disabled');
       node.setReactiveProperty('disabled', disabled$);
 
-      node.slots.get('*')!(node);
+      node.slots.get('*')!(node, {});
 
     },
   });
@@ -367,7 +367,7 @@ async function debugTranspilers() {
   //   </rx-switch>
   // `;
 
-  const html = `<div #ref="$.$out" disable></div>`;
+  // const html = `<div #ref="$.$out" disable></div>`;
 
 //   const html = `
 //     <rx-inject-slot
@@ -377,7 +377,7 @@ async function debugTranspilers() {
 //     </rx-inject-slot>
 //
 // <!--    <div-->
-// <!--      *inject-slot="slot-a"-->
+// <!--      *slot="slot-a"-->
 // <!--    >-->
 // <!--      default content A-->
 // <!--    </div>-->
@@ -402,6 +402,27 @@ async function debugTranspilers() {
   // const html = await import('../assets/debug-reactive-dom-compiler-3.rxhtml?raw').then(_ => _.default);
   // const html = await import('../assets/debug-reactive-dom-compiler-4.rxhtml?raw').then(_ => _.default);
   // const html = await import('../assets/debug-reactive-dom-compiler-5.rxhtml?raw').then(_ => _.default);
+
+  // WITH ERRORS
+
+  // const html = `<rx-invalid></rx-invalid>`;
+  // const html = `<rx-if></rx-if>`;
+  // const html = `<rx-if condition="true">abc</rx-if>`;
+  // const html = `<rx-if condition="true"></rx-if>`;
+  // const html = `<rx-if condition="true" invalid></rx-if>`;
+  // const html = `<rx-if condition="true"><abc></abc></rx-if>`;
+  // const html = `<rx-if condition="true">
+  //   <rx-if-true></rx-if-true>
+  //   <rx-if-true></rx-if-true>
+  // </rx-if>`;
+  // const html = `<app-test>
+  //   <rx-slot name="a"></rx-slot>
+  //   <rx-slot name="a"></rx-slot>
+  // </app-test>`;
+
+  // const html = `<rx-container a=""></rx-container>`;
+  // const html = `<!--<div *for="const i = 5">-->`;
+  const html = await import('./assets/debug-reactive-dom-compiler-6.rxhtml?raw').then(_ => _.default);
 
   const data = {
     text$: createTextObservable('text$'),
@@ -432,7 +453,7 @@ async function debugTranspilers() {
         createSimpleMatButton(),
       ],
       modifiers: [
-        NODE_REFERENCE_MODIFIER,
+        ELEMENT_REFERENCE_MODIFIER,
       ],
     });
     console.timeEnd('transpiling');
@@ -490,6 +511,6 @@ export function debugLiRXDOM(): void {
   // testReactiveIfNode();
   // testReactiveForLoopNode();
   // testCustomElementNode();
-  // debugTranspilers();
+  debugTranspilers();
 
 }

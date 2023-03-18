@@ -1,0 +1,227 @@
+import {
+  $log,
+  combineLatest,
+  debounceMicrotaskObservable,
+  distinctObservable,
+  function$$,
+  IObservable,
+  let$$,
+  map$$,
+  mapObservable,
+  single,
+} from '@lirx/core';
+import { $LOCALES, LOCALES$ } from '../../intl/locale/locales.constants';
+import { ITranslateFunction } from '../../reactive/translation/translate-function.type';
+import { ITranslateVariables } from '../../reactive/translation/translate-variable.type';
+import { ITranslateVariablesObservable } from '../../reactive/translation/translate-variables-observable.type';
+import { ICreateFluentDefaultCallFunctionEntries } from '../built-in/call-function/built-in/create-fluent-default-call-function-entries';
+import {
+  createFluentDefaultCallFunctions,
+  IFluentDefaultCallFunctionsOptions,
+} from '../built-in/call-function/built-in/create-fluent-default-call-functions';
+import { IFluentGetVariableEntry } from '../built-in/get-variable/fluent-get-variable-function.type';
+import { createFluentMessageOptions, ICreateFluentMessageOptionsOptions } from '../built-in/message/create-fluent-message-options';
+import { IFluentMessageOptions } from '../built-in/message/fluent-message-function.type';
+import { IFluentRenderMessageFunction } from '../built-in/message/render/fluent-render-message-function.type';
+import { createFluentTranslationsLoader } from '../reactive/create-fluent-translations-loader';
+
+/*----*/
+
+export type ICreateFluentDefaultCallFunctionsObservableLocales = Exclude<IFluentDefaultCallFunctionsOptions['locales'], void | undefined>;
+
+export interface ICreateFluentDefaultCallFunctionsObservableOptions extends Omit<IFluentDefaultCallFunctionsOptions, 'locales'> {
+  locales$?: IObservable<ICreateFluentDefaultCallFunctionsObservableLocales>;
+}
+
+/**
+ * Creates an Observable, which, when some locales change, generates the default format functions required by fluent,
+ * and returns the result
+ */
+export function createFluentDefaultCallFunctionsObservable(
+  {
+    locales$ = LOCALES$,
+  }: ICreateFluentDefaultCallFunctionsObservableOptions = {},
+): IObservable<ICreateFluentDefaultCallFunctionEntries> {
+  return map$$(locales$, (locales: ICreateFluentDefaultCallFunctionsObservableLocales): ICreateFluentDefaultCallFunctionEntries => {
+    return createFluentDefaultCallFunctions({
+      locales,
+    });
+  });
+}
+
+/*--*/
+
+export type ICreateFluentMessageOptionsObservableVariables = ICreateFluentMessageOptionsOptions['variables'];
+
+export interface ICreateFluentMessageOptionsObservableOptions extends ICreateFluentDefaultCallFunctionsObservableOptions {
+  variables$?: IObservable<ICreateFluentMessageOptionsObservableVariables>;
+}
+
+/**
+ * Creates an Observable, which, when some locales change, generates the default format functions required by fluent,
+ * appends the variables, and returns the result
+ */
+export function createFluentMessageOptionsObservable(
+  {
+    variables$,
+    ...options
+  }: ICreateFluentMessageOptionsObservableOptions,
+): IObservable<IFluentMessageOptions> {
+  return function$$(
+    [
+      createFluentDefaultCallFunctionsObservable(options),
+      (variables$ === void 0)
+        ? single(void 0)
+        : variables$,
+    ],
+    (
+      options: ICreateFluentDefaultCallFunctionEntries,
+      variables: ICreateFluentMessageOptionsObservableVariables,
+    ): IFluentMessageOptions => {
+      return createFluentMessageOptions({
+        ...options,
+        variables,
+      });
+    },
+  );
+}
+
+/*--*/
+
+export function createFluentTranslateFunction(
+  translations$: IObservable<IFluentRenderMessageFunction>,
+): ITranslateFunction {
+  return (
+    key: string,
+    variables$?: ITranslateVariablesObservable,
+  ): IObservable<string> => {
+    return function$$(
+      [
+        translations$,
+        createFluentMessageOptionsObservable({
+          variables$,
+        }),
+      ],
+      (
+        translations: IFluentRenderMessageFunction,
+        options: IFluentMessageOptions,
+      ): string => {
+        return translations(
+          key,
+          options,
+        );
+      },
+    );
+  };
+}
+
+export function createTranslateVariables(
+  variables: Record<string, IObservable<unknown>>,
+): ITranslateVariablesObservable {
+  const entries: [string, IObservable<unknown>][] = Object.entries(variables);
+
+  const keys: string[] = entries.map(([key]): string => {
+    return (key.endsWith('$'))
+      ? key.slice(0, -1)
+      : key;
+  });
+
+  const values: IObservable<unknown>[] = entries.map(([, value]): IObservable<unknown> => {
+    return value;
+  });
+
+  return distinctObservable(
+    mapObservable(
+      debounceMicrotaskObservable(combineLatest(values)),
+      (values: readonly unknown[]): ITranslateVariables => {
+        return values.map((value: unknown, index: number): [string, unknown] => {
+          return [keys[index], value];
+        });
+      },
+    ),
+  );
+}
+
+// export function createFluentTranslateFunction(
+//   translations$: IObservable<IFluentRenderMessageFunction>,
+// ): ITranslateFunction {
+//   return (
+//     key: string,
+//     variables$?: ITranslateVariablesObservable,
+//   ): IObservable<string> => {
+//
+//     const normalizeVariables = (): IObservable<Iterable<IFluentGetVariableEntry>> => {
+//       return map$$(toObservable(variables$), (variables: ITranslateVariables | undefined): Iterable<IFluentGetVariableEntry> => {
+//         if (
+//           (variables === void 0)
+//           || (variables === null)
+//         ) {
+//           return [];
+//         } else if (Symbol.iterator in variables) {
+//           return variables;
+//         } else if (typeof variables === 'object') {
+//           return Object.entries(variables);
+//         } else {
+//           throw new TypeError(`Invalid variable type`);
+//         }
+//       });
+//     };
+//
+//     return function$$(
+//       [
+//         translations$,
+//         createFluentMessageOptionsObservable({
+//           variables$: normalizeVariables(),
+//         }),
+//       ],
+//       (
+//         translations: IFluentRenderMessageFunction,
+//         options: IFluentMessageOptions,
+//       ) => {
+//         return translations(
+//           key,
+//           options,
+//         );
+//       },
+//     );
+//   }
+// }
+
+/*----*/
+
+export function debugFluent2(): void {
+  const [$userName, userName$] = let$$('Anne');
+  const [$photoCount, photoCount$] = let$$(5);
+  const [$userGender, userGender$] = let$$<string>('female');
+
+  // TODO uniformize functions
+  const translations$ = createFluentTranslationsLoader({
+    availableLocales: ['en', 'fr'],
+    getURL: (locale: string) => new URL(`./samples/01/sample-01.${locale}.ftl`, import.meta.url),
+  });
+
+  const translate = createFluentTranslateFunction(translations$);
+
+  const translated$ = translate('shared-photos', createTranslateVariables({
+    userName$,
+    photoCount$,
+    userGender$,
+  }));
+
+  translated$($log);
+
+  setTimeout(() => {
+    $photoCount(1);
+
+    setTimeout(() => {
+      $userName('Paul');
+      $userGender('male');
+
+      setTimeout(() => {
+        $LOCALES(['fr']);
+      }, 200);
+    }, 200);
+  }, 1000);
+}
+
+

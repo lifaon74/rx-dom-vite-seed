@@ -1,0 +1,158 @@
+import {
+  $log,
+  fromPromiseFactory,
+  function$$,
+  IDefaultNotificationsUnion,
+  IObservable,
+  let$$,
+  map$$,
+  notificationsToLastValueObservablePipe,
+  pipe$$,
+  switchMap$$$,
+  switchMap$$,
+} from '@lirx/core';
+import { ILocaleMatcherObservableOptions, localeMatcherObservable } from '../../intl/locale-matcher/locale-matcher-observable';
+import { ILocaleMatcherMatchFunctionOptions } from '../../intl/locale-matcher/locale-matcher.type';
+import { ILocalesInput } from '../../intl/locale/locales-input.type';
+import { ILocalesList } from '../../intl/locale/locales-list.type';
+import { $LOCALES, LOCALES$ } from '../../intl/locale/locales.constants';
+import { ICreateFluentDefaultCallFunctionEntries } from '../built-in/call-function/built-in/create-fluent-default-call-function-entries';
+import { createFluentDefaultCallFunctions } from '../built-in/call-function/built-in/create-fluent-default-call-functions';
+import { IFluentGetVariableEntry } from '../built-in/get-variable/fluent-get-variable-function.type';
+import { createFluentMessageOptions } from '../built-in/message/create-fluent-message-options';
+import { IFluentMessageOptions } from '../built-in/message/fluent-message-function.type';
+import { IFluentRenderMessageFunction } from '../built-in/message/render/fluent-render-message-function.type';
+import { loadFluentResource } from '../compile/load-fluent-resource';
+
+/*----*/
+
+export interface IGetFluentFileURLFromLocale {
+  (
+    locale: string,
+  ): URL;
+}
+
+export interface ICreateFluentTranslationsLoaderOptions extends ILocaleMatcherObservableOptions {
+  getURL: IGetFluentFileURLFromLocale;
+}
+
+export function createFluentTranslationsLoader(
+  {
+    getURL,
+    ...options
+  }: ICreateFluentTranslationsLoaderOptions,
+): IObservable<IFluentRenderMessageFunction> {
+  return switchMap$$<string, IFluentRenderMessageFunction>(
+    localeMatcherObservable(options),
+    (locale: string): IObservable<IFluentRenderMessageFunction> => {
+      return pipe$$(
+        fromPromiseFactory<IFluentRenderMessageFunction>((): Promise<IFluentRenderMessageFunction> => {
+          // return import(`./samples/01/sample-01.${locale}.ts`).then(_ => _.default);
+          // return loadFluentResource(new URL(`./${path}.${locale}.ftl`, import.meta.url));
+          return loadFluentResource(getURL(locale));
+        }),
+        [
+          notificationsToLastValueObservablePipe<IFluentRenderMessageFunction>(),
+        ],
+      );
+    },
+  );
+}
+
+/*----*/
+
+export function debugFluent2(): void {
+  const [$userName, userName$] = let$$('Anne');
+  const [$photoCount, photoCount$] = let$$(5);
+  const [$userGender, userGender$] = let$$<string>('female');
+
+  const availableTranslationsLocale$ = localeMatcherObservable({
+    availableLocales: ['en', 'fr'],
+  });
+
+  const translations$ = switchMap$$<string, IFluentRenderMessageFunction>(availableTranslationsLocale$, (locale: string): IObservable<IFluentRenderMessageFunction> => {
+    return pipe$$(
+      fromPromiseFactory<IFluentRenderMessageFunction>((): Promise<IFluentRenderMessageFunction> => {
+        return import(`./samples/01/sample-01.${locale}.ts`).then(_ => _.default);
+        // return loadFluentResource(new URL(`./samples/01/sample-01.${locale}.ftl`, import.meta.url));
+      }),
+      [
+        notificationsToLastValueObservablePipe<IFluentRenderMessageFunction>(),
+      ],
+    );
+  });
+
+  const $options = map$$(LOCALES$, (locales: ILocalesInput): ICreateFluentDefaultCallFunctionEntries => {
+    return createFluentDefaultCallFunctions({
+      locales,
+    });
+  });
+
+  const variables$ = function$$(
+    [
+      userName$,
+      photoCount$,
+      userGender$,
+    ],
+    (
+      userName: string,
+      photoCount: number,
+      userGender: string,
+    ): Iterable<IFluentGetVariableEntry> => {
+      return Object.entries({
+        userName,
+        photoCount,
+        userGender,
+      });
+    },
+  );
+
+  const fluentOptions$ = function$$(
+    [
+      $options,
+      variables$,
+    ],
+    (
+      options: ICreateFluentDefaultCallFunctionEntries,
+      variables: Iterable<IFluentGetVariableEntry>,
+    ): IFluentMessageOptions => {
+      return createFluentMessageOptions({
+        ...options,
+        variables,
+      });
+    },
+  );
+
+  const translated$ = function$$(
+    [
+      translations$,
+      fluentOptions$,
+    ],
+    (
+      translations: IFluentRenderMessageFunction,
+      options: IFluentMessageOptions,
+    ) => {
+      return translations(
+        'shared-photos',
+        options,
+      );
+    },
+  );
+
+  translated$($log);
+
+  setTimeout(() => {
+    $photoCount(1);
+
+    setTimeout(() => {
+      $userName('Paul');
+      $userGender('male');
+
+      setTimeout(() => {
+        $LOCALES(['fr']);
+      }, 200);
+    }, 200);
+  }, 1000);
+}
+
+
