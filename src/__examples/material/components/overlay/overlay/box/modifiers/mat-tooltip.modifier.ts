@@ -104,4 +104,4 @@ export function createMatTooltipModifier(
 
 /*--*/
 
-export const MAT_TOOLTIP_MODIFIER = createMatTooltipModifier(getGlobalMatOverlayManager);
+export const MatTooltipModifier = createMatTooltipModifier(() => MatOverlayManager.main);

@@ -8,7 +8,7 @@ import {
   VirtualDOMNode, VirtualReactiveElementNode, VirtualReactiveForLoopNode, VirtualReactiveIfNode, VirtualReactiveTextNode,
   VirtualRootNode, VirtualTextNode,
 } from '@lirx/dom';
-import { ELEMENT_REFERENCE_MODIFIER } from '@lirx/dom-material';
+// import { ELEMENT_REFERENCE_MODIFIER } from '@lirx/dom-material';
 
 
 const ROOT = VirtualRootNode.body;
@@ -16,7 +16,7 @@ const ROOT = VirtualRootNode.body;
 function createTextObservable(
   name: string,
 ): IObservable<string> {
-  return debug$$(map$$(interval(100), () => new Date().toISOString()), name);
+  return debug$$(map$$(interval(1000), () => new Date().toISOString()), name);
 }
 
 function createConditionObservable(
@@ -224,20 +224,6 @@ OR node.isConnected$(node.sources.get$('name'))($value);
 
 /*-----------*/
 
-function debugVirtualNode(): void {
-  const container = VirtualReactiveElementNode.createHTML('div');
-
-  const date$ = debug$$(map$$(interval(1000), () => new Date().toISOString()), 'date');
-  // const n3 = new VirtualTextNode('hello world !');
-  const reactiveTextNode = new VirtualReactiveTextNode(date$);
-
-  reactiveTextNode.attach(container);
-
-  container.attach(ROOT);
-
-  setTimeout(() => container.detach(), 2000);
-}
-
 function createSimpleMatButton() {
   type ISources = [
     ['disabled', boolean],
@@ -259,7 +245,7 @@ function createSimpleMatButton() {
       node,
     ): void => {
       const disabled$ = node.inputs.get$('disabled');
-      node.setReactiveProperty('disabled', disabled$);
+      // node.setReactiveProperty('disabled', disabled$);
 
       node.slots.get('*')!(node, {});
 
@@ -269,7 +255,7 @@ function createSimpleMatButton() {
 
 async function debugTranspilers() {
 
-  // const html = 'hello world';
+  const html = 'hello world';
   // const html = 'a{{$.text$}}b';
   // const html = '<strong>abc</strong>';
   // const html = '<button disabled>abc</button>';
@@ -422,7 +408,7 @@ async function debugTranspilers() {
 
   // const html = `<rx-container a=""></rx-container>`;
   // const html = `<!--<div *for="const i = 5">-->`;
-  const html = await import('./assets/debug-reactive-dom-compiler-6.rxhtml?raw').then(_ => _.default);
+  // const html = await import('./assets/debug-reactive-dom-compiler-6.rxhtml?raw').then(_ => _.default);
 
   const data = {
     text$: createTextObservable('text$'),
@@ -453,7 +439,7 @@ async function debugTranspilers() {
         createSimpleMatButton(),
       ],
       modifiers: [
-        ELEMENT_REFERENCE_MODIFIER,
+        // ELEMENT_REFERENCE_MODIFIER,
       ],
     });
     console.timeEnd('transpiling');
@@ -504,7 +490,6 @@ async function debugTranspilers() {
 }
 
 export function debugLiRXDOM(): void {
-  // debugVirtualNode();
   // testReactiveAttribute();
   // testReactiveClass();
   // testReactiveTextNode();

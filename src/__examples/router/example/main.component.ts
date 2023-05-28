@@ -4,11 +4,10 @@ import {
   fromAnimationFrame,
   IObservable,
   IObserver,
-  IUnsubscribe,
   map$$,
   switchMap$$,
   single,
-  timeout,
+  timeout, IUnsubscribeOfObservable,
 } from '@lirx/core';
 import {
   compileReactiveHTMLAsComponentTemplate,
@@ -16,16 +15,15 @@ import {
   createComponent,
   VirtualCustomElementNode,
 } from '@lirx/dom';
+import { MatProgressBarComponent, NODE_REFERENCE_MODIFIER } from '@lirx/dom-material';
 import { createRXRouter, IRXRouter, IRXRouterNavigationState, IRXRouterOutletElement, NAVIGATION } from '@lirx/router';
-import { MatProgressBarComponent } from '../../material/components/progress/progress-bar/mat-progress-bar.component';
-import { NODE_REFERENCE_MODIFIER } from '../../material/modifiers/node-reference.modifier';
 import { APP_ROUTES } from './routes';
 import { APP_ROUTES_ASYNC } from './routes-async';
 
 function createFakeProgressObservable(
   timeConstant: number,
 ): IObservable<number> {
-  return (emit: IObserver<number>): IUnsubscribe => {
+  return (emit: IObserver<number>): IUnsubscribeOfObservable => {
     const startTimestamp: number = Date.now();
 
     return fromAnimationFrame()(() => {
@@ -100,7 +98,7 @@ export const AppMainComponent = createComponent<IAppMainComponentConfig>({
     const { emit: $routerOutletElement, subscribe: routerOutletElement$ } = createUnicastReplayLastSource<IRXRouterOutletElement>();
 
     let router: IRXRouter;
-    let unsubscribeLoading: IUnsubscribe;
+    let unsubscribeLoading: IUnsubscribeOfObservable;
 
     const progress$ = switchMap$$(routerOutletElement$, (routerOutletElement: IRXRouterOutletElement): IObservable<number> => {
       if (router !== void 0) {

@@ -1,3 +1,4 @@
+import { DeepWritable } from '@lirx/core';
 import { TicTacToeCellState, TicTacToeMatrix } from '../types/types';
 
 export function updateTicTacToeMatrix(
@@ -17,4 +18,13 @@ export function updateTicTacToeMatrix(
   ];
 }
 
+
+export function mutateTicTacToeMatrix(
+  matrix: DeepWritable<TicTacToeMatrix>,
+  rowIndex: number,
+  columnIndex: number,
+  state: TicTacToeCellState,
+): void {
+  matrix[rowIndex][columnIndex] = state;
+}
 

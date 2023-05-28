@@ -1,0 +1,226 @@
+import { Pattern } from '@fluent/syntax';
+import { createMulticastReplayLastSource, IMulticastReplayLastSource, IObservable, IObserver } from '@lirx/core';
+import { INullish, isNullish } from '@lirx/utils';
+import { IFormInputOptions } from './form-control/form-input.class';
+
+/*------------------------------*/
+
+export abstract class Validator<GValue> {
+  // abstract isValid(
+  //   value: GValue,
+  // ): boolean;
+
+  abstract validate(
+    value: GValue,
+  ): Validator<GValue>[];
+}
+
+export type IGenericValidator = Validator<any>;
+
+export class IsNumberValidator extends Validator<number> {
+  validate(
+    value: number,
+  ): Validator<number>[] {
+    return Number.isNaN(value)
+      ? [this]
+      : [];
+  }
+}
+
+export class StringPatternValidator extends Validator<string> {
+  readonly pattern: RegExp;
+
+  constructor(
+    pattern: RegExp,
+  ) {
+    super();
+    this.pattern = pattern;
+  }
+
+  validate(
+    value: string,
+  ): Validator<string>[] {
+    this.pattern.lastIndex = 0;
+    return this.pattern.test(value)
+      ? []
+      : [this];
+  }
+}
+
+export class GroupedValidators<GValue> extends Validator<GValue> {
+  readonly validators: readonly Validator<GValue>[];
+
+  constructor(
+    validators: readonly Validator<GValue>[],
+  ) {
+    super();
+    this.validators = validators;
+  }
+
+  validate(
+    value: GValue,
+  ): Validator<GValue>[] {
+    return this.validators.flatMap((validator: Validator<GValue>): Validator<GValue>[] => {
+      return validator.validate(value);
+    });
+  }
+}
+
+export class RequiredValidator<GValue> extends Validator<GValue | INullish> {
+  readonly validator: Validator<GValue>;
+
+  constructor(
+    validator: Validator<GValue> | readonly Validator<GValue>[],
+  ) {
+    super();
+    this.validator = Array.isArray(validator)
+      ? new GroupedValidators<GValue>(validator)
+      : validator as Validator<GValue>;
+  }
+
+  validate(
+    value: GValue | INullish,
+  ): Validator<GValue>[] {
+    return isNullish(value)
+      ? [this]
+      : this.validator.validate(value);
+  }
+}
+
+/*------------------------------*/
+
+export type IPushValueMode =
+  | 'fix'
+  | 'throw'
+  ;
+
+export abstract class FormInput<GName extends string, GValue> {
+  protected readonly _name: GName;
+  protected readonly _$value$: IMulticastReplayLastSource<GValue | null>;
+  protected readonly _$disabled$: IMulticastReplayLastSource<boolean>;
+  protected readonly _$required$: IMulticastReplayLastSource<boolean>;
+
+  protected constructor(
+    name: GName,
+  ) {
+    this._name = name;
+    this._$value$ = createMulticastReplayLastSource<GValue | null>(null);
+    this._$disabled$ = createMulticastReplayLastSource<boolean>(false);
+    this._$required$ = createMulticastReplayLastSource<boolean>(false);
+  }
+
+  /* NAME */
+
+  get name(): GName {
+    return this._name;
+  }
+
+  /* VALUE */
+
+  get value(): GValue | null {
+    return this._$value$.getValue();
+  }
+
+  get value$(): IObservable<GValue | null> {
+    return this._$value$.subscribe;
+  }
+
+  pushValue(
+    value: GValue,
+    mode?: IPushValueMode,
+  ): void {
+
+  }
+
+  /* DISABLED */
+
+  get disabled(): boolean {
+    return this._$disabled$.getValue();
+  }
+
+  set disabled(
+    input: boolean,
+  ) {
+    this._$disabled$.emit(input);
+  }
+
+  get disabled$(): IObservable<boolean> {
+    return this._$disabled$.subscribe;
+  }
+
+  get $disabled(): IObserver<boolean> {
+    return this._$disabled$.emit;
+  }
+
+  /* REQUIRED */
+
+  get required(): boolean {
+    return this._$required$.getValue();
+  }
+
+  set required(
+    input: boolean,
+  ) {
+    this._$required$.emit(input);
+  }
+
+  get required$(): IObservable<boolean> {
+    return this._$required$.subscribe;
+  }
+
+  get $required(): IObserver<boolean> {
+    return this._$required$.emit;
+  }
+
+  /* METHODS */
+
+  reset(): void {
+    this._$value$.emit(null);
+  }
+}
+
+export type IGenericFormInput = FormInput<string, any>;
+
+/*----*/
+
+export class FormInputText<GName extends string, GValue> extends FormInput<GName, GValue> {
+  constructor(
+    name: GName,
+  ) {
+    super(name);
+  }
+
+  override pushValue(
+    value: GValue,
+    mode?: IPushValueMode,
+  ): void {
+
+  }
+}
+
+/*----*/
+
+export class FormInputRaw<GRawValue, GFormInput extends IGenericFormInput> {
+  protected readonly _formInput: GFormInput;
+
+  constructor(
+    formInput: GFormInput,
+  ) {
+    this._formInput = formInput;
+  }
+
+  get formInput(): GFormInput {
+    return this._formInput;
+  }
+}
+
+/*------------------------------*/
+
+async function formControlExample1() {
+}
+
+/*------------------------------*/
+
+export async function formControlExample() {
+  await formControlExample1();
+}

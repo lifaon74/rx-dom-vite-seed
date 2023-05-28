@@ -1,6 +1,7 @@
 import { freeze } from '@lirx/core';
+import { formControlExample } from './form-control/form-control.example';
 import { matInputFieldExample } from './input-field/mat-input-field.example';
-import { matInputTextExample } from './input-text/mat-input-text.example';
+// import { matInputTextExample } from './input-text/mat-input-text.example';
 import { numberInputValidator } from './input-validator/built-in/number-input-validator';
 
 // class InputController {
@@ -154,6 +155,7 @@ function matInputValidatorExample() {
 export function matFormExample() {
   // matInputValidatorExample();
   // matFormFieldExample();
-  matInputFieldExample();
+  // matInputFieldExample();
   // matInputTextExample();
+  formControlExample();
 }

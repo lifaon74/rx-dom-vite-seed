@@ -1,0 +1,25 @@
+@import './mat-dialog-footer.variables';
+
+/** STYLE **/
+
+:host {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  padding: $mat-dialog-footer-padding-y $mat-dialog-footer-padding-x;
+  gap: 6px;
+  font-size: 0;
+
+  &.mat-start {
+    justify-content: flex-start;
+  }
+
+  &.mat-center {
+    justify-content: center;
+  }
+
+  &.mat-end {
+    justify-content: flex-end;
+  }
+}

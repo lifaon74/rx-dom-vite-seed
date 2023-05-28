@@ -3,8 +3,7 @@ import { compileReactiveHTMLAsComponentTemplate, compileStyleAsComponentStyle, c
 import { IconMenuComponent } from '@lirx/mdi';
 import {
   IMatSidenavComponentMode,
-  IMatSidenavComponentUserCloseType,
-  MatButtonComponent, MatIconButtonComponent,
+  IMatSidenavComponentUserCloseType, MatButtonModifier, MatIconButtonModifier,
   MatSidenavContainerComponent, MatToolbarComponent, MatToolbarContainerComponent,
 } from '@lirx/dom-material';
 
@@ -39,10 +38,12 @@ export const AppMainComponent = createComponent<IAppMainComponentConfig>({
       MatSidenavContainerComponent,
       MatToolbarContainerComponent,
       MatToolbarComponent,
-      MatButtonComponent,
       IconMenuComponent,
-      MatIconButtonComponent,
     ],
+    modifiers: [
+      MatButtonModifier,
+      MatIconButtonModifier,
+    ]
   }),
   styles: [compileStyleAsComponentStyle(style)],
   init: (node: VirtualCustomElementNode<IAppMainComponentConfig>): IData => {

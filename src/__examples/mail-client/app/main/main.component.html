@@ -36,12 +36,13 @@
 <!--        menu-->
 <!--      </mat-button>-->
 
-      <mat-icon-button
+      <button
+        #mat-icon-button
         *if="$.menuButtonVisible$"
         (click)="$.onClickMenuButton"
       >
         <icon-menu></icon-menu>
-      </mat-icon-button>
+      </button>
     </mat-toolbar>
 
 

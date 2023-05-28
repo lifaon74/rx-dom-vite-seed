@@ -1,0 +1,698 @@
+import { math_floor, math_max, math_min } from '@lifaon/math';
+import {
+  $$distinct,
+  $log,
+  createMulticastReplayLastSource,
+  function$$,
+  IObservable,
+  IObserver,
+  mapDistinct$$,
+  readObservableValue,
+  single,
+  switchMap$$,
+  UNABLE_TO_READ_OBSERVABLE,
+} from '@lirx/core';
+import { INullish, isNullish } from '@lirx/utils';
+
+/*------------------------------*/
+
+export interface IConstraintTestFunction<GValue> {
+  (
+    value: GValue,
+  ): boolean;
+}
+
+export interface IConstraintReducerFunction<GData> {
+  (
+    constraint: IGenericConstraint,
+    data: GData,
+  ): GData;
+}
+
+export class Constraint<GValue> {
+  readonly test: IConstraintTestFunction<GValue>;
+
+  constructor(
+    test: IConstraintTestFunction<GValue>,
+  ) {
+    this.test = test;
+  }
+
+  reduce<GData>(
+    reducer: IConstraintReducerFunction<GData>,
+    data: GData,
+  ): GData {
+    return reducer(this, data);
+  }
+}
+
+export const ACCEPT_TOKEN = Symbol('ACCEPT_TOKEN');
+export type IAcceptToken = typeof ACCEPT_TOKEN;
+
+export const REJECT_TOKEN = Symbol('REJECT_TOKEN');
+export type IRejectToken = typeof REJECT_TOKEN;
+
+export type ITransformConstraintFunctionResult<GOut> =
+  | GOut
+  | IAcceptToken
+  | IRejectToken
+  ;
+
+export interface ITransformConstraintFunction<GIn, GOut> {
+  (
+    value: GIn,
+  ): ITransformConstraintFunctionResult<GOut>;
+}
+
+export class TransformConstraint<GIn, GOut> extends Constraint<GIn> {
+  readonly child: Constraint<GOut>;
+
+  constructor(
+    transform: ITransformConstraintFunction<GIn, GOut>,
+    child: Constraint<GOut>,
+  ) {
+    super(
+      (value: GIn): boolean => {
+        const result: ITransformConstraintFunctionResult<GOut> = transform(value);
+        return (result === ACCEPT_TOKEN)
+          ? true
+          : (
+            (result === REJECT_TOKEN)
+              ? false
+              : child.test(result)
+          );
+      },
+    );
+    this.child = child;
+  }
+
+  override reduce<GData>(
+    reducer: IConstraintReducerFunction<GData>,
+    data: GData,
+  ): GData {
+    return this.child.reduce(reducer, reducer(this, data));
+  }
+}
+
+export class FilterConstraint<GValue, GChildValue extends GValue> extends TransformConstraint<GValue, GChildValue> {
+  constructor(
+    filter: (value: GValue) => value is GChildValue,
+    child: Constraint<GChildValue>,
+    falseToken: IAcceptToken | IRejectToken,
+  ) {
+    super(
+      (value: GValue): ITransformConstraintFunctionResult<GChildValue> => {
+        return filter(value)
+          ? value
+          : falseToken;
+      },
+      child,
+    );
+  }
+}
+
+let SHARED_NO_CONSTRAINT: NoConstraint<any>;
+
+export class NoConstraint<GValue> extends Constraint<GValue> {
+  static get shared(): NoConstraint<any> {
+    if (SHARED_NO_CONSTRAINT === void 0) {
+      SHARED_NO_CONSTRAINT = new NoConstraint<any>();
+    }
+    return SHARED_NO_CONSTRAINT;
+  }
+
+  constructor() {
+    super(
+      (): boolean => {
+        return true;
+      },
+    );
+  }
+}
+
+export class RequiredConstraint<GValue> extends FilterConstraint<GValue | INullish, GValue> {
+  readonly required: boolean;
+
+  constructor(
+    child: Constraint<GValue>,
+    required: boolean = true,
+  ) {
+    super(
+      (value: GValue | INullish): value is GValue => {
+        return !isNullish(value);
+      },
+      child,
+      required ? REJECT_TOKEN : ACCEPT_TOKEN,
+    );
+    this.required = required;
+  }
+}
+
+export class GroupedConstraint<GValue> extends Constraint<GValue> {
+  readonly children: readonly Constraint<GValue>[];
+
+  constructor(
+    children: readonly Constraint<GValue>[],
+  ) {
+    super(
+      (value: GValue): boolean => {
+        return this.children.every((child: Constraint<GValue>): boolean => {
+          return child.test(value);
+        });
+      },
+    );
+    this.children = children;
+  }
+
+  override reduce<GData>(
+    reducer: IConstraintReducerFunction<GData>,
+    data: GData,
+  ): GData {
+    return this.children.reduce((data: GData, child: IGenericConstraint): GData => {
+      return child.reduce(reducer, data);
+    }, reducer(this, data));
+  }
+}
+
+export type IGenericConstraint = Constraint<any>;
+
+export class StringPatternConstraint extends Constraint<string> {
+  readonly pattern: RegExp;
+
+  constructor(
+    pattern: RegExp,
+  ) {
+    super(
+      (value: string): boolean => {
+        pattern.lastIndex = 0;
+        return pattern.test(value);
+      },
+    );
+    this.pattern = pattern;
+  }
+}
+
+export interface IStringLengthConstraintOptions {
+  min?: number;
+  max?: number;
+}
+
+export class StringLengthConstraint extends Constraint<string> {
+  readonly min: number;
+  readonly max: number;
+
+  constructor(
+    {
+      min = 0,
+      max = Number.POSITIVE_INFINITY,
+    }: IStringLengthConstraintOptions,
+  ) {
+    min = math_floor(math_max(0, min));
+    max = math_max(min, math_floor(max));
+
+    super(
+      (value: string): boolean => {
+        return (min <= value.length)
+          && (value.length <= max);
+      },
+    );
+
+    this.min = min;
+    this.max = max;
+  }
+}
+
+export class IsNumberConstraint extends Constraint<number> {
+  constructor() {
+    super(
+      (value: number): boolean => {
+        return !Number.isNaN(value);
+      },
+    );
+  }
+}
+
+export interface INumberRangeConstraintOptions {
+  min?: number;
+  max?: number;
+  step?: number;
+}
+
+export class NumberRangeConstraint extends Constraint<number> {
+  readonly min: number;
+  readonly max: number;
+  readonly step: number;
+
+  constructor(
+    {
+      min = Number.NEGATIVE_INFINITY,
+      max = Number.POSITIVE_INFINITY,
+      step = 0,
+    }: INumberRangeConstraintOptions,
+  ) {
+    step = math_max(0, step);
+
+    super(
+      (value: number): boolean => {
+        if (
+          (min <= value)
+          && (value <= max)
+        ) {
+          if (step === 0) {
+            return true;
+          } else {
+            const start: number = Number.isFinite(min)
+              ? min
+              : 0;
+            const v: number = ((value - start) / step);
+            return Math.trunc(v) === v;
+          }
+        } else {
+          return false;
+        }
+      },
+    );
+
+    this.min = min;
+    this.max = max;
+    this.step = step;
+  }
+}
+
+/*------------------------------*/
+
+export interface IFormInputConstraintOptions {
+  required?: boolean;
+}
+
+export function formInputConstraint<GValue>(
+  {
+    required = false,
+  }: IFormInputConstraintOptions = {},
+  constraint: Constraint<GValue>,
+): Constraint<GValue | INullish> {
+  return new RequiredConstraint<GValue>(
+    constraint,
+    required,
+  );
+}
+
+export interface IFormInputTextConstraintOptions extends IFormInputConstraintOptions {
+  pattern?: RegExp;
+  minLength?: number;
+  maxLength?: number;
+}
+
+export function formInputTextConstraint(
+  {
+    pattern,
+    minLength,
+    maxLength,
+    ...options
+  }: IFormInputTextConstraintOptions = {},
+): Constraint<string | INullish> {
+  const constraints: Constraint<string>[] = [];
+  if (pattern !== void 0) {
+    constraints.push(
+      new StringPatternConstraint(pattern),
+    );
+  }
+
+  if (
+    (minLength !== void 0)
+    || (maxLength !== void 0)
+  ) {
+    constraints.push(
+      new StringLengthConstraint({
+        min: minLength!,
+        max: maxLength!,
+      }),
+    );
+  }
+
+  return formInputConstraint<string>(
+    options,
+    new GroupedConstraint(constraints),
+  );
+}
+
+export interface IFormInputNumberConstraintOptions extends IFormInputConstraintOptions {
+  min?: number;
+  max?: number;
+  step?: number;
+}
+
+export function formInputNumberConstraint(
+  {
+    min,
+    max,
+    step,
+    ...options
+  }: IFormInputNumberConstraintOptions = {},
+): Constraint<number | INullish> {
+  const constraints: Constraint<number>[] = [];
+
+  if (
+    (min !== void 0)
+    || (max !== void 0)
+    || (step !== void 0)
+  ) {
+    constraints.push(
+      new NumberRangeConstraint({
+        min,
+        max,
+        step,
+      }),
+    );
+  }
+
+  return formInputConstraint<number>(
+    options,
+    new IsNumberConstraint(),
+    new GroupedConstraint(constraints),
+  );
+}
+
+/*------------------------------*/
+
+function isRequired(
+  constraint: IGenericConstraint,
+): boolean {
+  return constraint.reduce((constraint: IGenericConstraint, required: boolean): boolean => {
+    return required
+      || (
+        (constraint instanceof RequiredConstraint)
+        && constraint.required
+      );
+  }, false);
+}
+
+function getPattern(
+  constraint: IGenericConstraint,
+): RegExp | null {
+  return constraint.reduce((constraint: IGenericConstraint, pattern: RegExp | null): RegExp | null => {
+    return (pattern === null)
+      ? (
+        (constraint instanceof StringPatternConstraint)
+          ? constraint.pattern
+          : null
+      )
+      : pattern;
+  }, null);
+}
+
+function getMinLength(
+  constraint: IGenericConstraint,
+): number {
+  return constraint.reduce((constraint: IGenericConstraint, minLength: number): number => {
+    return (constraint instanceof StringLengthConstraint)
+      ? math_max(minLength, constraint.min)
+      : minLength;
+  }, 0);
+}
+
+function getMaxLength(
+  constraint: IGenericConstraint,
+): number {
+  return constraint.reduce((constraint: IGenericConstraint, maxLength: number): number => {
+    return (constraint instanceof StringLengthConstraint)
+      ? math_min(maxLength, constraint.max)
+      : maxLength;
+  }, 0);
+}
+
+/*------------------------------*/
+
+export type IFormInputValue<GValue> = GValue | null;
+export type IFormInputConstraint<GValue> = Constraint<IFormInputValue<GValue>>;
+
+export interface IFormInputOptions<GValue> {
+  value?: IFormInputValue<GValue>;
+  disabled?: boolean;
+  constraint?: IFormInputConstraint<GValue>;
+}
+
+export class FormInput<GName extends string, GValue> {
+  protected readonly _name: GName;
+
+  protected readonly _value$: IObservable<IFormInputValue<GValue>>;
+  protected readonly _$value: IObserver<IFormInputValue<GValue>>;
+
+  protected readonly _disabled$: IObservable<boolean>;
+  protected readonly _$disabled: IObserver<boolean>;
+
+  protected readonly _constraintWithDisabled$: IObservable<IFormInputConstraint<GValue>>;
+  protected readonly _$constraint: IObserver<IFormInputConstraint<GValue>>;
+
+  protected readonly _isValid$: IObservable<boolean>; // computed
+  protected readonly _required$: IObservable<boolean>; // computed
+
+  constructor(
+    name: GName,
+    {
+      value = null,
+      disabled = false,
+      constraint = NoConstraint.shared,
+    }: IFormInputOptions<GValue> = {},
+  ) {
+    this._name = name;
+
+    /* VALUE */
+
+    const $value$ = createMulticastReplayLastSource<IFormInputValue<GValue>>(value);
+
+    const value$ = $value$.subscribe;
+    const $value = $$distinct($value$.emit, value);
+
+    this._value$ = value$;
+    this._$value = $value;
+
+    /* DISABLED */
+
+    const $disabled$ = createMulticastReplayLastSource<boolean>(disabled);
+
+    const disabled$ = $disabled$.subscribe;
+    const $disabled = $$distinct($disabled$.emit, disabled);
+
+    this._disabled$ = disabled$;
+    this._$disabled = $disabled;
+
+    /* CONSTRAINT */
+
+    const $constraint$ = createMulticastReplayLastSource<IFormInputConstraint<GValue>>(constraint);
+
+    const constraint$ = $constraint$.subscribe;
+    const $constraint = $constraint$.emit;
+
+    const constraintWithDisabled$ = switchMap$$(disabled$, (disabled: boolean): IObservable<IFormInputConstraint<GValue>> => {
+      return disabled
+        ? single(NoConstraint.shared)
+        : constraint$;
+    });
+
+    this._constraintWithDisabled$ = constraintWithDisabled$;
+    this._$constraint = $constraint;
+
+    /* IS VALID */
+
+    const isValid$ = function$$(
+      [constraintWithDisabled$, value$],
+      (constraintWithDisabled: IFormInputConstraint<GValue>, value: IFormInputValue<GValue>): boolean => {
+        return constraintWithDisabled.test(value);
+      });
+
+    this._isValid$ = isValid$;
+
+    /* REQUIRED */
+
+    const required$ = mapDistinct$$(constraint$, isRequired);
+
+    this._required$ = required$;
+  }
+
+  /* NAME */
+
+  get name(): GName {
+    return this._name;
+  }
+
+  /* VALUE */
+
+  get value(): IFormInputValue<GValue> {
+    return readObservableValue(
+      this._value$,
+      UNABLE_TO_READ_OBSERVABLE,
+    );
+  }
+
+  set value(
+    input: IFormInputValue<GValue>,
+  ) {
+    this._$value(input);
+  }
+
+  get value$(): IObservable<IFormInputValue<GValue>> {
+    return this._value$;
+  }
+
+  get $value(): IObserver<IFormInputValue<GValue>> {
+    return this._$value;
+  }
+
+  /* DISABLED */
+
+  get disabled(): boolean {
+    return readObservableValue(
+      this._disabled$,
+      UNABLE_TO_READ_OBSERVABLE,
+    );
+  }
+
+  set disabled(
+    input: boolean,
+  ) {
+    this._$disabled(input);
+  }
+
+  get disabled$(): IObservable<boolean> {
+    return this._disabled$;
+  }
+
+  get $disabled(): IObserver<boolean> {
+    return this._$disabled;
+  }
+
+  /* CONSTRAINT */
+
+  get constraint(): IFormInputConstraint<GValue> {
+    return readObservableValue(
+      this._constraintWithDisabled$,
+      UNABLE_TO_READ_OBSERVABLE,
+    );
+  }
+
+  set constraint(
+    input: IFormInputConstraint<GValue>,
+  ) {
+    this._$constraint(input);
+  }
+
+  get constraint$(): IObservable<IFormInputConstraint<GValue>> {
+    return this._constraintWithDisabled$;
+  }
+
+  get $constraint(): IObserver<IFormInputConstraint<GValue>> {
+    return this._$constraint;
+  }
+
+  /* VALIDITY */
+
+  get isValid$(): IObservable<boolean> {
+    return this._isValid$;
+  }
+
+  /* REQUIRED */
+
+  get required$(): IObservable<boolean> {
+    return this._required$;
+  }
+
+  /* METHODS */
+
+  reset(): void {
+    this._$value(null);
+  }
+}
+
+export type IGenericFormInput = FormInput<string, any>;
+
+/*----*/
+
+export interface IFormInputTextOptions extends IFormInputOptions<string> {
+}
+
+export class FormInputText<GName extends string> extends FormInput<GName, string> {
+  constructor(
+    name: GName,
+    options?: IFormInputTextOptions,
+  ) {
+    super(name, options);
+  }
+}
+
+/*----*/
+
+export interface IFormInputNumberOptions extends IFormInputOptions<number> {
+}
+
+export class FormInputNumber<GName extends string> extends FormInput<GName, number> {
+  constructor(
+    name: GName,
+    options?: IFormInputNumberOptions,
+  ) {
+    super(name, options);
+  }
+}
+
+/*------------------------------*/
+
+/*------------------------------*/
+
+async function formControlExample1() {
+  const stringConstraint = () => {
+    const constraint = new RequiredConstraint(
+      new StringPatternConstraint(/.+/),
+      true,
+    );
+
+    console.log(constraint.test('a'));
+    console.log(constraint.test(''));
+    console.log(constraint.test(null));
+    // console.log(constraint.test(4));
+
+    console.log(isRequired(constraint));
+  };
+
+  const numberConstraint = () => {
+    const constraint = new NumberRangeConstraint({
+      step: 0.2,
+    });
+
+    console.log(constraint.test(4.2));
+  };
+
+  // stringConstraint();
+  numberConstraint();
+}
+
+async function formControlExample2() {
+  const inputText = new FormInputText('abc', {
+    constraint: formInputTextConstraint({
+      pattern: /.+/,
+      required: false,
+    }),
+  });
+
+  inputText.isValid$($log);
+  (window as any).inputText = inputText;
+}
+
+async function formControlExample3() {
+  const inputNumber = new FormInputNumber('abc', {
+    constraint: formInputNumberConstraint({
+      min: 0,
+      max: 10,
+      step: 1,
+    }),
+  });
+
+  inputNumber.isValid$($log);
+  (window as any).inputNumber = inputNumber;
+}
+
+/*------------------------------*/
+
+export async function formControlExample() {
+  await formControlExample1();
+  // await formControlExample2();
+}

@@ -1,5 +1,6 @@
-import { $log, combineLatest, empty, function$$, IObservable, map$$, noop, switchMap$$, tuple } from '@lirx/core';
+import { empty, function$$, IObservable, map$$, switchMap$$ } from '@lirx/core';
 import { compileStyleAsComponentStyle, createComponent, IClassNamesList, VirtualCustomElementNode } from '@lirx/dom';
+import { noop } from '@lirx/utils';
 import { TicTacToeCellState, TicTacToePlayer } from '../../types/types';
 
 // @ts-ignore

@@ -1,15 +1,19 @@
 import { ITransitionProgress } from '@lirx/animations';
-import { IObservable, IObservableLike, IUnsubscribe, mergeUnsubscribeFunctions, single, toObservable } from '@lirx/core';
-import { VirtualCustomElementNode } from '@lirx/dom';
-import { noop } from '@lirx/utils';
+import { IObservable, IObservableLike, single, toObservable } from '@lirx/core';
+import {
+  virtualCustomElementNodeSetInput,
+  virtualCustomElementNodeSetReactiveInput,
+  virtualCustomElementNodeSetReactiveOutput,
+} from '@lirx/dom';
 import { MatOverlayManager } from '../../../manager/mat-overlay-manager';
 import {
   IMatSnackbarComponentConfig,
   IMatSnackbarComponentHorizontalPosition,
   IMatSnackbarComponentVerticalPosition,
   IMatSnackbarComponentWidth,
+  IMatSnackbarVirtualCustomElementNode,
   MatSnackbarComponent,
-} from '../snackbar/mat-snackbar.component';
+} from '../mat-snackbar/mat-snackbar.component';
 import { IMatSnackbarAnimatedOptions, MatSnackbarAnimated } from './mat-snackbar-animated';
 
 /** TYPES **/
@@ -52,31 +56,26 @@ export class MatSnackbarController extends MatSnackbarAnimated {
       ...option
     }: ICreateMatSnackbarAnimatedOptions,
   ): MatSnackbarController {
-    const node: VirtualCustomElementNode<IMatSnackbarComponentConfig> = MatSnackbarComponent.create();
-
-    let unsusbscribe: IUnsubscribe = noop;
+    const node: IMatSnackbarVirtualCustomElementNode = MatSnackbarComponent.create();
 
     const message$: IObservable<string> = toObservable(message);
     const actionText$: IObservable<string | undefined> = toObservable(actionText);
 
-    node.isConnected$((connected: boolean): void => {
-      if (connected) {
-        unsusbscribe = mergeUnsubscribeFunctions([
-          message$(node.inputs.$set('message')),
-          actionText$(node.inputs.$set('actionText')),
-          ...optionalArrayValues(onClickAction, (onClickAction) => node.outputs.get$('clickAction')(onClickAction)),
-        ]);
-      } else {
-        unsusbscribe();
-      }
-    });
+    virtualCustomElementNodeSetReactiveInput<IMatSnackbarComponentConfig, 'message'>(node, 'message', message$);
+    virtualCustomElementNodeSetReactiveInput<IMatSnackbarComponentConfig, 'actionText'>(node, 'actionText', actionText$);
 
-    node.inputs.set('horizontalPosition', horizontalPosition);
-    node.inputs.set('verticalPosition', verticalPosition);
-    node.inputs.set('width', width);
+    if (onClickAction !== void 0) {
+      virtualCustomElementNodeSetReactiveOutput<IMatSnackbarComponentConfig, 'clickAction'>(node, 'clickAction', onClickAction);
+    }
+
+    virtualCustomElementNodeSetInput<IMatSnackbarComponentConfig, 'horizontalPosition'>(node, 'horizontalPosition', horizontalPosition);
+    virtualCustomElementNodeSetInput<IMatSnackbarComponentConfig, 'verticalPosition'>(node, 'verticalPosition', verticalPosition);
+    virtualCustomElementNodeSetInput<IMatSnackbarComponentConfig, 'width'>(node, 'width', width);
 
     return new MatSnackbarController({
       ...option,
+      horizontalPosition,
+      verticalPosition,
       node,
     });
   }
@@ -114,20 +113,4 @@ export class MatSnackbarController extends MatSnackbarAnimated {
   }
 
 }
-
-/** FUNCTIONS **/
-
-/* OTHERS */
-
-function optionalArrayValues<GValue, GItem>(
-  value: GValue | undefined,
-  factory: (value: GValue) => GItem,
-): GItem[] {
-  return (value === void 0)
-    ? []
-    : [
-      factory(value),
-    ];
-}
-
 

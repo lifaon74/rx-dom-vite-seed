@@ -1,0 +1,15 @@
+@import 'mat-dialog-container.variables';
+
+
+/** STYLE **/
+
+:host {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: auto;
+
+  position: absolute;
+  inset: 0;
+  background-color: $mat-dialog-container-backdrop-color;
+}

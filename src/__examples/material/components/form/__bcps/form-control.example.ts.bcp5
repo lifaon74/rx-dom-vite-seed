@@ -1,0 +1,119 @@
+import { Abortable } from '@lirx/async-task';
+import {
+  createMulticastReplayLastSource,
+  fromPromiseFactory,
+  ICreateReplayLastSourceInitialValue,
+  IDefaultNotificationsUnion,
+  IMulticastReplayLastSource,
+  IObservable,
+  IObserver,
+  singleN,
+  switchMap$$,
+} from '@lirx/core';
+import { StringValidator } from './value-validator/built-in/string/string-validator.class';
+import { IValueValidatorErrorList } from './value-validator/value-validator-input.type';
+import { ValueValidator } from './value-validator/value-validator.class';
+
+/** FORM VALIDATION **/
+
+/** FORM INPUT **/
+
+export interface IFormInputOptions<GValue> {
+  initialValue?: GValue;
+  validator?: ValueValidator<GValue>;
+}
+
+export abstract class FormInput<GValue> {
+  protected readonly _$value$: IMulticastReplayLastSource<GValue>;
+  protected readonly _$disabled$: IMulticastReplayLastSource<boolean>;
+
+  protected readonly _validator: ValueValidator<GValue> | undefined;
+
+  protected readonly _validity$: IObservable<IDefaultNotificationsUnion<IValueValidatorErrorList>>;
+
+  protected constructor(
+    {
+      validator,
+      ...options
+    }: IFormInputOptions<GValue>,
+  ) {
+    const initialValue: ICreateReplayLastSourceInitialValue<GValue> = ('initialValue' in options)
+      ? [options.initialValue] as [GValue]
+      : [];
+    this._$value$ = createMulticastReplayLastSource<GValue>(...initialValue);
+    this._$disabled$ = createMulticastReplayLastSource<boolean>(false);
+    this._validator = validator;
+
+    this._validity$ = (this._validator === void 0)
+      ? singleN<IValueValidatorErrorList>([])
+      : switchMap$$(this.disabled$, (disabled: boolean): IObservable<IDefaultNotificationsUnion<IValueValidatorErrorList>> => {
+        return disabled
+          ? singleN<IValueValidatorErrorList>([])
+          : switchMap$$(this.value$, (value: GValue): IObservable<IDefaultNotificationsUnion<IValueValidatorErrorList>> => {
+            return fromPromiseFactory((signal: AbortSignal) => {
+              return this._validator!.validate(value, Abortable.fromAbortSignal(signal)).toPromise();
+            });
+          });
+      });
+  }
+
+  /* VALUE */
+
+  get value(): GValue {
+    return this._$value$.getValue();
+  }
+
+  get value$(): IObservable<GValue> {
+    return this._$value$.subscribe;
+  }
+
+  get $value(): IObserver<GValue> {
+    return this._$value$.emit;
+  }
+
+  /* DISABLED */
+
+  get disabled(): boolean {
+    return this._$disabled$.getValue();
+  }
+
+  get disabled$(): IObservable<boolean> {
+    return this._$disabled$.subscribe;
+  }
+
+  get $disabled(): IObserver<boolean> {
+    return this._$disabled$.emit;
+  }
+
+  /* VALIDITY */
+
+  get validity$(): IObservable<IDefaultNotificationsUnion<IValueValidatorErrorList>> {
+    return this._validity$;
+  }
+
+  /* METHODS */
+
+  abstract reset(): void;
+}
+
+// export class FormInputText extends FormInput<string> {
+//   constructor() {
+//     super();
+//   }
+// }
+
+/*------------------------------*/
+
+async function formControlExample1() {
+  const validator = ValueValidator.group([
+    StringValidator.pattern(/.+/),
+  ]);
+
+  console.log(await (validator.validate('', Abortable.never)));
+}
+
+/*------------------------------*/
+
+export async function formControlExample() {
+  await formControlExample1();
+}

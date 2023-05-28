@@ -10,32 +10,34 @@
     "serve": "vite preview",
     "clear:cache": "npm run clear:cache:vite && npm run clear:cache:lirx-dom",
     "clear:cache:vite": "node ./tools/clear-cache.js --vite",
-    "clear:cache:lirx-dom": "node ./tools/clear-cache.js --lirx-dom"
+    "clear:cache:lirx-dom": "node ./tools/clear-cache.js --lirx-dom",
+    "reinstall": "rm -rf ./node_modules && rm -f ./yarn.lock && yarn install"
   },
   "sideEffects": false,
   "devDependencies": {
-    "sass": "^1.56.1",
-    "terser": "^5.16.1",
-    "typescript": "^4.9.3",
-    "vite": "^3.2.4"
+    "sass": "^1.62.0",
+    "terser": "^5.17.1",
+    "typescript": "^5.0.4",
+    "vite": "^4.3.0"
   },
   "dependencies": {
     "@fluent/syntax": "^0.18.1",
+    "@lifaon/jbson": "latest",
+    "@lifaon/math": "latest",
+    "@lifaon/path": "latest",
+    "@lirx/animations": "latest",
+    "@lirx/async-task": "latest",
+    "@lirx/core": "latest",
+    "@lirx/dom": "latest",
+    "@lirx/dom-aot-plugin": "latest",
+    "@lirx/dom-material": "latest",
+    "@lirx/mdi": "latest",
+    "@lirx/promise": "latest",
+    "@lirx/router": "latest",
+    "@lirx/store": "latest",
+    "@lirx/utils": "latest",
     "messageformat": "4.0.0-1",
-    "@lirx/core": "1.3.0",
-    "@lirx/utils": "1.1.0",
-    "@lirx/promise": "1.1.0",
-    "@lirx/store": "2.0.0",
-    "@lirx/dom": "0.8.0",
-    "@lirx/dom-material": "0.5.0-beta.1",
-    "@lirx/router": "0.9.0",
-    "@lirx/mdi": "1.0.0",
-    "@lirx/dom-aot-plugin": "1.1.0",
-    "@lirx/animations": "1.0.0",
-    "@uni-fs/core": "1.0.0",
-    "@lifaon/path": "2.1.1",
-    "@lifaon/jbson": "2.0.0",
-    "tslib": "^2.4.1"
+    "tslib": "^2.5.0"
   },
   "_dependencies": {
     "@fluent/syntax": "^0.18.1",

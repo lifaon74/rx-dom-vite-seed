@@ -9,10 +9,11 @@ import { debugLiRXCache } from './lirx-cache/debug-lirx-cache';
 import { debugObjectProxy } from './object-proxy/debug-object-proxy';
 import { debugObservableProxy } from './object-proxy/debug-observable-proxy';
 import { debugObservables } from './observables/debug-observables';
+import { debugSignals } from './signals/signals';
 import { debugStore } from './store/debug-store';
 
 export function debug(): void {
-  // debugLiRXDOM();
+  debugLiRXDOM();
   // debugReactiveDOMCompiler();
   // debugJBSONV2();
   // debugAnimations();
@@ -21,7 +22,8 @@ export function debug(): void {
   // debugObjectProxy();
   // debugObservableProxy();
   // debugAnimation();
-  debugI18n();
+  // debugI18n();
   // debugLiRXCache();
   // debugStore();
+  // debugSignals();
 }

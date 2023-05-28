@@ -4,7 +4,7 @@ import {
   mapTransition,
   parallelTransitions,
 } from '@lirx/animations';
-import { IOpenCloseAnimationControllerOptions, OpenAnimationController } from '../../helpers/open-animation-controller';
+import { IOpenCloseAnimationControllerOptions, OpenCloseAnimationController } from '../../helpers/open-close-animation-controller';
 import { IMatOverlayBoxVirtualCustomElementNode } from '../components/box/mat-overlay-box.component';
 import { IMatOverlayBoxStickyVirtualCustomElementNode } from '../components/sticky/mat-overlay-box-sticky.component';
 
@@ -21,7 +21,7 @@ export interface IMatOverlayBoxAnimatedOptions extends //
 
 /** CLASS **/
 
-export class MatOverlayBoxAnimated extends OpenAnimationController {
+export class MatOverlayBoxAnimated extends OpenCloseAnimationController {
   constructor(
     {
       node,

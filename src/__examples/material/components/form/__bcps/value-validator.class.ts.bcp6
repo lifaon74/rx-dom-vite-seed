@@ -1,0 +1,238 @@
+import { Abortable, AsyncTask, IAsyncTaskFactory, IAsyncTaskInput } from '@lirx/async-task';
+import { IValueValidatorError } from './value-validator-error.type';
+import { IValueValidatorInput } from './value-validator-input.type';
+
+export type InferValueValidatorMergeValue<GValidators> =
+  GValidators extends readonly IGenericValueValidator[]
+    ? {
+      [GKey in keyof GValidators]: GValidators[GKey] extends ValueValidator<infer GValue, IValueValidatorError>
+        ? GValue
+        : never;
+    }[number]
+    : never;
+
+// export type InferValueValidatorMergeFirstValue<GValidators> =
+//   GValidators extends readonly IGenericValueValidator[]
+//     ? (
+//       GValidators extends []
+//         ? []
+//         : (
+//           GValidators extends [ValueValidator<infer GValue, any>, ...any[]]
+//             ? GValue
+//             : never
+//         )
+//     )
+//     : never;
+
+export type InferValueValidatorMergeError<GValidators> =
+  GValidators extends readonly IGenericValueValidator[]
+    ? {
+      [GKey in keyof GValidators]: GValidators[GKey] extends ValueValidator<any, infer GError>
+        ? GError
+        : never;
+    }[number]
+    : never;
+
+export type IValueValidatorMergeConstraint<GValidators> = [GValidators] extends [readonly IGenericValueValidator[]]
+  ? {
+    [GKey in keyof GValidators]: ValueValidator<InferValueValidatorMergeValue<GValidators>, any> extends GValidators[GKey]
+      ? any
+      : {
+        ERROR: `Expected type`,
+        type: InferValueValidatorMergeValue<GValidators>,
+        typeA: GValidators,
+      };
+  }
+  : readonly IGenericValueValidator[];
+
+
+export class ValueValidator<GValue, GError extends IValueValidatorError> {
+  static none<GValue>(): ValueValidator<GValue, never> {
+    return new ValueValidator<GValue, never>(() => []);
+  }
+
+  // static subType<GValue, GSubValue extends GValue>(
+  //   isSubType: (value: GValue) => value is GSubValue,
+  //   validator: ValueValidator<GSubValue>,
+  // ): ValueValidator<GValue> {
+  //   return new ValueValidator<GValue>((
+  //     value: GValue,
+  //     abortable: Abortable,
+  //   ): AsyncTask<IValueValidatorErrorList> => {
+  //     return isSubType(value)
+  //      ?
+  //     return this.validate(value, abortable)
+  //       .successful((errors: IValueValidatorErrorList, abortable: Abortable): IValueValidatorErrorList | AsyncTask<IValueValidatorErrorList> => {
+  //         return (errors.length === 0)
+  //           ? validator.validate(value as GSubValue, abortable)
+  //           : errors;
+  //       });
+  //   });
+  // }
+
+  // static optional<GValue>(): ValueValidator<GValue | INullish> {
+  //   return new ValueValidator<GValue | INullish>(((
+  //     value: GValue | INullish,
+  //     abortable: Abortable,
+  //   ): AsyncTask<IValueValidatorErrorList> | IValueValidatorErrorList => {
+  //     return isNullish(value)
+  //       ? []
+  //       : this.validate(value, abortable)
+  //   }) as IValueValidatorInput<GValue | INullish>);
+  // }
+
+  // static required<GValue>(
+  //   error: IValueValidatorErrorGenerator<GValue | INullish> = DEFAULT_VALUE_VALIDATOR_REQUIRED_ERROR_GENERATOR,
+  // ): ValueValidator<GValue | INullish> {
+  //   return new ValueValidator<GValue | INullish>(
+  //     createSyncValueValidator<GValue | INullish>(
+  //       (value: GValue | INullish) => !isNullish(value),
+  //       error,
+  //     ),
+  //   );
+  // }
+
+  // static not<GValue>(
+  //   validator: ValueValidator<GValue>,
+  // ): ValueValidator<GValue> {
+  //   return new ValueValidator<GValue>((
+  //     value: GValue,
+  //     abortable: Abortable,
+  //   ): AsyncTask<IValueValidatorErrorList> => {
+  //     return validator.validate(value, abortable)
+  //       .successful((errors: IValueValidatorErrorList): IValueValidatorErrorList => {
+  //         return (errors.length === 0)
+  //           ? [
+  //             {
+  //               code: 'not',
+  //               message: '',
+  //             },
+  //           ]
+  //           : [];
+  //       });
+  //   });
+  // }
+
+  // static or<GValue>(
+  //   ...validators: readonly ValueValidator<GValue>[]
+  // ): ValueValidator<GValue> {
+  //   return new ValueValidator<GValue>((
+  //     value: GValue,
+  //     abortable: Abortable,
+  //   ): AsyncTask<IValueValidatorErrorList> => {
+  //     const loop = (
+  //       index: number,
+  //       abortable: Abortable,
+  //       allErrors: IValueValidatorErrorList,
+  //     ): AsyncTask<IValueValidatorErrorList> => {
+  //       return (index < validators.length)
+  //         ? validators[index].validate(value, abortable)
+  //           .successful((errors: IValueValidatorErrorList): IValueValidatorErrorList | AsyncTask<IValueValidatorErrorList> => {
+  //             return (errors.length === 0)
+  //               ? []
+  //               : loop(index + 1, abortable, [...allErrors, ...errors]);
+  //           })
+  //         : AsyncTask.success<IValueValidatorErrorList>([], abortable);
+  //     };
+  //
+  //     return loop(0, abortable, []);
+  //   });
+  // }
+
+  // static sequence<GValue>(
+  //   ...validators: readonly ValueValidator<GValue>[]
+  // ): ValueValidator<GValue> {
+  //   return new ValueValidator<GValue>((
+  //     value: GValue,
+  //     abortable: Abortable,
+  //   ): AsyncTask<IValueValidatorErrorList> => {
+  //     const loop = (
+  //       index: number,
+  //       abortable: Abortable,
+  //     ): AsyncTask<IValueValidatorErrorList> => {
+  //       return (index < validators.length)
+  //         ? validators[index].validate(value, abortable)
+  //           .successful((errors: IValueValidatorErrorList): IValueValidatorErrorList | AsyncTask<IValueValidatorErrorList> => {
+  //             return (errors.length === 0)
+  //               ? loop(index + 1, abortable)
+  //               : errors;
+  //           })
+  //         : AsyncTask.success<IValueValidatorErrorList>([], abortable);
+  //     };
+  //
+  //     return loop(0, abortable);
+  //   });
+  // }
+
+  static merge<GValidators extends IValueValidatorMergeConstraint<GValidators>>(
+    validators: GValidators,
+  ): ValueValidator<InferValueValidatorMergeValue<GValidators>, InferValueValidatorMergeError<GValidators>> {
+    type GValue = InferValueValidatorMergeValue<GValidators>;
+    type GError = InferValueValidatorMergeError<GValidators>;
+
+    return new ValueValidator<GValue, GError>((
+      value: GValue,
+      abortable: Abortable,
+    ): AsyncTask<GError[]> => {
+      return AsyncTask.all(
+        (validators as ValueValidator<GValue, GError>[]).map((validator: ValueValidator<GValue, GError>): IAsyncTaskFactory<GError[]> => {
+          return (abortable: Abortable): IAsyncTaskInput<GError[]> => {
+            return validator.validate(value, abortable);
+          };
+        }),
+        abortable,
+      )
+        .successful((errors: GError[][]): GError[] => {
+          return errors.flat();
+        });
+    });
+  }
+
+  protected readonly _validator: IValueValidatorInput<GValue, GError>;
+
+  constructor(
+    validator: IValueValidatorInput<GValue, GError>,
+  ) {
+    this._validator = validator;
+  }
+
+  validate(
+    value: GValue,
+    abortable: Abortable = Abortable.never,
+  ): AsyncTask<GError[]> {
+    return AsyncTask.fromFactory<GError[]>((abortable: Abortable): IAsyncTaskInput<GError[]> => {
+      return this._validator(value, abortable);
+    }, abortable);
+  }
+
+  // child<GChildValue extends GValue>(
+  //   validator: ValueValidator<GChildValue>,
+  // ): ValueValidator<GValue> {
+  //   return new ValueValidator<GValue>((
+  //     value: GValue,
+  //     abortable: Abortable,
+  //   ): AsyncTask<IValueValidatorErrorList> => {
+  //     return this.validate(value, abortable)
+  //       .successful((errors: IValueValidatorErrorList, abortable: Abortable): IValueValidatorErrorList | AsyncTask<IValueValidatorErrorList> => {
+  //         return (errors.length === 0)
+  //           ? validator.validate(value as GChildValue, abortable)
+  //           : errors;
+  //       });
+  //   });
+  // }
+
+  // required(
+  //   error: IValueValidatorErrorGenerator<GValue | INullish> = DEFAULT_VALUE_VALIDATOR_REQUIRED_ERROR_GENERATOR,
+  // ): ValueValidator<GValue | INullish> {
+  //   return new ValueValidator<GValue | INullish>(((
+  //     value: GValue | INullish,
+  //     abortable: Abortable,
+  //   ): AsyncTask<IValueValidatorErrorList> | IValueValidatorErrorList => {
+  //     return isNullish(value)
+  //       ? [error(value)]
+  //       : this.validate(value, abortable);
+  //   }) as IValueValidatorInput<GValue | INullish>);
+  // }
+}
+
+export type IGenericValueValidator = ValueValidator<any, any>;

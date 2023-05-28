@@ -1,17 +1,25 @@
 
-<div
-  class="row"
-  *for="let row of $.matrix$; index$ as rowIndex$"
->
+<div class="grid">
   <div
-    *for="let column of row; index$ as columnIndex$"
-    class="column"
+    class="row"
+    *for="let row of $.matrix; index$ as rowIndex$"
   >
-    <app-tic-tac-toe-cell
-      $[state]="column"
-      $[player]="$.player$"
-      $(onSelected)="$.$$onSelected(node, rowIndex$, columnIndex$)"
-    ></app-tic-tac-toe-cell>
+    <div
+      *for="let column of row; index$ as columnIndex$"
+      class="column"
+    >
+      <app-tic-tac-toe-cell
+        $[state]="column"
+        $[player]="$.player"
+        $(onSelected)="$.$$onSelected(node, rowIndex$, columnIndex$)"
+      ></app-tic-tac-toe-cell>
+    </div>
   </div>
 </div>
 
+<button
+  class="reset-button"
+  (click)="$.$onClickResetButton"
+>
+  Reset
+</button>

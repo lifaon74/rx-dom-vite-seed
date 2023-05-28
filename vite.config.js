@@ -12,6 +12,7 @@ const NODE_MODULE_PATH = join(DIRNAME, 'node_modules');
 const config = {
   build: {
     target: 'esnext',
+    useDefineForClassFields: true,
     // minify: 'terser',
     polyfillModulePreload: false,
     terserOptions: {

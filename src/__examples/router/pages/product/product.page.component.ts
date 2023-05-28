@@ -53,8 +53,7 @@ export const AppProductPageComponent = createComponent<IAppProductPageComponentC
   init: (node: VirtualCustomElementNode<IAppProductPageComponentConfig>): IData => {
     const params$ = getRouteParams(node);
 
-    const $productIds$ = let$$(Array.from({ length: 1e1 }, (v: any, i: number) => `${i}`));
-    const productIds$ = $productIds$.subscribe;
+    const [productIds, productIds$] = let$$(Array.from({ length: 1e1 }, (v: any, i: number) => `${i}`));
 
     // params$((params: IRouteParams) => {
     //   console.log('params', params);

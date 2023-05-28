@@ -1,0 +1,19 @@
+@import 'mat-dialog.variables';
+
+
+/** STYLE **/
+
+:host {
+  display: flex;
+  flex-direction: column;
+  position: static;
+
+  max-width: min(#{$mat-dialog-max-width}, calc(100% - #{$mat-dialog-margin-x}));
+  max-height: min(#{$mat-dialog-max-height}, calc(100% - #{$mat-dialog-margin-y}));
+
+  overflow: hidden;
+
+  background-color: $mat-dialog-background-color;
+  box-shadow: 0 5px 10px rgba(#000, 0.15);
+  border-radius: 4px;
+}

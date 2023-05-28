@@ -1,26 +1,22 @@
+import { $log, computed, DeepWritable, effect, IObservable, IObserver, ISignal, signal, single, toSignal } from '@lirx/core';
 import {
-  $log,
-  combineLatest,
-  createMulticastSource, debounceMicrotask$$$,
-  IObservable,
-  IObserver,
-  let$$,
-  map$$, pipe$$,
-  shareRL$$, shareRL$$$,
-  switchMap$$, switchMap$$$,
-  tuple,
-} from '@lirx/core';
-import { compileReactiveHTMLAsComponentTemplate, compileStyleAsComponentStyle, createComponent, VirtualDOMNode } from '@lirx/dom';
+  compileReactiveHTMLAsComponentTemplate,
+  compileStyleAsComponentStyle,
+  createComponent,
+  VirtualDOMNode,
+  virtualNodeEffect,
+} from '@lirx/dom';
+import { VirtualCustomElementNode } from '@lirx/dom/src/virtual-node/dom/nodes/reactive/custom-element/virtual-custom-element-node.class';
 import { TicTacToeCellComponent } from './components/cell/tic-tac-toe-cell.component';
 import { createTicTacToeMatrix } from './functions/create-tic-tac-toe-matrix';
 import { getTicTacToeMatrixWinner } from './functions/get-tic-tac-toe-matrix-winner';
-import { updateTicTacToeMatrix } from './functions/update-tic-tac-toe-matrix';
-import { TicTacToeCellState, TicTacToeMatrix, TicTacToePlayer, TicTacToeWinner } from './types/types';
+import { mutateTicTacToeMatrix, updateTicTacToeMatrix } from './functions/update-tic-tac-toe-matrix';
 
 // @ts-ignore
 import html from './tic-tac-toe.component.html?raw';
 // @ts-ignore
 import style from './tic-tac-toe.component.scss?inline';
+import { TicTacToeMatrix, TicTacToePlayer } from './types/types';
 
 /**
  * COMPONENT: 'app-tic-tac-toe'
@@ -35,17 +31,18 @@ interface IOnSelected {
 }
 
 interface IData {
-  readonly matrix$: IObservable<TicTacToeMatrix>;
-  readonly player$: IObservable<TicTacToePlayer>;
+  readonly matrix: ISignal<TicTacToeMatrix>;
+  readonly player: ISignal<TicTacToePlayer>;
   readonly $$onSelected: IOnSelected;
+  readonly $onClickResetButton: IObserver<any>;
 }
 
-interface IMatBadgeComponentConfig {
+interface ITicTacToeComponentConfig {
   element: HTMLElement;
   data: IData;
 }
 
-export const TicTacToeComponent = createComponent<IMatBadgeComponentConfig>({
+export const TicTacToeComponent = createComponent<ITicTacToeComponentConfig>({
   name: 'app-tic-tac-toe',
   template: compileReactiveHTMLAsComponentTemplate({
     html,
@@ -54,69 +51,61 @@ export const TicTacToeComponent = createComponent<IMatBadgeComponentConfig>({
     ],
   }),
   styles: [compileStyleAsComponentStyle(style)],
-  init: (): IData => {
-    const { emit: $matrix, subscribe: matrix$ } = let$$<TicTacToeMatrix>(createTicTacToeMatrix());
-    const { emit: $player, subscribe: player$ } = let$$<TicTacToePlayer>('player-1');
+  init: (node: VirtualCustomElementNode<ITicTacToeComponentConfig>): IData => {
+    const matrix = signal<TicTacToeMatrix>(createTicTacToeMatrix());
+    const player = signal<TicTacToePlayer>('player-1');
+    const winner = computed(() => getTicTacToeMatrixWinner(matrix()));
 
     const $$onSelected = (
       node: VirtualDOMNode,
       rowIndex$: IObservable<number>,
       columnIndex$: IObservable<number>,
     ): IObserver<void> => {
-      const { emit: $onSelected, subscribe: onSelected$ } = createMulticastSource<void>();
+      const rowIndex = toSignal(rowIndex$);
+      const columnIndex = toSignal(columnIndex$);
 
-      type IMatrixAndPlayer = readonly [TicTacToeMatrix, TicTacToePlayer];
+      return () => {
+        if (winner() === 'none') {
+          matrix.update((matrix: TicTacToeMatrix): TicTacToeMatrix => {
+            return updateTicTacToeMatrix(
+              matrix,
+              rowIndex(),
+              columnIndex(),
+              player(),
+            );
+          });
 
-      const newMatrixAndPlayer$ = pipe$$(
-        combineLatest(tuple(matrix$, player$, rowIndex$, columnIndex$)),
-        [
-          debounceMicrotask$$$<any>(),
-          switchMap$$$<any, IMatrixAndPlayer>(([matrix, player, rowIndex, columnIndex]): IObservable<IMatrixAndPlayer> => {
-            console.log('map');
-              return map$$(onSelected$, (): IMatrixAndPlayer => {
-                const newMatrix: TicTacToeMatrix = updateTicTacToeMatrix(
-                  matrix,
-                  rowIndex,
-                  columnIndex,
-                  player,
-                );
-
-                const newPlayer: TicTacToePlayer = (player === 'player-1')
-                  ? 'player-2'
-                  : 'player-1';
-
-                return [
-                  newMatrix,
-                  newPlayer,
-                ];
-              });
-            },
-          ),
-          shareRL$$$<IMatrixAndPlayer>(),
-        ]
-      );
-
-      const newMatrix$ = map$$(newMatrixAndPlayer$, ([matrix]) => matrix);
-      const newPlayer$ = map$$(newMatrixAndPlayer$, ([, player]) => player);
-
-      newMatrixAndPlayer$($log);
-
-      // newMatrix$($matrix);
-      // newPlayer$($player);
-      node.onConnected$(newMatrix$)($matrix);
-      node.onConnected$(newPlayer$)($player);
-
-      return $onSelected;
+          player.update((player: TicTacToePlayer): TicTacToePlayer => {
+            return (player === 'player-1')
+              ? 'player-2'
+              : 'player-1';
+          });
+        }
+      };
     };
 
-    const winner$ = map$$(matrix$, getTicTacToeMatrixWinner);
+    const reset = (): void => {
+      matrix.set(createTicTacToeMatrix());
+      player.set('player-1');
+    };
 
-    // winner$($log);
+
+    const $onClickResetButton = reset;
+
+    virtualNodeEffect(node, () => {
+      if (winner() !== 'none') {
+        alert(`winner: ${winner()}`);
+      }
+
+      node.setClass('playing', winner() === 'none')
+    });
+
 
     return {
-      matrix$,
-      player$,
+      matrix,
+      player,
       $$onSelected,
+      $onClickResetButton,
     };
   },
 });

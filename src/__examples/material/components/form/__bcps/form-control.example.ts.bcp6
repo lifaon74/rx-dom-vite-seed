@@ -1,0 +1,203 @@
+import { Abortable } from '@lirx/async-task';
+import { AbstractFormControl, IGenericAbstractFormControl, InferAbstractFormControlName } from './form-control/abstract-form-control';
+import { FormInput, IFormInputOptions, IGenericFormInput } from './form-control/form-input';
+import { NumberValidator } from './value-validator/built-in/number/number-validator.class';
+import { StringValidator } from './value-validator/built-in/string/string-validator.class';
+import { IValueValidatorError } from './value-validator/errors/value-validator-error.type';
+import { ValueValidator } from './value-validator/value-validator.class';
+
+/*---*/
+
+export type IGenericFormGroupItem = IGenericAbstractFormControl;
+
+export type InferFormGroupItemNames<GItems extends readonly IGenericFormGroupItem[]> = {
+  [GKey in keyof GItems]: InferAbstractFormControlName<GItems[GKey]>;
+}[number];
+
+export type InferFormGroupItemFromName<GItems extends readonly IGenericFormGroupItem[], GItemName extends InferFormGroupItemNames<GItems>> = {
+  [GKey in keyof GItems]: InferAbstractFormControlName<GItems[GKey]> extends GItemName
+    ? GItems[GKey]
+    : never;
+}[number];
+
+export class FormGroup<GName extends string, GItems extends readonly IGenericFormGroupItem[]> extends AbstractFormControl<GName> {
+  protected readonly _items: ReadonlyMap<string, IGenericFormGroupItem>;
+
+  // protected readonly _validity$: IObservable<IValueValidatorErrorList>;
+
+  constructor(
+    name: GName,
+    inputs: GItems,
+  ) {
+    super(name);
+
+    this._items = new Map<string, IGenericFormGroupItem>(
+      Array.from(inputs, (input: IGenericFormGroupItem): [string, IGenericFormGroupItem] => {
+        return [
+          input.name,
+          input,
+        ];
+      }),
+    );
+  }
+
+  /* ITEMS */
+
+  get<GItemName extends InferFormGroupItemNames<GItems>>(
+    name: GItemName,
+  ): InferFormGroupItemFromName<GItems, GItemName> {
+    const item: IGenericFormGroupItem | undefined = this._items.get(name);
+    if (item === void 0) {
+      throw new Error(`Cannot find item with name: ${name}`);
+    } else {
+      return item as any;
+    }
+  }
+
+  /* VALIDITY */
+
+  // get isValid$(): IObservable<boolean> {
+  //   return map$$(this._validity$, (errors: IValueValidatorErrorList) => errors.length === 0);
+  // }
+  //
+  // get validator(): ValueValidator<GValue | null> {
+  //   return this.disabled
+  //     ? ValueValidator.none<GValue | null>()
+  //     : (
+  //       (this._validator === void 0)
+  //         ? (
+  //           this.required
+  //             ? ValueValidator.required<GValue>()
+  //             : ValueValidator.none<GValue | null>()
+  //         )
+  //         : (
+  //           this.required
+  //             ? ValueValidator.required<GValue>()
+  //               .child(this._validator)
+  //             : this._validator
+  //         )
+  //
+  //     );
+  // }
+  //
+  // validate(
+  //   abortable?: Abortable,
+  // ): AsyncTask<IValueValidatorErrorList> {
+  //   return this.validator.validate(this.value, abortable);
+  // }
+  //
+  // /* METHODS */
+  //
+  // reset(): void {
+  //   this.value = null;
+  // }
+}
+
+export type IGenericFormGroup = FormGroup<string, any[]>;
+
+/*---*/
+
+// export abstract class FormInputFromTextSource<GValue> extends FormInput<GValue> {
+//   protected readonly _$rawValue$: IMulticastReplayLastSource<string>;
+//
+//   protected constructor() {
+//     super();
+//   }
+// }
+
+/*---*/
+
+export interface IFormInputTextOptions<GError extends IValueValidatorError> extends IFormInputOptions<string, GError> {
+
+}
+
+export class FormInputText<GName extends string, GError extends IValueValidatorError> extends FormInput<GName, string, GError> {
+  constructor(
+    name: GName,
+    options?: IFormInputTextOptions<GError>,
+  ) {
+    super(
+      name,
+      options,
+    );
+  }
+}
+
+export interface IFormInputNumberOptions<GError extends IValueValidatorError> extends IFormInputOptions<number, GError> {
+
+}
+
+export class FormInputNumber<GName extends string, GError extends IValueValidatorError> extends FormInput<GName, number, GError> {
+  constructor(
+    name: GName,
+    options?: IFormInputNumberOptions<GError>,
+  ) {
+    super(
+      name,
+      options,
+    );
+  }
+}
+
+/*------------------------------*/
+
+async function formControlExample1() {
+  // const validator = StringValidator.pattern(/.+/);
+
+  // const validator = ValueValidator.merge([
+  //   // StringValidator.pattern(/.+/),
+  //   StringValidator.pattern(/.+/),
+  //   NumberValidator.isValid(),
+  // ]);
+
+  // const validator = ValueValidator.and(
+  //   StringValidator.notEmpty(),
+  //   StringValidator.pattern(/.+/),
+  //   // NumberValidator.isValid(),
+  // );
+
+  const validator = ValueValidator.optional(
+    StringValidator.all(
+      StringValidator.notEmpty(),
+      StringValidator.pattern(/.+/),
+      StringValidator.email(),
+    ),
+  );
+
+  // console.log(await (validator.validate(null, Abortable.never)));
+  console.log(await (validator.validate('', Abortable.never)));
+}
+
+async function formControlExample2() {
+  const textInput = new FormInputText('input-a', {
+    validator: ValueValidator.optional(
+      StringValidator.email(),
+    ),
+  });
+
+  textInput.value = 'abc@mail.com';
+
+  const numberInput = new FormInputNumber('input-b', {
+    validator: ValueValidator.optional(
+      NumberValidator.isValid(),
+    ),
+  });
+
+  numberInput.value = 5;
+  numberInput.value = Number.NaN;
+
+  const group = new FormGroup('group-a', [
+    textInput,
+    numberInput,
+  ]);
+
+  const a = group.get('input-a');
+  console.log(a);
+}
+
+/*------------------------------*/
+
+export async function formControlExample() {
+  // await formControlExample1();
+  await formControlExample2();
+}

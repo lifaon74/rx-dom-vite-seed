@@ -30,6 +30,8 @@ function matSnackbarExample1(): void {
     message: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas tincidunt',
     horizontalPosition: 'left',
     verticalPosition: 'bottom',
+    actionText: 'Click me',
+    onClickAction: () => console.log('clicked')
   });
 
   openButton.onclick = () => snackbar.open();

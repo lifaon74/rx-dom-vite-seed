@@ -1,7 +1,7 @@
 import { bootstrap, compileReactiveHTMLAsComponentTemplate, createComponent } from '@lirx/dom';
 import { MatFlatButtonPrimaryComponent } from '@lirx/dom-material';
 import { MatOverlayManager } from '../../../manager/mat-overlay-manager';
-import { MAT_TOOLTIP_MODIFIER } from './mat-tooltip.modifier';
+import { MatTooltipModifier } from './mat-tooltip.modifier';
 
 /*----------------------------*/
 
@@ -37,7 +37,7 @@ const MatTooltipModifierExampleComponent = createComponent<IMatTooltipModifierEx
     ],
     modifiers: [
       // createMatTooltipModifier(() => manager),
-      MAT_TOOLTIP_MODIFIER,
+      MatTooltipModifier,
     ],
   }),
 });

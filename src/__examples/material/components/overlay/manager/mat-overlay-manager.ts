@@ -1,11 +1,11 @@
 import {
   IComponent,
   IGenericVirtualCustomElementNode,
-  IVirtualCustomElementNodeConfig, IVirtualCustomElementNodeSlotsMap,
+  IVirtualCustomElementNodeConfig,
+  IVirtualCustomElementNodeSlotsMap,
   VirtualCustomElementNode,
   VirtualRootNode,
 } from '@lirx/dom';
-import { setOptionallyGlobalMatOverlayManager } from './functions/global-mat-overlay-manager';
 
 // @ts-ignore
 import style from './mat-overlay-manager.scss?inline';
@@ -13,17 +13,40 @@ import style from './mat-overlay-manager.scss?inline';
 let matOverlayManagerStyleElementInitialized: boolean = false;
 
 export class MatOverlayManager extends VirtualRootNode<HTMLElement> {
+  protected static _main: MatOverlayManager;
+
+  static get main(): MatOverlayManager {
+    if (this._main === void 0) {
+      throw new Error(`The main MatOverlayManager is undefined`);
+    } else {
+      return this._main;
+    }
+  }
+
+  static set main(
+    manager: MatOverlayManager,
+  ) {
+    if (this._main === void 0) {
+      this._main = manager;
+    } else {
+      throw new Error(`The main MatOverlayManager is already defined`);
+    }
+  }
 
   static create(): MatOverlayManager {
     const matOverlayManagerElement = document.createElement('mat-overlay-manager');
     document.body.appendChild(matOverlayManagerElement);
-    return setOptionallyGlobalMatOverlayManager(new MatOverlayManager(matOverlayManagerElement));
+    return new MatOverlayManager(matOverlayManagerElement);
   }
 
   constructor(
     element: HTMLElement,
   ) {
     super(element);
+
+    if (MatOverlayManager._main === void 0) {
+      MatOverlayManager.main = this;
+    }
 
     if (!matOverlayManagerStyleElementInitialized) {
       matOverlayManagerStyleElementInitialized = true;
@@ -60,11 +83,11 @@ export class MatOverlayManager extends VirtualRootNode<HTMLElement> {
     node: IGenericVirtualCustomElementNode,
   ): void {
     if (this.has(node)) {
-      if (node.inputs.has('close')) {
-        (node.inputs as any).set('close','manager');
-      } else {
+      // if (node.inputs.has('close')) {
+      //   (node.inputs as any).set('close', 'manager');
+      // } else {
         node.detach();
-      }
+      // }
     } else {
       throw new Error(`Not a node of this MatOverlayManager`);
     }

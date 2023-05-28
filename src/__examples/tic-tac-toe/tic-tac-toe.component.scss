@@ -7,23 +7,39 @@
   $cell-size: 50px;
   $cell-border: 1px solid black;
 
-  & > .row {
+  & > .grid {
+    & > .row {
+      & > .column {
+        display: inline-block;
+        width: $cell-size;
+        height: $cell-size;
+        box-sizing: content-box;
 
-    & > .column {
-      display: inline-block;
-      width: $cell-size;
-      height: $cell-size;
-      box-sizing: content-box;
+        &:not(:last-child) {
+          border-right: $cell-border;
+        }
+      }
 
       &:not(:last-child) {
-        border-right: $cell-border;
+        & > .column {
+          border-bottom: $cell-border;
+        }
       }
     }
+  }
 
-    &:not(:last-child) {
-      & > .column {
-        border-bottom: $cell-border;
-      }
+  & > .reset-button {
+    margin-top: 20px;
+    border: 0;
+    background-color: #ddd;
+    padding: 5px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  &:not(.playing) {
+    & > .grid {
+      pointer-events: none;
     }
   }
 }

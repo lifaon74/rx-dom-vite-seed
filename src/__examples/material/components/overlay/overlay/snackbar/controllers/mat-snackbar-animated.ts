@@ -4,14 +4,14 @@ import {
   mapTransition,
   parallelTransitions,
 } from '@lirx/animations';
-import { IOpenCloseAnimationControllerOptions, OpenAnimationController } from '../../helpers/open-animation-controller';
+import { IOpenCloseAnimationControllerOptions, OpenCloseAnimationController } from '../../helpers/open-close-animation-controller';
 import {
   IMatSnackbarComponentHorizontalPosition,
   IMatSnackbarComponentVerticalPosition,
   IMatSnackbarVirtualCustomElementNode,
   MAT_SNACKBAR_COMPONENT_DEFAULT_HORIZONTAL_POSITION,
   MAT_SNACKBAR_COMPONENT_DEFAULT_VERTICAL_POSITION,
-} from '../snackbar/mat-snackbar.component';
+} from '../mat-snackbar/mat-snackbar.component';
 
 /** TYPES **/
 
@@ -26,7 +26,7 @@ export interface IMatSnackbarAnimatedOptions extends //
 
 /** CLASS **/
 
-export class MatSnackbarAnimated extends OpenAnimationController {
+export class MatSnackbarAnimated extends OpenCloseAnimationController {
   protected readonly _node: IMatSnackbarVirtualCustomElementNode;
 
   constructor(
