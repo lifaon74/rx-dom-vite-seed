@@ -1,0 +1,9 @@
+@use 'mat-input-readonly.variables' as mat-input-readonly;
+
+
+/** STYLE **/
+
+:host(:is(:read-only, .mat--readonly)) {
+  background-color: mat-input-readonly.$mat-input-readonly-background-color;
+  border-color: mat-input-readonly.$mat-input-readonly-border-color;
+}

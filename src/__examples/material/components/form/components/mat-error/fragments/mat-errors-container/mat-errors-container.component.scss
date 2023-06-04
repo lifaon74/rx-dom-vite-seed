@@ -1,0 +1,17 @@
+@use 'mat-errors-container.variables' as mat-errors-container;
+
+
+/** STYLE **/
+
+:host {
+  display: flex;
+  flex-direction: column;
+  color: #ff3d3d;
+  font-size: 12px;
+
+  & > * {
+    &:not([class*="mat--has-error"]) {
+      display: none;
+    }
+  }
+}

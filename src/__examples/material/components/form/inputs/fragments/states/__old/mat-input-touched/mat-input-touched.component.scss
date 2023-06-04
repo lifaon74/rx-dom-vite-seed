@@ -1,0 +1,9 @@
+@use 'mat-input-touched.variables' as mat-input-touched;
+
+
+/** STYLE **/
+
+:host(.mat--touched) {
+  background-color: mat-input-touched.$mat-input-touched-background-color;
+  border-color: mat-input-touched.$mat-input-touched-border-color;
+}

@@ -1,0 +1,4 @@
+@use 'fragments/mat-input/mat-input.variables' as mat-input;
+
+$mat-input-touched-background-color: var(--mat-input-touched-background-color, mat-input.$mat-input-background-color);
+$mat-input-touched-border-color: var(--mat-input-touched-border-color, mat-input.$mat-input-border-color);

@@ -1,0 +1,9 @@
+@use 'mat-input-disabled.variables' as mat-input-disabled;
+
+
+/** STYLE **/
+
+:host(:is(:disabled, .mat--disabled)) {
+  background-color: mat-input-disabled.$mat-input-disabled-background-color;
+  border-color: mat-input-disabled.$mat-input-disabled-border-color;
+}

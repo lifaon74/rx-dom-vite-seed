@@ -1,0 +1,4 @@
+@use 'fragments/mat-input/mat-input.variables' as mat-input;
+
+$mat-input-disabled-background-color: var(--mat-input-disabled-background-color, #f3f3f3);
+$mat-input-disabled-border-color: var(--mat-input-disabled-border-color, #cecece);

@@ -1,0 +1,35 @@
+@use 'mat-input-field.variables' as mat-input-field;
+@use '../states/mat-input-state-invalid/mat-input-state-invalid.variables' as mat-input-state-invalid;
+
+
+/** STYLE **/
+
+:host {
+  display: block;
+  appearance: none;
+  max-width: none;
+  width: 100%;
+  height: mat-input-field.$mat-input-field-height;
+  padding: 0 mat-input-field.$mat-input-field-padding-x;
+
+  background-color: mat-input-field.$mat-input-field-background-color;
+  border: mat-input-field.$mat-input-field-border-width solid mat-input-field.$mat-input-field-border-color;
+  border-radius: 3px;
+
+  font-family: mat-input-field.$mat-input-field-font-family;
+  font-size: mat-input-field.$mat-input-field-font-size;
+  color: mat-input-field.$mat-input-field-color;
+  text-overflow: ellipsis;
+
+  &::placeholder {
+    color: mat-input-field.$mat-input-field-placeholder-color;
+  }
+
+  &:-webkit-autofill {
+    transition: background-color 600000s 0s, color 600000s 0s;
+  }
+}
+
+:host(#{mat-input-state-invalid.$mat-input-state-invalid-selector}) {
+  border-color: mat-input-field.$mat-input-field-border-color--invalid;
+}

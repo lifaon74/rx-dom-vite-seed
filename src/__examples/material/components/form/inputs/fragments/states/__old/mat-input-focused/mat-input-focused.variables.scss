@@ -1,0 +1,4 @@
+@use 'fragments/mat-input/mat-input.variables' as mat-input;
+
+$mat-input-focused-background-color: var(--mat-input-focused-background-color, mat-input.$mat-input-background-color);
+$mat-input-focused-border-color: var(--mat-input-focused-border-color, #000);

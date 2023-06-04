@@ -1,0 +1,22 @@
+@use 'mat-label.variables' as mat-label;
+
+
+/** STYLE **/
+
+:host {
+  display: block;
+  padding: mat-label.$mat-label-padding-y 0;
+
+  font-family: mat-label.$mat-label-font-family;
+  font-size: mat-label.$mat-label-font-size;
+  color: mat-label.$mat-label-color;
+}
+
+
+:host(.mat--required) {
+  &::after {
+    content: '*';
+    display: inline;
+    margin-left: 1px;
+  }
+}

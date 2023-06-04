@@ -1,0 +1,9 @@
+@use 'mat-input-focused.variables' as mat-input-focused;
+
+
+/** STYLE **/
+
+:host(:is(:focus, .mat-focused)) {
+  background-color: mat-input-focused.$mat-input-focused-background-color;
+  border-color: mat-input-focused.$mat-input-focused-border-color;
+}

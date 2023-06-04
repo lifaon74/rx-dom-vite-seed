@@ -1,22 +1,22 @@
-import { $log, computed, DeepWritable, effect, IObservable, IObserver, ISignal, signal, single, toSignal } from '@lirx/core';
+import { computed, IObservable, IObserver, ISignal, signal, toSignal } from '@lirx/core';
 import {
   compileReactiveHTMLAsComponentTemplate,
   compileStyleAsComponentStyle,
   createComponent,
+  VirtualCustomElementNode,
   VirtualDOMNode,
   virtualNodeEffect,
 } from '@lirx/dom';
-import { VirtualCustomElementNode } from '@lirx/dom/src/virtual-node/dom/nodes/reactive/custom-element/virtual-custom-element-node.class';
 import { TicTacToeCellComponent } from './components/cell/tic-tac-toe-cell.component';
 import { createTicTacToeMatrix } from './functions/create-tic-tac-toe-matrix';
 import { getTicTacToeMatrixWinner } from './functions/get-tic-tac-toe-matrix-winner';
-import { mutateTicTacToeMatrix, updateTicTacToeMatrix } from './functions/update-tic-tac-toe-matrix';
+import { updateTicTacToeMatrix } from './functions/update-tic-tac-toe-matrix';
+import { TicTacToeMatrix, TicTacToePlayer } from './types/types';
 
 // @ts-ignore
 import html from './tic-tac-toe.component.html?raw';
 // @ts-ignore
 import style from './tic-tac-toe.component.scss?inline';
-import { TicTacToeMatrix, TicTacToePlayer } from './types/types';
 
 /**
  * COMPONENT: 'app-tic-tac-toe'

@@ -1,0 +1,9 @@
+@use 'mat-input-invalid.variables' as mat-input-invalid;
+
+
+/** STYLE **/
+
+:host(:not(.mat--untouched):is(:invalid, .mat--invalid)) {
+  background-color: mat-input-invalid.$mat-input-invalid-background-color;
+  border-color: mat-input-invalid.$mat-input-invalid-border-color;
+}

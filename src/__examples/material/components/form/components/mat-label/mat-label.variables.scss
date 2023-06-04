@@ -1,0 +1,8 @@
+
+@import '../../../../styles/mat.variables';
+
+$mat-label-padding-y: var(--mat-label-padding-y, 2px);
+
+$mat-label-font-family: var(--mat-label-font-family, $mat-font-family);
+$mat-label-font-size: var(--mat-label-font-size, 14px);
+$mat-label-color: var(--mat-label-color, #444);

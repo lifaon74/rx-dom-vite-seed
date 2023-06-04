@@ -1,0 +1,9 @@
+@use 'mat-input-dirty.variables' as mat-input-dirty;
+
+
+/** STYLE **/
+
+:host(.mat--dirty) {
+  background-color: mat-input-dirty.$mat-input-dirty-background-color;
+  border-color: mat-input-dirty.$mat-input-dirty-border-color;
+}

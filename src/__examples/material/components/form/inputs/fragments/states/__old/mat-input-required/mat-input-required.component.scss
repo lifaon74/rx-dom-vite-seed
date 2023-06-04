@@ -1,0 +1,9 @@
+@use 'mat-input-required.variables' as mat-input-required;
+
+
+/** STYLE **/
+
+:host(:is(:required, .mat--required)) {
+  background-color: mat-input-required.$mat-input-required-background-color;
+  border-color: mat-input-required.$mat-input-required-border-color;
+}

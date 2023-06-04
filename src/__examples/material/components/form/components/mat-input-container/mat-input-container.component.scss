@@ -1,0 +1,13 @@
+@use 'mat-input-container.variables' as mat-input-container;
+
+
+/** STYLE **/
+
+:host {
+  display: flex;
+  flex-direction: column;
+
+  & > mat-errors-container {
+    margin-top: 6px;
+  }
+}

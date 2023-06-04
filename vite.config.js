@@ -43,6 +43,7 @@ const config = {
         // console.log(path);
         const matches = path.endsWith('.ts')
           || path.endsWith('.component.mjs')
+          || path.endsWith('.modifier.mjs')
           || (
             path.includes('lirx/mdi')
           );
@@ -59,14 +60,14 @@ const config = {
   },
   optimizeDeps: {
     include: [
-      '@lirx/promise',
-      '@lirx/utils',
-      '@lirx/core',
-      '@lirx/store',
-      '@lirx/dom',
-      '@lirx/mdi',
-      '@lirx/dom-material',
-      '@lirx/animations',
+      // '@lirx/promise',
+      // '@lirx/utils',
+      // '@lirx/core',
+      // '@lirx/store',
+      // '@lirx/dom',
+      // '@lirx/mdi',
+      // '@lirx/dom-material',
+      // '@lirx/animations',
     ],
   },
   resolve: {

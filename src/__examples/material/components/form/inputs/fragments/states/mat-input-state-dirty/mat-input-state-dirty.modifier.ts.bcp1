@@ -1,0 +1,36 @@
+import { IObservableLike, map$$, reference, switchMap$$, toObservableThrowIfUndefined } from '@lirx/core';
+import { createVirtualReactiveElementNodeModifier, IGenericVirtualReactiveElementNode, VirtualDOMNode } from '@lirx/dom';
+import {
+  assertIsInputOrTextAreaVirtualReactiveElementNode,
+} from '../../../helpers/assert-is-input-or-text-area-virtual-reactive-element-node';
+import { IInputDirtyElement, observeInputDirty } from './observe-input-dirty';
+
+export function matInputStateDirtyModifierFunction(
+  node: IGenericVirtualReactiveElementNode,
+  inputLike$?: IObservableLike<IInputDirtyElement>,
+): VirtualDOMNode {
+  let input$: IObservableLike<IInputDirtyElement>;
+
+  if (inputLike$ === void 0) {
+    assertIsInputOrTextAreaVirtualReactiveElementNode(node);
+    input$ = reference(() => node.elementNode);
+  } else {
+    input$ = toObservableThrowIfUndefined(inputLike$);
+  }
+
+  const dirty$ = switchMap$$(input$, input => observeInputDirty(input));
+
+  const classNames$ = map$$(dirty$, (dirty: boolean): Set<string> => {
+    return new Set([dirty ? 'mat--dirty' : 'mat--pristine']);
+  });
+  node.setReactiveClassNamesList(classNames$);
+
+  return node;
+
+}
+
+export const MatInputStateDirtyModifier = createVirtualReactiveElementNodeModifier<IObservableLike<IInputDirtyElement> | undefined, VirtualDOMNode>(
+  'mat-input-state-dirty',
+  matInputStateDirtyModifierFunction,
+);
+

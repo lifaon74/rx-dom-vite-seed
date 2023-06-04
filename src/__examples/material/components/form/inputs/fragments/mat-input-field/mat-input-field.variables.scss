@@ -1,0 +1,16 @@
+@import '../../../../../styles/mat.variables';
+
+$mat-input-field-height: var(--mat-input-field-height, 38px);
+
+$mat-input-field-padding-x: var(--mat-input-field-padding-x, 10px);
+
+$mat-input-field-background-color: var(--mat-input-field-background-color, #fff);
+
+$mat-input-field-border-width: var(--mat-input-field-border-width, 1px);
+$mat-input-field-border-color: var(--mat-input-field-border-color, #aaa);
+$mat-input-field-border-color--invalid: var(--mat-input-field-border-color--invalid, #ff8a8a);
+
+$mat-input-field-font-family: var(--mat-input-field-font-family, $mat-font-family);
+$mat-input-field-font-size: var(--mat-input-field-font-size, 16px);
+$mat-input-field-color: var(--mat-input-field-color, #333);
+$mat-input-field-placeholder-color: var(--mat-input-field-placeholder-color, #999);

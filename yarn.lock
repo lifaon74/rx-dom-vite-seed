@@ -136,7 +136,7 @@
   resolved "http://localhost:4873/@jridgewell/set-array/-/set-array-1.1.2.tgz#7c6cf998d6d20b914c0a55a91ae928ff25965e72"
   integrity sha512-xnkseuNADM0gt2bs+BvhO0p78Mk762YnZdsuzFV018NoG1Sj1SCQvpSqa7XUaTam5vAGasABV9qXASMKnFMwMw==
 
-"@jridgewell/source-map@^0.3.2":
+"@jridgewell/source-map@^0.3.3":
   version "0.3.3"
   resolved "http://localhost:4873/@jridgewell/source-map/-/source-map-0.3.3.tgz#8108265659d4c33e72ffe14e33d6cc5eb59f2fda"
   integrity sha512-b+fsZXeLYi9fEULmfBrhxn4IrPlINf8fiNarzTof004v3lFdntdwa9PF7vFJqm3mg7s+ScJMxXaE3Acp1irZcg==
@@ -195,9 +195,9 @@
   integrity sha512-OTT0FYeYrRPmmOe/sgTt6nTOiL+r3Hq6Fbqnkh4L8ca7rGr1HAD5xZZ/7ym7lhIfnMSRyZbuXRatPqM2qMZurA==
 
 "@lirx/core@latest":
-  version "1.4.0-dev.1685087644638"
-  resolved "http://localhost:4873/@lirx/core/-/core-1.4.0-dev.1685087644638.tgz#f7c137f087e355de7dee3c7d65eb004f89fdb341"
-  integrity sha512-LM74MPNbQgC8MoufVwOZrNLVH0FdtH+jggtUNYyNKD8VLe5ien0U2UDUttt19MFbEybOMDKL/tt5ZBp6hrxx5Q==
+  version "1.4.0-dev.1685689865278"
+  resolved "http://localhost:4873/@lirx/core/-/core-1.4.0-dev.1685689865278.tgz#f964ad0f7e126c3a3c1fefb5643a7107cf798e73"
+  integrity sha512-iJvzdemk/buvYTt93gaTPSDonhXj8Ph4xj3Cq4DlPItVtbHa0gEXVp3K/98YjCJJdTvzqSm/o7sz6YacMN4wRg==
   dependencies:
     "@lirx/utils" latest
 
@@ -219,17 +219,18 @@
     source-map "^0.7.4"
 
 "@lirx/dom-material@latest":
-  version "0.6.0-dev.1683557171156"
-  resolved "http://localhost:4873/@lirx/dom-material/-/dom-material-0.6.0-dev.1683557171156.tgz#acb513ce1afcdd47bc52748a50050cc7d80e38c6"
-  integrity sha512-ML6M4AgUWMqOuUOgrvP6HpdvczWpdWWUlbzA/Ks9cj/A9RV+DzQYzfNKWzX1XkrCRAZUwvPVG4WuQdcP07xj0Q==
+  version "0.6.0-dev.1685625622021"
+  resolved "http://localhost:4873/@lirx/dom-material/-/dom-material-0.6.0-dev.1685625622021.tgz#bf7c15eabe817b8a6a4c65c17ce21069151e91e2"
+  integrity sha512-/nDnQmRXugdkHeEtK3MyCb2WE1R2kgnAQQq0QTJz179pvCVuMFQn1sS88e8wWQapHieaMGurU7KYl9Rl9Ibpfw==
   dependencies:
     "@lirx/core" latest
     "@lirx/dom" latest
+    "@lirx/mdi" latest
 
 "@lirx/dom@latest":
-  version "0.9.0-dev.1684081864758"
-  resolved "http://localhost:4873/@lirx/dom/-/dom-0.9.0-dev.1684081864758.tgz#922f6135ab9211ea20c944d484b7bd1c5e14b763"
-  integrity sha512-QgFUq0SNLn3JEZPj7Uq4AEu6ynWaYg7+1ZEIz4KtnpZXSFhDPeTYCzp9Ucd1d9mKwAjhU5WAf5Fuj3L3KfShzA==
+  version "0.9.0-dev.1685693381939"
+  resolved "http://localhost:4873/@lirx/dom/-/dom-0.9.0-dev.1685693381939.tgz#3387af6aeecf3edab7b434cb33b9dfb5f0fa11bc"
+  integrity sha512-k9vqJwkPflJKhVzhU21YQnpvoQlSw6lLr6Tj+8EhBOigWokchsEdw/eNOT9g+K7MeSdjgRqIQN/BaZ+RPJfoYA==
   dependencies:
     "@lirx/core" latest
     "@lirx/utils" latest
@@ -265,15 +266,10 @@
   dependencies:
     "@lirx/core" latest
 
-"@lirx/utils@^1.0.0":
-  version "1.1.1"
-  resolved "http://localhost:4873/@lirx/utils/-/utils-1.1.1.tgz#78e1bcc6b8d961b680517797c6d8ebced6d10956"
-  integrity sha512-FIh/xx8aYJmTEhxwUtwESTbpecRn2qpbWHV5gAx4wDhe7gV/eAz7Ko6AU+tFNThX3DjN7aKA9apYZpvivjoCHA==
-
-"@lirx/utils@latest":
-  version "1.1.2-dev.1685113777076"
-  resolved "http://localhost:4873/@lirx/utils/-/utils-1.1.2-dev.1685113777076.tgz#7f4c50ff75563f3bdf257a62f3188a22120144ca"
-  integrity sha512-MiIaVcC3eIk5kPhNzCrtQ+QCC2ri2BRxABMKx0jpN7DcO08ETAPP/V8ZNZsHhj4SbdSynEWDO3To0EE0IN8RLQ==
+"@lirx/utils@^1.0.0", "@lirx/utils@latest":
+  version "1.1.2"
+  resolved "http://localhost:4873/@lirx/utils/-/utils-1.1.2.tgz#fcd44275563e6bf0ea0672bbf953f56c1fcdf609"
+  integrity sha512-tjVwiDXeEFm/t4sLSCmRbS23mS94g8w6DEF3HGN4JFgwUOLC5eZKBqy2+0F+jNLNVUZSkSCyPj6i+OI7RB9RRQ==
 
 "@tootallnate/once@2":
   version "2.0.0"
@@ -303,7 +299,7 @@ acorn-walk@^8.0.2, acorn-walk@^8.2.0:
   resolved "http://localhost:4873/acorn-walk/-/acorn-walk-8.2.0.tgz#741210f2e2426454508853a2f44d0ab83b7f69c1"
   integrity sha512-k+iyHEuPgSw6SbuDpGQM+06HQUa04DZ3o+F6CSzXMvvI5KMvnaEqXe+YVe555R9nn6GPt404fos4wcgpw12SDA==
 
-acorn@^8.1.0, acorn@^8.5.0, acorn@^8.8.1, acorn@^8.8.2:
+acorn@^8.1.0, acorn@^8.8.1, acorn@^8.8.2:
   version "8.8.2"
   resolved "http://localhost:4873/acorn/-/acorn-8.8.2.tgz#1b2f25db02af965399b9776b0c2c391276d37c4a"
   integrity sha512-xjIYgE8HBrkpd/sJqOGNspf8uHG+NOHGOw6a/Urj8taM2EXfdNAH2oFcPeIFfsv3+kz/mJrS5VuMqbNLjCa2vw==
@@ -324,9 +320,9 @@ anymatch@~3.1.2:
     picomatch "^2.0.4"
 
 astring@^1.8.4:
-  version "1.8.5"
-  resolved "http://localhost:4873/astring/-/astring-1.8.5.tgz#d5b95ce508e8987e32ab14ee62b4a0ac21de6938"
-  integrity sha512-TuBbdn7jWVzf8dmFGTaRpW8qgANtWLi1qJLnkfGO5uVf6jf9f/F4B1H35tnOI+qVYZo3p3i8WZlbZOuPAE0wEA==
+  version "1.8.6"
+  resolved "http://localhost:4873/astring/-/astring-1.8.6.tgz#2c9c157cf1739d67561c56ba896e6948f6b93731"
+  integrity sha512-ISvCdHdlTDlH5IpxQJIex7BWBywFWgjJSVdwst+/iQCoEYnyOaQ95+X1JGshuBjGp6nxKUy1jMgE3zPqN7fQdg==
 
 asynckit@^0.4.0:
   version "0.4.0"
@@ -351,14 +347,14 @@ braces@~3.0.2:
     fill-range "^7.0.1"
 
 browserslist@^4.0.0, browserslist@^4.21.4:
-  version "4.21.5"
-  resolved "http://localhost:4873/browserslist/-/browserslist-4.21.5.tgz#75c5dae60063ee641f977e00edd3cfb2fb7af6a7"
-  integrity sha512-tUkiguQGW7S3IhB7N+c2MV/HZPSCPAAiYBZXLsBhFB/PCy6ZKKsZrmBayHV9fdGV/ARIfJ14NkxKzRDjvp7L6w==
+  version "4.21.7"
+  resolved "http://localhost:4873/browserslist/-/browserslist-4.21.7.tgz#e2b420947e5fb0a58e8f4668ae6e23488127e551"
+  integrity sha512-BauCXrQ7I2ftSqd2mvKHGo85XR0u7Ru3C/Hxsy/0TkfCtjrmAbPdzLGasmoiBxplpDXlPvdjX9u7srIMfgasNA==
   dependencies:
-    caniuse-lite "^1.0.30001449"
-    electron-to-chromium "^1.4.284"
-    node-releases "^2.0.8"
-    update-browserslist-db "^1.0.10"
+    caniuse-lite "^1.0.30001489"
+    electron-to-chromium "^1.4.411"
+    node-releases "^2.0.12"
+    update-browserslist-db "^1.0.11"
 
 buffer-from@^1.0.0:
   version "1.1.2"
@@ -383,10 +379,10 @@ caniuse-api@^3.0.0:
     lodash.memoize "^4.1.2"
     lodash.uniq "^4.5.0"
 
-caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001449:
-  version "1.0.30001489"
-  resolved "http://localhost:4873/caniuse-lite/-/caniuse-lite-1.0.30001489.tgz#ca82ee2d4e4dbf2bd2589c9360d3fcc2c7ba3bd8"
-  integrity sha512-x1mgZEXK8jHIfAxm+xgdpHpk50IN3z3q3zP261/WS+uvePxW8izXuCu6AHz0lkuYTlATDehiZ/tNyYBdSQsOUQ==
+caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001489:
+  version "1.0.30001492"
+  resolved "http://localhost:4873/caniuse-lite/-/caniuse-lite-1.0.30001492.tgz#4a06861788a52b4c81fd3344573b68cc87fe062b"
+  integrity sha512-2efF8SAZwgAX1FJr87KWhvuJxnGJKOnctQa8xLOskAXNXq8oiuqgl6u1kk3fFpsp3GgvzlRjiK1sl63hNtFADw==
 
 "chokidar@>=3.0.0 <4.0.0":
   version "3.5.3"
@@ -610,10 +606,10 @@ dot-case@^3.0.4:
     no-case "^3.0.4"
     tslib "^2.0.3"
 
-electron-to-chromium@^1.4.284:
-  version "1.4.408"
-  resolved "http://localhost:4873/electron-to-chromium/-/electron-to-chromium-1.4.408.tgz#73e657a24bd0b7481d68c943dded0d097b0d0a52"
-  integrity sha512-vjeaj0u/UYnzA/CIdGXzzcxRLCqRwREYc9YfaWInjIEr7/XPttZ6ShpyqapchEy0S2r6LpLjDBTnNj7ZxnxJKg==
+electron-to-chromium@^1.4.411:
+  version "1.4.417"
+  resolved "http://localhost:4873/electron-to-chromium/-/electron-to-chromium-1.4.417.tgz#a0c7eb992e68287fa50c8da5a5238b01f20b9a82"
+  integrity sha512-8rY8HdCxuSVY8wku3i/eDac4g1b4cSbruzocenrqBlzqruAZYHjQCHIjC66dLR9DXhEHTojsC4EjhZ8KmzwXqA==
 
 entities@^2.0.0:
   version "2.2.0"
@@ -898,7 +894,7 @@ no-case@^3.0.4:
     lower-case "^2.0.2"
     tslib "^2.0.3"
 
-node-releases@^2.0.8:
+node-releases@^2.0.12:
   version "2.0.12"
   resolved "http://localhost:4873/node-releases/-/node-releases-2.0.12.tgz#35627cc224a23bfb06fb3380f2b3afaaa7eb1039"
   integrity sha512-QzsYKWhXTWx8h1kIvqfnC++o0pEmpRQA/aenALsL2F4pqNVr7YzcdMlDij5WBnwftRbJCNJL/O7zdKaxKPHqgQ==
@@ -921,9 +917,9 @@ nth-check@^2.0.1:
     boolbase "^1.0.0"
 
 nwsapi@^2.2.4:
-  version "2.2.4"
-  resolved "http://localhost:4873/nwsapi/-/nwsapi-2.2.4.tgz#fd59d5e904e8e1f03c25a7d5a15cfa16c714a1e5"
-  integrity sha512-NHj4rzRo0tQdijE9ZqAx6kYDcoRwYwSYzCA8MY3JzfxlrvEU0jhnhJT9BhqhJs7I/dKcrDm6TyulaRqZPIhN5g==
+  version "2.2.5"
+  resolved "http://localhost:4873/nwsapi/-/nwsapi-2.2.5.tgz#a52744c61b3889dd44b0a158687add39b8d935e2"
+  integrity sha512-6xpotnECFy/og7tKSBVmUNft7J3jyXAka4XvG6AUhFWRz+Q/Ljus7znJAA3bxColfQLdS+XsjoodtJfCgeTEFQ==
 
 optionator@^0.8.1:
   version "0.8.3"
@@ -1181,9 +1177,9 @@ postcss-value-parser@^4.2.0:
   integrity sha512-1NNCs6uurfkVbeXG4S8JFT9t19m45ICnif8zWLd5oPSZ50QnwMfK+H3jv408d4jw/7Bttv5axS5IiHoLaVNHeQ==
 
 postcss@^8.4.21, postcss@^8.4.23:
-  version "8.4.23"
-  resolved "http://localhost:4873/postcss/-/postcss-8.4.23.tgz#df0aee9ac7c5e53e1075c24a3613496f9e6552ab"
-  integrity sha512-bQ3qMcpF6A/YjR55xtoTr0jGOlnPOKAIMdOWiv0EIT6HVPEaJiJB4NLljSbiHoC2RX7DN5Uvjtpbg1NPdwv1oA==
+  version "8.4.24"
+  resolved "http://localhost:4873/postcss/-/postcss-8.4.24.tgz#f714dba9b2284be3cc07dbd2fc57ee4dc972d2df"
+  integrity sha512-M0RzbcI0sO/XJNucsGjvWU9ERWxb/ytp1w6dKtxTKgixdtQDq4rmx/g8W1hnaheq9jgwL/oyEdH5Bc4WwJKMqg==
   dependencies:
     nanoid "^3.3.6"
     picocolors "^1.0.0"
@@ -1314,12 +1310,12 @@ symbol-tree@^3.2.4:
   integrity sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==
 
 terser@^5.15.1, terser@^5.17.1:
-  version "5.17.6"
-  resolved "http://localhost:4873/terser/-/terser-5.17.6.tgz#d810e75e1bb3350c799cd90ebefe19c9412c12de"
-  integrity sha512-V8QHcs8YuyLkLHsJO5ucyff1ykrLVsR4dNnS//L5Y3NiSXpbK1J+WMVUs67eI0KTxs9JtHhgEQpXQVHlHI92DQ==
+  version "5.17.7"
+  resolved "http://localhost:4873/terser/-/terser-5.17.7.tgz#2a8b134826fe179b711969fd9d9a0c2479b2a8c3"
+  integrity sha512-/bi0Zm2C6VAexlGgLlVxA0P2lru/sdLyfCVaRMfKVo9nWxbmz7f/sD8VPybPeSUJaJcwmCJis9pBIhcVcG1QcQ==
   dependencies:
-    "@jridgewell/source-map" "^0.3.2"
-    acorn "^8.5.0"
+    "@jridgewell/source-map" "^0.3.3"
+    acorn "^8.8.2"
     commander "^2.20.0"
     source-map-support "~0.5.20"
 
@@ -1360,16 +1356,16 @@ type-check@~0.3.2:
     prelude-ls "~1.1.2"
 
 typescript@^5.0.4:
-  version "5.0.4"
-  resolved "http://localhost:4873/typescript/-/typescript-5.0.4.tgz#b217fd20119bd61a94d4011274e0ab369058da3b"
-  integrity sha512-cW9T5W9xY37cc+jfEnaUvX91foxtHkza3Nw3wkoF4sSlKn0MONdkdEndig/qPBWXNkmplh3NzayQzCiHM4/hqw==
+  version "5.1.3"
+  resolved "http://localhost:4873/typescript/-/typescript-5.1.3.tgz#8d84219244a6b40b6fb2b33cc1c062f715b9e826"
+  integrity sha512-XH627E9vkeqhlZFQuL+UsyAXEnibT0kWR2FWONlr4sTjvxyJYnyefgrkyECLzM5NenmKzRAy2rR/OlYLA1HkZw==
 
 universalify@^0.2.0:
   version "0.2.0"
   resolved "http://localhost:4873/universalify/-/universalify-0.2.0.tgz#6451760566fa857534745ab1dde952d1b1761be0"
   integrity sha512-CJ1QgKmNg3CwvAv/kOFmtnEN05f0D/cn9QntgNOQlQF9dgvVTHj3t+8JPdjqawCHk7V/KA+fbUqzZ9XWhcqPUg==
 
-update-browserslist-db@^1.0.10:
+update-browserslist-db@^1.0.11:
   version "1.0.11"
   resolved "http://localhost:4873/update-browserslist-db/-/update-browserslist-db-1.0.11.tgz#9a2a641ad2907ae7b3616506f4b977851db5b940"
   integrity sha512-dCwEFf0/oT85M1fHBg4F0jtLwJrutGoHSQXCh7u4o2t1drG+c0a9Flnqww6XUKSfQMPpJBRjU8d4RXB09qtvaA==
