@@ -1,4 +1,4 @@
-import { IListFormatFunction } from '../../../../../intl/list/list-format-function.type';
+import { IListFormatFunction } from '../../../../../intl/list/types/list-format-function.type';
 import {
   IFluentListFormatFunction,
   IFluentListFormatFunctionArguments,

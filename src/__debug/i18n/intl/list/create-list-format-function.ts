@@ -1,20 +1,28 @@
-import { ILocalesInput } from '../locale/locales-input.type';
-import { IListFormatFunction } from './list-format-function.type';
+import { ILocalesList } from '../locale/locales-list.type';
+import { IListFormatFunction } from './types/list-format-function.type';
 
-export function createListFormatFunction(
-  locales?: ILocalesInput,
-  _options?: Intl.ListFormatOptions,
-): IListFormatFunction {
-  return (
-    value: Iterable<string>,
+export class ListFormat {
+  readonly #format: IListFormatFunction;
+
+  constructor(
+    locales?: ILocalesList,
     options?: Intl.ListFormatOptions,
-  ): string => {
-    return new Intl.ListFormat(
-      locales as any,
-      {
-        ..._options,
-        ...options,
-      },
-    ).format(value);
-  };
+  ) {
+    this.#format = (
+      value: Iterable<string>,
+      _options?: Partial<Intl.ListFormatOptions>,
+    ): string => {
+      return new Intl.ListFormat(
+        locales as any,
+        {
+          ...options,
+          ..._options,
+        },
+      ).format(value);
+    };
+  }
+
+  get format(): IListFormatFunction {
+    return this.#format;
+  }
 }

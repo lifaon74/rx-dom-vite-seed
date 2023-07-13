@@ -1,17 +1,17 @@
-import { $log, signal } from '@lirx/core';
-import { createDateTimeFormatFunction } from '../../intl/date-time/create-date-time-format-function';
-import { LOCALE } from '../../intl/locale/locales.constants';
-import { createNumberFormatFunction } from '../../intl/number/create-number-format-function';
+import { $log, map$$, signal, single, string$$ } from '@lirx/core';
+import { createDateTimeFormatFunction } from '../../intl/date-time/date-time-format.class';
+import { LOCALES$ } from '../../intl/locale/locales.constants';
+import { ObservableTranslations } from '../../intl/translate/observable/observable-translations.class';
 import {
   convertObjectOfObservableLikesToSignalTranslateVariables,
 } from '../../intl/translate/signal/functions/convert-object-of-observable-likes-to-signal-translate-variables';
-import { TranslationsStore } from '../../intl/translate/translations-store.class';
-import { ITranslateFunctions } from '../../intl/translate/types/translate-function/translate-functions.type';
-import { ITranslateVariables } from '../../intl/translate/types/translate-function/translate-variables.type';
+import { Translations } from '../../intl/translate/translations.class';
+import { ITranslationsEntry } from '../../intl/translate/types/class/translations-entry.type';
+import { ITranslateFunctionFunctions } from '../../intl/translate/types/translate-function-functions.type';
+import { ITranslateFunctionVariables } from '../../intl/translate/types/translate-function-variables.type';
 import {
-  ITranslationsStoreTranslationEntry,
-  ITranslationsStoreTranslations,
-} from '../../intl/translate/types/translations-store-translations.type';
+  ITranslationsIterable,
+} from '../../intl/translate/types/class/translations-iterable.type';
 import {
   convertListFormatFunctionToFluentListFormat,
 } from '../built-in/call-function/built-in/list/convert-list-format-function-to-fluent-list-format';
@@ -23,30 +23,46 @@ import messages from './samples/01/sample-01.en';
 
 /*----*/
 
+import message from `./samples/01/sample-01.en.ftl?raw`;
+
+/*----*/
+
 function debugFluentStore1(): void {
-  const store: TranslationsStore = new TranslationsStore([
+  const store: Translations = new Translations([
     ['abc', ({ name }) => `Hello ${name}`],
   ]);
 
   const str = store.translate('abc', {
     name: 'Alice',
-  }, {
+  }/*, {
     numberFormat: createNumberFormatFunction(),
     dateTimeFormat: createDateTimeFormatFunction(),
     abc: createDateTimeFormatFunction(),
-  });
+  }*/);
+
+  console.log(str);
+}
+
+function debugFluentStoreObservable1(): void {
+  const store: ObservableTranslations = new ObservableTranslations(single([
+    ['abc', (variables$) => string$$`Hello ${map$$(variables$, _ => _.name)}`],
+  ]));
+
+  const str = store.translate('abc', single({
+    name: 'Alice',
+  }));
 
   console.log(str);
 }
 
 function debugFluentStore2(): void {
 
-  const translations: ITranslationsStoreTranslations = Array.from(messages.entries(), ([key, fluentMessageFunction]): ITranslationsStoreTranslationEntry => {
+  const translations: ITranslationsIterable = Array.from(messages.entries(), ([key, fluentMessageFunction]): ITranslationsEntry => {
     return [
       key,
       (
-        variables: ITranslateVariables,
-        functions: ITranslateFunctions,
+        variables: ITranslateFunctionVariables,
+        functions: ITranslateFunctionFunctions,
       ): string => {
         const {
           numberFormat,
@@ -70,7 +86,7 @@ function debugFluentStore2(): void {
     ];
   });
 
-  const store: TranslationsStore = new TranslationsStore(translations);
+  const store: Translations = new Translations(translations);
 
   const str = store.translate('shared-photos', {
     userName: 'Alice',
@@ -134,7 +150,7 @@ function debugFluentStore4(): void {
     photoCount,
     userGender,
     duration,
-    LOCALE,
+    LOCALES$,
   });
 }
 
@@ -142,9 +158,10 @@ function debugFluentStore4(): void {
 
 export function debugFluent3(): void {
   // debugFluentStore1();
+  debugFluentStoreObservable1();
   // debugFluentStore2();
   // debugFluentStore3();
-  debugFluentStore4();
+  // debugFluentStore4();
 }
 
 

@@ -1,7 +1,7 @@
 import { computed, ISignal } from '@lirx/core';
 import { SignalTranslationsStore } from '../../intl/translate/signal/signal-translations-store.class';
 import { IPartialSignalTranslateFunctions } from '../../intl/translate/signal/types/translate-function/signal-translate-functions.type';
-import { ITranslationsStoreOptions } from '../../intl/translate/translations-store.class';
+import { ITranslationsOptions } from '../../intl/translate/types/class/translations-options.type';
 import { IReadonlyFluentMessagesMap } from '../built-in/message/map/fluent-messages-map.type';
 import {
   convertFluentMessagesMapToSignalTranslationsStoreTranslations,
@@ -11,7 +11,7 @@ export class FluentSignalTranslationsStore extends SignalTranslationsStore {
   constructor(
     fluentMessagesMap: ISignal<IReadonlyFluentMessagesMap>,
     defaultFunctions?: IPartialSignalTranslateFunctions,
-    options?: ITranslationsStoreOptions,
+    options?: ITranslationsOptions,
   ) {
     super(
       computed(() => convertFluentMessagesMapToSignalTranslationsStoreTranslations(fluentMessagesMap())),

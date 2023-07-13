@@ -1,0 +1,1 @@
+export const FLUENT_NUMBER_FUNCTION_NAME = 'NUMBER';

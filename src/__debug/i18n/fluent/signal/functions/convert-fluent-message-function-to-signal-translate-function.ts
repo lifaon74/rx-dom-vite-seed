@@ -3,7 +3,7 @@ import { EQUAL_FUNCTION_STRICT_EQUAL } from '@lirx/utils';
 import { ISignalTranslateFunction } from '../../../intl/translate/signal/types/translate-function/signal-translate-function.type';
 import { ISignalTranslateFunctions } from '../../../intl/translate/signal/types/translate-function/signal-translate-functions.type';
 import { ISignalTranslateVariables } from '../../../intl/translate/signal/types/translate-function/signal-translate-variables.type';
-import { IGenericTranslateFunctions, ITranslateFunctions } from '../../../intl/translate/types/translate-function/translate-functions.type';
+import { IGenericTranslateFunctionFunctions, ITranslateFunctionFunctions } from '../../../intl/translate/types/translate-function-functions.type';
 import { createFluentDefaultCallFunctionEntries } from '../../built-in/call-function/built-in/create-fluent-default-call-function-entries';
 import { IFluentDateTimeFormatFunction } from '../../built-in/call-function/built-in/date-time/fluent-date-time-format-function.type';
 import {
@@ -50,14 +50,14 @@ export function convertFluentMessageFunctionToSignalTranslateFunction(
       return functions().pluralRulesSelect;
     });
 
-    const otherFunctions = computed((): IGenericTranslateFunctions => {
+    const otherFunctions = computed((): IGenericTranslateFunctionFunctions => {
       const {
         numberFormat,
         dateTimeFormat,
         listFormat,
         pluralRulesSelect,
         ...otherFunctions
-      }: ITranslateFunctions = functions();
+      }: ITranslateFunctionFunctions = functions();
       return (Object.keys(otherFunctions).length === 0)
         ? EMPTY_OBJECT
         : otherFunctions;

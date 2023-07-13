@@ -16,7 +16,7 @@ export function compileFluentResource(
 
   const code: string = linesToString(
     transpileFluentResourceNodeToJSLines({
-      resourceNode: resourceNode,
+      resourceNode,
     }),
   );
 

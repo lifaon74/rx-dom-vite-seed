@@ -1,7 +1,7 @@
 import { Abortable } from '@lirx/async-task';
 import { effect, IOnCleanUpFunction, ISignal, IWritableSignal, signal } from '@lirx/core';
 import { IUnsubscribe } from '@lirx/utils';
-import { ILocaleMatcherSignalOptions, localeMatcherSignal } from '../../intl/locale-matcher/locale-matcher-signal';
+import { ILocaleMatcherObservableOptions, localeMatcherObservable } from '../../intl/locale-matcher/locale-matcher-observable';
 import { IPartialSignalTranslateFunctions } from '../../intl/translate/signal/types/translate-function/signal-translate-functions.type';
 import { IReadonlyFluentMessagesMap } from '../built-in/message/map/fluent-messages-map.type';
 import { loadFluentResource } from '../compile/load-fluent-resource';
@@ -13,7 +13,7 @@ export interface IGetFluentFileURLFromLocale {
   ): URL;
 }
 
-export interface IFluentLoaderSignalTranslationsStoreOptions extends ILocaleMatcherSignalOptions {
+export interface IFluentLoaderSignalTranslationsStoreOptions extends ILocaleMatcherObservableOptions {
   getURL: IGetFluentFileURLFromLocale;
 }
 
@@ -28,7 +28,7 @@ export class FluentLoaderSignalTranslationsStore extends FluentSignalTranslation
     }: IFluentLoaderSignalTranslationsStoreOptions,
     defaultFunctions?: IPartialSignalTranslateFunctions,
   ) {
-    const locale: ISignal<string> = localeMatcherSignal(options);
+    const locale: ISignal<string> = localeMatcherObservable(options);
     const fluentMessagesMap: IWritableSignal<IReadonlyFluentMessagesMap> = signal(new Map());
 
     super(

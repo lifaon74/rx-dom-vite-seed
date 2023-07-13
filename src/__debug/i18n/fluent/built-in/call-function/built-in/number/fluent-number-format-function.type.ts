@@ -1,3 +1,3 @@
-import { INumberFormatFunction } from '../../../../../intl/number/number-format-function.type';
+import { INumberFormatFunction } from '../../../../../intl/number/types/number-format-function.type';
 
 export type IFluentNumberFormatFunction = INumberFormatFunction;

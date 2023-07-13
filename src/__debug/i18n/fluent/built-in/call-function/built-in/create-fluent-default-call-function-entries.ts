@@ -1,5 +1,5 @@
 import { IFluentCallFunctionEntry } from '../create-fluent-call-function-function';
-import { createFluentGetDateTimeFormatFunctionEntry } from './date-time/create-fluent-get-date-time-format-function-entry';
+import { createFluentDateTimeFormatFunctionEntry } from './date-time/create-fluent-date-time-format-function-entry';
 import { IFluentDateTimeFormatFunction } from './date-time/fluent-date-time-format-function.type';
 import { createFluentListFormatFunctionEntry } from './list/create-fluent-list-format-function-entry';
 import { IFluentListFormatFunction } from './list/fluent-list-format-function.type';
@@ -25,7 +25,7 @@ export function createFluentDefaultCallFunctionEntries(
 ): IFluentCallFunctionEntry[] {
   return [
     createFluentNumberFormatFunctionEntry(fluentNumberFormat),
-    createFluentGetDateTimeFormatFunctionEntry(fluentDateTimeFormat),
+    createFluentDateTimeFormatFunctionEntry(fluentDateTimeFormat),
     createFluentListFormatFunctionEntry(fluentListFormat),
     createFluentPluralRulesSelectFunctionEntry(fluentPluralRulesSelect),
   ];

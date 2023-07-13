@@ -1,0 +1,1 @@
+export const FLUENT_LIST_FUNCTION_NAME = 'LIST';

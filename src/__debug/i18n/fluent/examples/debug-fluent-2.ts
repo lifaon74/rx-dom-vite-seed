@@ -1,6 +1,4 @@
 import { $log, let$$ } from '@lirx/core';
-import { $LOCALES, LOCALES$ } from '../../intl/locale/locales.constants';
-import { createFluentTranslateFunctionLoader } from '../reactive/create-fluent-translate-function-loader';
 
 /*----*/
 
@@ -10,7 +8,7 @@ export function debugFluent2(): void {
   const [$userGender, userGender$] = let$$<string>('female');
 
   const translate = createFluentTranslateFunctionLoader({
-    locales$: LOCALES$,
+    locales$: LOCALES_LIST$,
     availableLocales: ['en', 'fr'],
     getURL: (locale: string) => new URL(`./samples/01/sample-01.${locale}.ftl`, import.meta.url),
   });
