@@ -1,7 +1,10 @@
 import { $log, signal } from '@lirx/core';
 import { createDateTimeFormatFunction } from '../../intl/date-time/create-date-time-format-function';
-import { LOCALES } from '../../intl/locale/locales.constants';
+import { LOCALE } from '../../intl/locale/locales.constants';
 import { createNumberFormatFunction } from '../../intl/number/create-number-format-function';
+import {
+  convertObjectOfObservableLikesToSignalTranslateVariables,
+} from '../../intl/translate/signal/functions/convert-object-of-observable-likes-to-signal-translate-variables';
 import { TranslationsStore } from '../../intl/translate/translations-store.class';
 import { ITranslateFunctions } from '../../intl/translate/types/translate-function/translate-functions.type';
 import { ITranslateVariables } from '../../intl/translate/types/translate-function/translate-variables.type';
@@ -13,14 +16,8 @@ import {
   convertListFormatFunctionToFluentListFormat,
 } from '../built-in/call-function/built-in/list/convert-list-format-function-to-fluent-list-format';
 import { createFluentMessageOptions } from '../built-in/message/create-fluent-message-options';
-import { FluentLoaderSignalTranslationsStore } from '../signal/fluent-signal-translations-store.class';
-
-import {
-  createSignalTranslationsStoreFromSignalFluentMessagesMap,
-} from '../signal/functions/create-signal-translations-store-from-signal-fluent-messages-map';
-import {
-  convertObjectOfObservableLikesToSignalTranslateVariables,
-} from '../../intl/translate/signal/functions/convert-object-of-observable-likes-to-signal-translate-variables';
+import { FluentLoaderSignalTranslationsStore } from '../signal/fluent-loader-signal-translations-store.class';
+import { FluentSignalTranslationsStore } from '../signal/fluent-signal-translations-store.class';
 
 import messages from './samples/01/sample-01.en';
 
@@ -85,7 +82,7 @@ function debugFluentStore2(): void {
 }
 
 function debugFluentStore3(): void {
-  const store = createSignalTranslationsStoreFromSignalFluentMessagesMap(signal(messages));
+  const store = new FluentSignalTranslationsStore(signal(messages));
 
   const userName = signal('Alice');
   const photoCount = signal(0);
@@ -107,7 +104,6 @@ function debugFluentStore3(): void {
   userGender.set('male');
   console.log(translated());
 }
-
 
 function debugFluentStore4(): void {
   const store = new FluentLoaderSignalTranslationsStore({
@@ -138,7 +134,7 @@ function debugFluentStore4(): void {
     photoCount,
     userGender,
     duration,
-    LOCALES,
+    LOCALE,
   });
 }
 
