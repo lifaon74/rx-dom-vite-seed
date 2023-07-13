@@ -11,22 +11,22 @@ import { IFluentPluralRulesSelectFunction } from './plural-rules/fluent-plural-r
 export interface ICreateFluentDefaultCallFunctionEntries {
   fluentNumberFormat: IFluentNumberFormatFunction;
   fluentDateTimeFormat: IFluentDateTimeFormatFunction;
-  fluentPluralRulesSelect: IFluentPluralRulesSelectFunction;
   fluentListFormat: IFluentListFormatFunction;
+  fluentPluralRulesSelect: IFluentPluralRulesSelectFunction;
 }
 
 export function createFluentDefaultCallFunctionEntries(
   {
     fluentNumberFormat,
     fluentDateTimeFormat,
-    fluentPluralRulesSelect,
     fluentListFormat,
+    fluentPluralRulesSelect,
   }: ICreateFluentDefaultCallFunctionEntries,
 ): IFluentCallFunctionEntry[] {
   return [
     createFluentNumberFormatFunctionEntry(fluentNumberFormat),
     createFluentGetDateTimeFormatFunctionEntry(fluentDateTimeFormat),
-    createFluentPluralRulesSelectFunctionEntry(fluentPluralRulesSelect),
     createFluentListFormatFunctionEntry(fluentListFormat),
+    createFluentPluralRulesSelectFunctionEntry(fluentPluralRulesSelect),
   ];
 }

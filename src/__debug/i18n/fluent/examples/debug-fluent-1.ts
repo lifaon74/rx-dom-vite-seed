@@ -1,4 +1,3 @@
-import { createFluentDefaultCallFunctions } from '../built-in/call-function/built-in/create-fluent-default-call-functions';
 import { createFluentMessageOptions } from '../built-in/message/create-fluent-message-options';
 import { compileFluentResource } from '../compile/compile-fluent-resource';
 
@@ -133,6 +132,6 @@ html = Click { LINK("Here") } to read the tutorial.
   const key = 'html';
 
   console.log(
-    render(key, fluentMessageOptions),
+    render.get(key)!(fluentMessageOptions),
   );
 }

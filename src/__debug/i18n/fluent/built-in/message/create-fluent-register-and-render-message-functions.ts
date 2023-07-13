@@ -1,23 +1,25 @@
 import { IFluentMessageFunction, IFluentMessageOptions } from './fluent-message-function.type';
+import { IFluentMessagesMap } from './map/fluent-messages-map.type';
 import { IFluentRegisterMessageFunction } from './register/fluent-register-message-function.type';
 import { IFluentRenderMessageFunction } from './render/fluent-render-message-function.type';
 
 export interface IFluentRegisterAndRenderMessageFunctions {
+  messages: IFluentMessagesMap;
   registerMessage: IFluentRegisterMessageFunction;
   renderMessage: IFluentRenderMessageFunction;
 }
 
 export function createFluentRegisterAndRenderMessageFunctions(): IFluentRegisterAndRenderMessageFunctions {
-  const map = new Map<string, IFluentMessageFunction>();
+  const messages: IFluentMessagesMap = new Map<string, IFluentMessageFunction>();
 
   const registerMessage: IFluentRegisterMessageFunction = (
     key: string,
     fnc: IFluentMessageFunction,
   ): void => {
-    if (map.has(key)) {
+    if (messages.has(key)) {
       throw new Error(`Message ${JSON.stringify(key)} already registered`);
     } else {
-      map.set(key, fnc);
+      messages.set(key, fnc);
     }
   };
 
@@ -25,14 +27,15 @@ export function createFluentRegisterAndRenderMessageFunctions(): IFluentRegister
     key: string,
     options: IFluentMessageOptions,
   ): string => {
-    if (map.has(key)) {
-      return map.get(key)!(options);
+    if (messages.has(key)) {
+      return messages.get(key)!(options);
     } else {
       throw new Error(`Missing message: ${JSON.stringify(key)}`);
     }
   };
 
   return {
+    messages,
     registerMessage,
     renderMessage,
   };

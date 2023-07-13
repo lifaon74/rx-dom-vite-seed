@@ -1,6 +1,3 @@
-export interface IFluentPluralRulesSelectFunction {
-  (
-    value: number,
-    options?: Intl.PluralRulesOptions,
-  ): Intl.LDMLPluralRule;
-}
+import { IPluralRulesSelectFunction } from '../../../../../intl/plural-rules/plural-rules-select-function.type';
+
+export type IFluentPluralRulesSelectFunction = IPluralRulesSelectFunction;

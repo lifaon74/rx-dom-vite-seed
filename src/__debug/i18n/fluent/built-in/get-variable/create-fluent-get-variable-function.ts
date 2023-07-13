@@ -3,7 +3,9 @@ import { IFluentGetVariableEntry, IFluentGetVariableFunction } from './fluent-ge
 export function createFluentGetVariableFunction(
   entries: Iterable<IFluentGetVariableEntry>,
 ): IFluentGetVariableFunction {
-  const map: Map<string, unknown> = new Map<string, unknown>(entries);
+  const map: Map<string, unknown> = (entries instanceof Map)
+    ? entries
+    : new Map<string, unknown>(entries);
   return (
     key: string,
   ): unknown => {

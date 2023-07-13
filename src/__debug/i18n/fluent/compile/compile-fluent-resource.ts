@@ -1,13 +1,13 @@
 import { parse, Resource } from '@fluent/syntax';
 import { linesToString } from '@lirx/dom';
-import { IFluentRenderMessageFunction } from '../built-in/message/render/fluent-render-message-function.type';
+import { IReadonlyFluentMessagesMap } from '../built-in/message/map/fluent-messages-map.type';
 import { createFluentResourceFunctionOptions } from '../built-in/resource/create-fluent-resource-function-options';
 import { IFluentResourceFunction, IFluentResourceOptions } from '../built-in/resource/fluent-resource-function.type';
 import { transpileFluentResourceNodeToJSLines } from '../transpile/resource/transpile-fluent-resource-node-to-js-lines';
 
 export function compileFluentResource(
   input: string,
-): IFluentRenderMessageFunction {
+): IReadonlyFluentMessagesMap {
   const resourceNode: Resource = parse(input, {
     withSpans: false,
   });
@@ -20,7 +20,7 @@ export function compileFluentResource(
     }),
   );
 
-  console.log(code);
+  // console.log(code);
 
   const run: IFluentResourceFunction = new Function('_', `return (${code})(_);`) as IFluentResourceFunction;
 
@@ -28,5 +28,5 @@ export function compileFluentResource(
 
   run(fluentResourceOptions);
 
-  return fluentResourceOptions.renderMessage;
+  return fluentResourceOptions.messages;
 }

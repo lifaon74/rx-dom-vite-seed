@@ -23,8 +23,8 @@ export function createFluentMessageOptions(
   {
     fluentNumberFormat,
     fluentDateTimeFormat,
-    fluentPluralRulesSelect,
     fluentListFormat,
+    fluentPluralRulesSelect,
     variables = [],
     functions = [],
   }: ICreateFluentMessageOptionsOptions,
@@ -44,8 +44,8 @@ export function createFluentMessageOptions(
     ...createFluentDefaultCallFunctionEntries({
       fluentNumberFormat,
       fluentDateTimeFormat,
-      fluentPluralRulesSelect,
       fluentListFormat,
+      fluentPluralRulesSelect,
     }),
     ...functions,
   ]);

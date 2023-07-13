@@ -1,6 +1,3 @@
-export interface IFluentNumberFormatFunction {
-  (
-    value: number,
-    options?: Intl.NumberFormatOptions,
-  ): string;
-}
+import { INumberFormatFunction } from '../../../../../intl/number/number-format-function.type';
+
+export type IFluentNumberFormatFunction = INumberFormatFunction;

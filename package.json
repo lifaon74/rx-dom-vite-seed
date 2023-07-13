@@ -30,7 +30,7 @@
     "@lirx/core": "latest",
     "@lirx/dom": "latest",
     "@lirx/dom-aot-plugin": "latest",
-    "@lirx/dom-material": "latest",
+    "@lirx/dom-material": "^0.6.0-dev.1687528635094",
     "@lirx/mdi": "latest",
     "@lirx/promise": "latest",
     "@lirx/router": "latest",

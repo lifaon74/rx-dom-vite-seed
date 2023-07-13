@@ -13,7 +13,7 @@ const config = {
   build: {
     target: 'esnext',
     useDefineForClassFields: true,
-    // minify: 'terser',
+    minify: 'terser',
     polyfillModulePreload: false,
     terserOptions: {
       toplevel: true,
@@ -38,21 +38,21 @@ const config = {
     },
   },
   plugins: [
-    aotPlugin({
-      pathMatches: (path) => {
-        // console.log(path);
-        const matches = path.endsWith('.ts')
-          || path.endsWith('.component.mjs')
-          || path.endsWith('.modifier.mjs')
-          || (
-            path.includes('lirx/mdi')
-          );
-        // if (matches) {
-        //   console.log(`\nOPTIMIZING => ${path}`);
-        // }
-        return matches;
-      },
-    }),
+    // aotPlugin({
+    //   pathMatches: (path) => {
+    //     // console.log(path);
+    //     const matches = path.endsWith('.ts')
+    //       || path.endsWith('.component.mjs')
+    //       || path.endsWith('.modifier.mjs')
+    //       || (
+    //         path.includes('lirx/mdi')
+    //       );
+    //     // if (matches) {
+    //     //   console.log(`\nOPTIMIZING => ${path}`);
+    //     // }
+    //     return matches;
+    //   },
+    // }),
   ],
   server: {
     // https: true,

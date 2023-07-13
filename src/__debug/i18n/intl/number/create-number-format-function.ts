@@ -1,15 +1,20 @@
 import { ILocalesInput } from '../locale/locales-input.type';
-import { createNumberFormatFunctionFromNumberFormat } from './create-number-format-function-from-number-format';
 import { INumberFormatFunction } from './number-format-function.type';
 
 export function createNumberFormatFunction(
   locales?: ILocalesInput,
-  options?: Intl.NumberFormatOptions,
+  _options?: Intl.NumberFormatOptions,
 ): INumberFormatFunction {
-  return createNumberFormatFunctionFromNumberFormat(
-    new Intl.NumberFormat(
+  return (
+    value: number,
+    options?: Intl.NumberFormatOptions,
+  ): string => {
+    return new Intl.NumberFormat(
       locales as any,
-      options,
-    ),
-  );
+      {
+        ..._options,
+        ...options,
+      },
+    ).format(value);
+  };
 }

@@ -12,3 +12,4 @@ shared-photos =
        *[other] their
     } stream.
 
+time-elapsed = Time elapsed: { NUMBER($duration, maximumFractionDigits: 0) }s.

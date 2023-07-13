@@ -1,5 +1,6 @@
 import { debugAnimations } from './animations/debug-animations';
 import { debugReactiveDOMCompiler } from './aot/debug-reactive-dom-compiler';
+import { debugAsyncTask } from './async-task/debug-async-task';
 import { debugAnimation } from './debug-animation';
 import { debugLiRXDOM } from './debug-lirx-dom';
 import { debugIndexedDB } from './indexed-db/debug-indexed-db';
@@ -13,7 +14,7 @@ import { debugSignals } from './signals/signals';
 import { debugStore } from './store/debug-store';
 
 export function debug(): void {
-  debugLiRXDOM();
+  // debugLiRXDOM();
   // debugReactiveDOMCompiler();
   // debugJBSONV2();
   // debugAnimations();
@@ -22,8 +23,9 @@ export function debug(): void {
   // debugObjectProxy();
   // debugObservableProxy();
   // debugAnimation();
-  // debugI18n();
+  debugI18n();
   // debugLiRXCache();
   // debugStore();
   // debugSignals();
+  // debugAsyncTask();
 }

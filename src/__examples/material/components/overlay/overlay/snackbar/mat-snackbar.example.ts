@@ -1,6 +1,12 @@
-import { MatOverlayManager } from '../../manager/mat-overlay-manager';
-import { MatSnackbarController } from './controllers/mat-snackbar-controller';
-import { MatSnackbarQueueManager } from './controllers/mat-snackbar-queue-manager';
+import { single } from '@lirx/core';
+import { VirtualCustomElementNode } from '@lirx/dom';
+import {
+  IMatSnackbarComponentConfig,
+  IMatSnackbarData,
+  MatOverlay,
+  MatSnackbarController,
+  MatSnackbarQueueController,
+} from '@lirx/dom-material';
 
 /*----------------------------*/
 
@@ -15,47 +21,47 @@ function getRandomText(): string {
 }
 
 function matSnackbarExample1(): void {
-  const manager = MatOverlayManager.create();
 
   const openButton = document.createElement('button');
   openButton.innerText = 'open';
   document.body.appendChild(openButton);
 
-  const closeButton = document.createElement('button');
-  closeButton.innerText = 'close';
-  document.body.appendChild(closeButton);
+  let snackbar: MatOverlay<VirtualCustomElementNode<IMatSnackbarComponentConfig>, IMatSnackbarData> | undefined;
 
-  const snackbar = MatSnackbarController.create({
-    manager,
-    message: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas tincidunt',
-    horizontalPosition: 'left',
-    verticalPosition: 'bottom',
-    actionText: 'Click me',
-    onClickAction: () => console.log('clicked')
-  });
-
-  openButton.onclick = () => snackbar.open();
-  closeButton.onclick = () => snackbar.close();
-
+  openButton.onclick = () => {
+    if (snackbar === void 0) {
+      snackbar = MatSnackbarController.open(
+        single({
+          message: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas tincidunt',
+          horizontalPosition: 'left',
+          verticalPosition: 'bottom',
+          actionText: 'Click me',
+          onClickAction: () => {
+            snackbar?.close();
+          },
+        }),
+      );
+    } else {
+      snackbar.close();
+      snackbar = void 0;
+    }
+  };
 }
 
 function matSnackbarExample2(): void {
-  const manager = MatOverlayManager.create();
-  const matSnackbarQueueManager = new MatSnackbarQueueManager({ manager });
 
   const openButton = document.createElement('button');
   openButton.innerText = 'open';
   document.body.appendChild(openButton);
 
   const open = () => {
-    const openPromise = matSnackbarQueueManager.open({
+    const openPromise = MatSnackbarQueueController.openStatic({
       message: getRandomText(),
       actionText: 'click me',
-      displayDuration: 1000,
       onClickAction: () => {
-        openPromise.then((close) => close());
+        openPromise.then((snackbar) => snackbar.close());
       },
-    });
+    }, { displayDuration: 10000 });
   };
 
   openButton.onclick = open;
@@ -64,6 +70,6 @@ function matSnackbarExample2(): void {
 /*----------------------------*/
 
 export function matSnackbarExample(): void {
-  // matSnackbarExample1();
-  matSnackbarExample2();
+  matSnackbarExample1();
+  // matSnackbarExample2();
 }
