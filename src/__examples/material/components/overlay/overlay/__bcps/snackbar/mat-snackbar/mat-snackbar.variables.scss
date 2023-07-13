@@ -1,0 +1,15 @@
+@import '../../../../../styles/mat.variables';
+
+$mat-snackbar-width: var(--mat-snackbar-width, 344px);
+$mat-snackbar-margin: var(--mat-snackbar-margin, 8px);
+
+$mat-snackbar-color: var(--mat-snackbar-color, #fff);
+$mat-snackbar-background-color: var(--mat-snackbar-background-color, #323232);
+$mat-snackbar-font-family: var(--mat-snackbar-font-family, $mat-font-family);
+
+$mat-snackbar-horizontal-offset: var(--mat-snackbar-horizontal-offset, 24px);
+$mat-snackbar-vertical-offset: var(--mat-snackbar-vertical-offset, 24px);
+
+$mat-snackbar-horizontal-offset-small: var(--mat-snackbar-horizontal-offset-small, 12px);
+$mat-snackbar-vertical-offset-small: var(--mat-snackbar-vertical-offset-small, 12px);
+

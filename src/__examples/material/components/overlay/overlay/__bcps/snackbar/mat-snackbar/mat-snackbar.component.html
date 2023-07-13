@@ -1,0 +1,13 @@
+<div class="message">
+  {{ $.message$ }}
+</div>
+
+<button
+  class="action"
+  *if="$.hasAction$"
+  (click)="$.$onClickActionButton"
+  #mat-basic-button-secondary
+>
+  {{ $.actionText$ }}
+</button>
+
