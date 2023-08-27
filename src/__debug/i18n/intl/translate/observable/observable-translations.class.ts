@@ -1,18 +1,24 @@
-import { IObservable, IObservableLike, map$$, single, switchMap$$, toObservable, toObservableThrowIfUndefined } from '@lirx/core';
+import {
+  debounceMicrotask$$,
+  distinct$$,
+  IObservable,
+  IObservableLike,
+  map$$,
+  shareRL$$,
+  single,
+  switchMap$$, unknownToObservableNotUndefined,
+} from '@lirx/core';
 import { ITranslateFunctionVariableType } from '../types/translate-function-variables.type';
 import { DEFAULT_OBSERVABLE_TRANSLATE_FUNCTION_FUNCTIONS } from './default-observable-translate-function-functions.constant';
+import { IIterableOfObservableTranslationsEntry } from './types/class/iterable-of-observable-translations-entry.type';
 import { IObservableTranslationsEntryTranslateFunction } from './types/class/observable-translations-entry-translate-function.type';
-import { IObservableTranslationsEntry } from './types/class/observable-translations-entry.type';
 import { IObservableTranslationsIterable } from './types/class/observable-translations-iterable.type';
 import {
   IObservableTranslateFunctionFunctions,
   IPartialObservableTranslateFunctionFunctions,
 } from './types/observable-translate-function-functions.type';
-import {
-  IObservableTranslateFunctionVariables,
-  IObservableTranslateFunctionVariablesLike,
-} from './types/observable-translate-function-variables.type';
-import { IObservableTranslateFunction, IObservableTranslateFunctionLike } from './types/observable-transtale-function.type';
+import { IObservableTranslateFunctionVariablesLike } from './types/observable-translate-function-variables.type';
+import { IObservableTranslateFunctionLike } from './types/observable-transtale-function.type';
 
 export class ObservableTranslations {
   readonly #translate: IObservableTranslateFunctionLike;
@@ -23,11 +29,13 @@ export class ObservableTranslations {
   ) {
     type ITranslationsMap = Map<string, IObservableTranslationsEntryTranslateFunction>;
 
-    const _translations$ = map$$(translations$, (translations: Iterable<IObservableTranslationsEntry>): ITranslationsMap => {
-      return (translations instanceof Map)
-        ? translations
-        : new Map<string, IObservableTranslationsEntryTranslateFunction>(translations);
-    });
+    const _translations$ = shareRL$$(
+      map$$(translations$, (translations: IIterableOfObservableTranslationsEntry): ITranslationsMap => {
+        return (translations instanceof Map)
+          ? translations
+          : new Map<string, IObservableTranslationsEntryTranslateFunction>(translations);
+      }),
+    );
 
     const _defaultFunctions: IObservableTranslateFunctionFunctions = {
       ...DEFAULT_OBSERVABLE_TRANSLATE_FUNCTION_FUNCTIONS,
@@ -44,7 +52,7 @@ export class ObservableTranslations {
         Object.entries(variables).map(([key, value]: [string, IObservableLike<ITranslateFunctionVariableType>]): [string, IObservable<ITranslateFunctionVariableType>] => {
           return [
             key,
-            toObservable(value),
+            unknownToObservableNotUndefined(value),
           ];
         }),
       );
@@ -54,16 +62,20 @@ export class ObservableTranslations {
         ...functions,
       } as IObservableTranslateFunctionFunctions;
 
-      return switchMap$$(_translations$, (translations: ITranslationsMap): IObservable<string> => {
-        if (translations.has(key)) {
-          return translations.get(key)!(
-            _variables,
-            _functions,
-          );
-        } else {
-          return single(key);
-        }
-      });
+      return debounceMicrotask$$(
+        distinct$$(
+          switchMap$$(_translations$, (translations: ITranslationsMap): IObservable<string> => {
+            if (translations.has(key)) {
+              return translations.get(key)!(
+                _variables,
+                _functions,
+              );
+            } else {
+              return single(key);
+            }
+          }),
+        ),
+      );
     };
   }
 

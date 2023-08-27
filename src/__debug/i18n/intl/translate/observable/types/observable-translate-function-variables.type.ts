@@ -1,5 +1,5 @@
 import { IObservable, IObservableLike } from '@lirx/core';
-import { ITranslateFunctionVariables, ITranslateFunctionVariableType } from '../../types/translate-function-variables.type';
+import { ITranslateFunctionVariableType } from '../../types/translate-function-variables.type';
 
 export type IObservableTranslateFunctionVariables = Record<string, IObservable<ITranslateFunctionVariableType>>;
 

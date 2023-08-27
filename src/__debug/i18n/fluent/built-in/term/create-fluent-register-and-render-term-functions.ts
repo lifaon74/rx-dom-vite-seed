@@ -39,7 +39,7 @@ export function createFluentRegisterAndRenderTermFunctions(): IFluentRegisterAnd
         if (_map.has(key)) {
           return _map.get(key)!;
         } else {
-          return getVariable;
+          return getVariable(key);
         }
       };
 

@@ -9,9 +9,9 @@ import { createProgressAnimation } from '../create-progress-animation';
 export function matProgressRingExample() {
   const progressRing = bootstrap(MatProgressRingComponent);
 
-  progressRing.setReactiveInput('progress', single(0.75));
-  progressRing.setReactiveInput('radius', single(100));
-  progressRing.setReactiveInput('stroke', single(20));
+  progressRing.bindInputWithObservable('progress', single(0.75));
+  progressRing.bindInputWithObservable('radius', single(100));
+  progressRing.bindInputWithObservable('stroke', single(20));
 
   progressRing.setStyleProperty('--mat-progress-ring-color', { value: 'red' });
 

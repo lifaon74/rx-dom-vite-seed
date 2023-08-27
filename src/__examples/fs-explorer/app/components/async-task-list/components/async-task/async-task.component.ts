@@ -4,7 +4,7 @@ import {
   compileStyleAsComponentStyle,
   createComponent,
   IClassNamesList,
-  VirtualCustomElementNode,
+  VirtualComponentNode,
 } from '@lirx/dom';
 import { IconCloseComponent, IconPauseComponent, IconPlayComponent } from '@lirx/mdi';
 import { MatIconButtonComponent } from '@lirx/dom-material';
@@ -31,7 +31,7 @@ export type IAppAsyncTaskComponentState =
 // export const APP_ASYNC_TASK_COMPONENT_PROGRESS_ERROR = -2;
 // export const APP_ASYNC_TASK_COMPONENT_PROGRESS_UNDETERMINED = -1;
 
-interface IData {
+interface ITemplateData {
   readonly name$: IObservable<string>;
   readonly hasMessage$: IObservable<boolean>;
   readonly message$: IObservable<string>;
@@ -47,14 +47,14 @@ interface IAppAsyncTaskComponentConfig {
     ['progress', number],
     ['state', IAppAsyncTaskComponentState],
   ];
-  data: IData;
+  data: ITemplateData;
 }
 
 export const AppAsyncTaskComponent = createComponent<IAppAsyncTaskComponentConfig>({
   name: 'app-async-task',
   template: compileReactiveHTMLAsComponentTemplate({
     html,
-    customElements: [
+    components: [
       IconPauseComponent,
       IconPlayComponent,
       IconCloseComponent,
@@ -68,7 +68,7 @@ export const AppAsyncTaskComponent = createComponent<IAppAsyncTaskComponentConfi
     ['progress', 0],
     ['state', 'running'],
   ],
-  init: (node: VirtualCustomElementNode<IAppAsyncTaskComponentConfig>): IData => {
+  init: (node: VirtualComponentNode<IAppAsyncTaskComponentConfig>): ITemplateData => {
     const name$ = node.inputs.get$('name');
     const message$ = node.inputs.get$('message');
     const progress$ = node.inputs.get$('progress');

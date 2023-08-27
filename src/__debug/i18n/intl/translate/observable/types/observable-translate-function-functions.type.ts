@@ -1,7 +1,7 @@
 import {
   IHavingObservableDateTimeFormatFunction
 } from '../../../date-time/observable/types/having-observable-date-time-format-function.type';
-import { IHavingObservableListFormatFunction } from '../../../list/observable/types/having-observable-number-format-function.type';
+import { IHavingObservableListFormatFunction } from '../../../list/observable/types/having-observable-list-format-function.type';
 import { IHavingObservableNumberFormatFunction } from '../../../number/observable/types/having-observable-number-format-function.type';
 import {
   IHavingObservablePluralRulesSelectFunction

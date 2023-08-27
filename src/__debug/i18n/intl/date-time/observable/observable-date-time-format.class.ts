@@ -1,13 +1,13 @@
-import { IObservable, map$$, mapDistinct$$, shareRL$$, switchMap$$ } from '@lirx/core';
+import { distinct$$, IObservable, map$$, shareRL$$, switchMap$$ } from '@lirx/core';
 import { ILocalesList } from '../../locale/locales-list.type';
-import { LOCALES$ } from '../../locale/locales.constants';
+import { LOCALES } from '../../locale/locales.constants';
 import { IObservableDateTimeFormatFunction } from './types/observable-date-time-format-function.type';
 
 export class ObservableDateTimeFormat {
   readonly #format: IObservableDateTimeFormatFunction;
 
   constructor(
-    locales$: IObservable<ILocalesList> = LOCALES$,
+    locales$: IObservable<ILocalesList> = LOCALES.observe,
     options?: Intl.DateTimeFormatOptions,
   ) {
     this.#format = (
@@ -25,11 +25,13 @@ export class ObservableDateTimeFormat {
       });
 
       return shareRL$$(
-        switchMap$$(format$, (format: Intl.DateTimeFormat): IObservable<string> => {
-          return mapDistinct$$(value$, (value: Date | number): string => {
-            return format.format(value);
-          });
-        }),
+        distinct$$(
+          switchMap$$(format$, (format: Intl.DateTimeFormat): IObservable<string> => {
+            return map$$(value$, (value: Date | number): string => {
+              return format.format(value);
+            });
+          }),
+        ),
       );
     };
   }

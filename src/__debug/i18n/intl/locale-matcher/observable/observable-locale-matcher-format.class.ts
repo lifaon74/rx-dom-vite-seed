@@ -1,5 +1,5 @@
-import { IObservable, map$$, shareRL$$ } from '@lirx/core';
-import { LOCALES$ } from '../../locale/locales.constants';
+import { IObservable, map$$, mapDistinct$$, shareRL$$ } from '@lirx/core';
+import { LOCALES } from '../../locale/locales.constants';
 import { getIntlLocaleMatcher } from '../native/get-intl-locale-matcher';
 import { ILocaleMatcherMatchFunctionOptions } from '../native/locale-matcher.type';
 import { IObservableLocalMatcherMatchFunction } from './types/observable-locale-matcher-format-function.type';
@@ -13,13 +13,13 @@ export class ObservableLocalMatcher {
     options?: ILocaleMatcherMatchFunctionOptions,
   ) {
     this.#match = (
-      requestedLocales$: IObservable<readonly string[]> = LOCALES$,
+      requestedLocales$: IObservable<readonly string[]> = LOCALES.observe,
       _availableLocales: readonly string[] = availableLocales,
       _defaultLocale: string = defaultLocale,
       _options: ILocaleMatcherMatchFunctionOptions | undefined = options,
     ): IObservable<string> => {
       return shareRL$$(
-        map$$(requestedLocales$, (requestedLocales: readonly string[]): string => {
+        mapDistinct$$(requestedLocales$, (requestedLocales: readonly string[]): string => {
           return getIntlLocaleMatcher().match(
             requestedLocales,
             _availableLocales,

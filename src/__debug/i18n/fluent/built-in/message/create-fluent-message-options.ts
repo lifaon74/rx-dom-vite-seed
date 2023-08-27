@@ -7,7 +7,8 @@ import {
   IFluentCallFunctionEntry,
   IFluentCallFunctionFunction,
 } from '../call-function/create-fluent-call-function-function';
-import { createFluentConcatFunction, IFluentConcatFunction } from '../concat/create-fluent-concat-function';
+import { createFluentConcatFunction } from '../concat/create-fluent-concat-function';
+import { IFluentConcatFunction } from '../concat/fluent-concat-function.type';
 import { createFluentGetVariableFunction } from '../get-variable/create-fluent-get-variable-function';
 import { IFluentGetVariableEntry, IFluentGetVariableFunction } from '../get-variable/fluent-get-variable-function.type';
 import { createFluentSelectFunction } from '../select/create-fluent-select-function';

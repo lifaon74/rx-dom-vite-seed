@@ -1,11 +1,7 @@
-import { bootstrap, compileReactiveHTMLAsComponentTemplate, compileStyleAsComponentStyle, createComponent } from '@lirx/dom';
+import { bootstrap, compileReactiveHTMLAsComponentTemplate, compileStyleAsComponentStyle, Component } from '@lirx/dom';
 import { MatRippleModifier } from '@lirx/dom-material';
 
-interface IConfig {
-  element: HTMLElement;
-}
-
-const MatRippleExampleComponent = createComponent<IConfig>({
+const MatRippleExampleComponent = new Component({
   name: 'mat-ripple-example',
   template: compileReactiveHTMLAsComponentTemplate({
     html: `

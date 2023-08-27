@@ -15,7 +15,7 @@ export const AppHomePageComponent = createComponent<IAppHomePageComponentConfig>
       </div>
       <app-menu/>
     `,
-    customElements: [
+    components: [
       AppMenuPageComponent,
     ],
   }),

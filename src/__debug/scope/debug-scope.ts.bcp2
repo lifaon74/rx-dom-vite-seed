@@ -1,0 +1,196 @@
+type ExploreId = number;
+
+let exploreId: ExploreId = 0;
+
+function getExploreId(): ExploreId {
+  return ++exploreId;
+}
+
+type OnDestroyCallback = (value: any) => void;
+
+class GraphNode {
+  static ROOT: GraphNode = new GraphNode(void 0, () => {});
+
+  readonly value: any;
+  readonly onDestroy: OnDestroyCallback;
+  readonly parents: Set<GraphNode>;
+  readonly children: Set<GraphNode>;
+  exploreId: ExploreId;
+  isRootReachableExplore: boolean;
+
+  constructor(
+    value: any,
+    onDestroy: OnDestroyCallback,
+  ) {
+    this.value = value;
+    this.onDestroy = onDestroy;
+    this.parents = new Set<GraphNode>();
+    this.children = new Set<GraphNode>();
+    this.exploreId = 0;
+    this.isRootReachableExplore = false;
+  }
+
+  hasChild(
+    child: GraphNode,
+  ): boolean {
+    return this.children.has(child);
+  }
+
+  addChild(
+    child: GraphNode,
+  ): void {
+    this.children.add(child);
+    child.parents.add(this);
+  }
+
+  removeChild(
+    child: GraphNode,
+    exploreId: ExploreId = getExploreId(),
+  ): void {
+    this.children.delete(child);
+    child.parents.delete(this);
+    child.garbageCollect(exploreId);
+  }
+
+  isRootReachable(
+    exploreId: ExploreId,
+  ): boolean {
+    if (this === GraphNode.ROOT) {
+      return true;
+    } else {
+      if (this.exploreId !== exploreId) {
+        this.exploreId = exploreId;
+        this.isRootReachableExplore = false;
+
+        let result: IteratorResult<GraphNode>;
+        while (!(result = this.parents[Symbol.iterator]().next()).done) {
+          if (result.value.value.isRootReachable(exploreId)) {
+            this.isRootReachableExplore = true;
+            break;
+          }
+        }
+      }
+      return this.isRootReachableExplore;
+    }
+  }
+
+  garbageCollect(
+    exploreId: ExploreId,
+  ): void {
+    if (!this.isRootReachable(exploreId)) {
+      this.onDestroy(this.value);
+      let result: IteratorResult<GraphNode>;
+      while (!(result = this.children[Symbol.iterator]().next()).done) {
+        this.removeChild(result.value);
+      }
+    }
+  }
+}
+
+
+class Value<GValue> {
+  readonly owners: Set<Scope>;
+  readonly value: GValue;
+  readonly destroy: (value: GValue) => void;
+
+  constructor(
+    owner: Scope,
+    value: GValue,
+    destroy: (value: GValue) => void,
+  ) {
+    this.owners = new Set<Scope>([owner]);
+    this.value = value;
+    this.destroy = destroy;
+  }
+
+  addOwner(
+    owner: Scope,
+  ): void {
+    this.owners.add(owner);
+    owner.values.add(this);
+  }
+
+  removeOwner(
+    owner: Scope,
+  ): void {
+    this.owners.delete(owner);
+    owner.values.delete(this);
+    if (this.owners.size === 0) {
+      this.destroy(this.value);
+    }
+  }
+}
+
+class Scope {
+  readonly values: Set<Value<any>>;
+
+  constructor() {
+    this.values = new Set<Value<any>>();
+  }
+
+  destroy(): void {
+    Array.from(this.values).forEach((value: Value<any>) => {
+      value.removeOwner(this);
+    });
+  }
+}
+
+class Object extends Value<void> {
+  properties: Map<string, Value<any>>;
+
+  constructor(
+    owner: Scope,
+  ) {
+    super(owner, void 0, () => {
+      Array.from(this.properties).forEach(() => {
+
+      });
+    });
+    this.properties = new Map<string, Value<any>>();
+  }
+
+  setProperty(
+    key: string,
+    value: Value<any>,
+  ): void {
+    this.properties.set(key, value);
+    value.addOwner(this.owners);
+  }
+}
+
+// class Closure<GArgument> extends Value<any> {
+//   readonly scope: Scope;
+//
+//   constructor(
+//     scope: Scope,
+//     fnc: () => void,
+//   ) {
+//     super(
+//       scope,
+//       fnc,
+//     );
+//   }
+// }
+
+/*-------------*/
+
+async function debugScope1() {
+  const scope = new Scope();
+
+  const a = new Value(scope, 'a', () => console.log('destroy A'));
+  const b = new Value(scope, 1, () => console.log('destroy 1'));
+
+  const ctx = new Object(scope);
+
+  // const c = new Closure(scope, () => {
+  //
+  // });
+
+  scope.destroy();
+}
+
+/*-------------*/
+
+export function debugScope(): void {
+  debugScope1();
+}

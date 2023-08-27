@@ -1,6 +1,7 @@
 import { matBadgeExample } from './components/badge/mat-badge.example';
 import { matButtonExample } from './components/buttons/button/mat-button.example';
 import { matRippleExample } from './components/buttons/ripple/mat-ripple.example';
+import { matFocusExample } from './components/focus/mat-focus.example';
 import { matFormExample } from './components/form/mat-form.example';
 import { matGridExample } from './components/grid/mat-grid.example';
 import { matDualRingLoaderExample } from './components/loaders/dual-ring-loader/mat-dual-ring-loader.example';
@@ -23,9 +24,10 @@ export function materialExample(): void {
   // matProgressRingExample();
   // matSidenavContainerExample();
   // matSkeletonExample();
+  // matGridExample();
+  // matOverlayExample();
 
   // IN PROGRESS
-  // matFormExample();
-  matOverlayExample();
-  // matGridExample();
+  matFormExample();
+  // matFocusExample();
 }

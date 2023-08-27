@@ -40,7 +40,7 @@ export const AppMenuPageComponent = createComponent<IAppMenuPageComponentConfig>
 <!--        </li>-->
       </ul>
     `,
-    customElements: [
+    components: [
       VirtualLinkComponent,
     ],
   }),

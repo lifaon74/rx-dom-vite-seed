@@ -1,11 +1,7 @@
-import { bootstrap, compileReactiveHTMLAsComponentTemplate, compileStyleAsComponentStyle, createComponent } from '@lirx/dom';
+import { bootstrap, compileReactiveHTMLAsComponentTemplate, compileStyleAsComponentStyle, Component } from '@lirx/dom';
 import { MatGridComponent, MatGridItemComponent } from '@lirx/dom-material';
 
-interface IMatGridExampleComponentConfig {
-  element: HTMLElement;
-}
-
-export const MatGridExampleComponent = createComponent<IMatGridExampleComponentConfig>({
+export const MatGridExampleComponent = new Component({
   name: 'mat-grid-example',
   template: compileReactiveHTMLAsComponentTemplate({
     html: `
@@ -16,7 +12,7 @@ export const MatGridExampleComponent = createComponent<IMatGridExampleComponentC
         <mat-grid-item $[position]="[4, 2, 2, 1]" style="background: #ffd1ac">D</mat-grid-item>
       </mat-grid>
     `,
-    customElements: [
+    components: [
       MatGridComponent,
       MatGridItemComponent,
     ],

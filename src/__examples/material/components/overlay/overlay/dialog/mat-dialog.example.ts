@@ -1,35 +1,35 @@
-import { $log, IObservable, IObserver, single, switchMap$$ } from '@lirx/core';
-import { compileReactiveHTMLAsComponentTemplate, createComponent, VirtualCustomElementNode } from '@lirx/dom';
+import { $log, IObservable, IObserver } from '@lirx/core';
+import { compileReactiveHTMLAsComponentTemplate, Component, input, Input, VirtualComponentNode } from '@lirx/dom';
 import {
-  createMatOverlayCloseObserver, getMatOverlayData$$,
-  IMatDialogBasicComponentCloseType, IMatOverlayFactoryOpenOptions, IMatOverlayInput,
-  MAT_OVERLAY_INPUT_NAME,
+  IMatDialogComponentCloseType,
   MatButtonModifier,
-  MatDialogBasicComponent, MatDialogFactory,
+  MatDialogComponent,
+  createMatDialogFactory,
   MatFlatButtonPrimaryModifier,
+  IHavingMatOverlayInput,
+  createMatOverlayCloseObserver,
+  matOverlayInput,
 } from '@lirx/dom-material';
 
 /*----------------------------*/
 
-interface IData {
-  readonly $userClose: IObservable<IObserver<IMatDialogBasicComponentCloseType>>;
+/*----------------------------*/
+
+interface IComponentData extends IHavingMatOverlayInput<HTMLElement, IComponentData> {
+  readonly text: Input<string>;
+}
+
+interface ITemplateData {
+  readonly $close: IObservable<IObserver<IMatDialogComponentCloseType>>;
   readonly text$: IObservable<string>;
   readonly $onClickCancelButton: IObservable<IObserver<MouseEvent>>;
 }
 
-export interface IMyModalComponentConfig {
-  element: HTMLElement;
-  inputs: [
-    IMatOverlayInput<IMyModalComponentConfig, string>,
-  ],
-  data: IData;
-}
-
-const MyModalComponent = createComponent<IMyModalComponentConfig>({
+const MyModalComponent = new Component<HTMLElement, IComponentData, ITemplateData>({
   name: 'my-modal',
   template: compileReactiveHTMLAsComponentTemplate({
     html: `
-      <mat-dialog-basic \${userClose}="$.$userClose">
+      <mat-dialog \${close}="$.$close">
         <rx-slot name="title">
           My modal
         </rx-slot>
@@ -49,34 +49,35 @@ const MyModalComponent = createComponent<IMyModalComponentConfig>({
             Go
           </button>
         </rx-slot>
-      </mat-dialog-basic>
+      </mat-dialog>
     `,
-    customElements: [
-      MatDialogBasicComponent,
+    components: [
+      MatDialogComponent,
     ],
     modifiers: [
       MatButtonModifier,
       MatFlatButtonPrimaryModifier,
     ],
   }),
-  inputs: [
-    [MAT_OVERLAY_INPUT_NAME],
-  ],
-  init: (node: VirtualCustomElementNode<IMyModalComponentConfig>): IData => {
-    const data$ = getMatOverlayData$$<IMyModalComponentConfig>(node);
-
-    const text$ = data$;
+  componentData: (): IComponentData => {
+    return {
+      ...matOverlayInput(),
+      text: input<string>(),
+    };
+  },
+  templateData: (node: VirtualComponentNode<HTMLElement, IComponentData>): ITemplateData => {
+    const text$ = node.data.text.subscribe;
 
     const $onClickCancelButton = createMatOverlayCloseObserver(node);
 
-    // const $userClose = createMatOverlayCloseObserver(node, (type: IMatDialogBasicComponentCloseType): boolean => {
-    //   return type !== 'backdrop';
-    // });
+    const $close = createMatOverlayCloseObserver(node, (type: IMatDialogComponentCloseType): boolean => {
+      return type !== 'backdrop';
+    });
 
-    const $userClose = createMatOverlayCloseObserver(node);
+    // const $close = createMatOverlayCloseObserver(node);
 
     return {
-      $userClose,
+      $close,
       text$,
       $onClickCancelButton,
     };
@@ -84,11 +85,11 @@ const MyModalComponent = createComponent<IMyModalComponentConfig>({
 });
 
 // type C<G> = [G] extends [never] ? true : false;
-// type A = InferMatOverlayDataFromVirtualCustomElementNodeConfig<IMyModalComponentConfig>;
+// type A = InferMatOverlayDataFromVirtualComponentNodeConfig<IMyModalComponentConfig>;
 // type B = IMatOverlayFactoryOpenOptionsFromData<never>;
 // type D = C<never>;
 
-const MyModalFactory = new MatDialogFactory(MyModalComponent, {
+const openMyModal = createMatDialogFactory(MyModalComponent, {
   animationDuration: 150,
 });
 
@@ -100,9 +101,9 @@ export function matDialogExample(): void {
   document.body.appendChild(button);
 
   const open = () => {
-    const instance = MyModalFactory.openStatic(
-      'Hello world !'.repeat(100),
-    );
+    const instance = openMyModal();
+
+    instance.node.data.text.emit('Hello world!'.repeat(200));
 
     instance.state$($log);
 
@@ -122,4 +123,5 @@ export function matDialogExample(): void {
   button.onclick = open;
 
   open();
+  // open();
 }

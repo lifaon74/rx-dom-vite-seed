@@ -1,11 +1,11 @@
 import { eq$$, IObservable, let$$, map$$, single } from '@lirx/core';
-import { compileReactiveHTMLAsComponentTemplate, createComponent, VirtualCustomElementNode } from '@lirx/dom';
+import { compileReactiveHTMLAsComponentTemplate, createComponent, VirtualComponentNode } from '@lirx/dom';
 import { getRouteParams, VirtualLinkComponent } from '@lirx/router';
 import { AppMenuPageComponent } from '../components/menu/menu.component';
 
 /** COMPONENT **/
 
-interface IData {
+interface ITemplateData {
   readonly productId$: IObservable<string>;
   readonly productIds$: IObservable<readonly string[]>;
   readonly single: typeof single;
@@ -14,7 +14,7 @@ interface IData {
 
 interface IAppProductPageComponentConfig {
   element: HTMLElement;
-  data: IData;
+  data: ITemplateData;
 }
 
 export const AppProductPageComponent = createComponent<IAppProductPageComponentConfig>({
@@ -45,12 +45,12 @@ export const AppProductPageComponent = createComponent<IAppProductPageComponentC
         </li>
       </ul>
     `,
-    customElements: [
+    components: [
       AppMenuPageComponent,
       VirtualLinkComponent,
     ],
   }),
-  init: (node: VirtualCustomElementNode<IAppProductPageComponentConfig>): IData => {
+  init: (node: VirtualComponentNode<IAppProductPageComponentConfig>): ITemplateData => {
     const params$ = getRouteParams(node);
 
     const [productIds, productIds$] = let$$(Array.from({ length: 1e1 }, (v: any, i: number) => `${i}`));

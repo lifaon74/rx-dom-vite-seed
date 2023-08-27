@@ -1,14 +1,17 @@
-export type IFluentListFormatFunctionItem =
+export type IFluentListFormatFunctionListItem =
   | string
   | Iterable<string>
   ;
 
+export type IFluentListFormatFunctionList = readonly IFluentListFormatFunctionListItem[];
+
 export type IFluentListFormatFunctionArguments = readonly [
-  ...values: readonly IFluentListFormatFunctionItem[],
-  options: Intl.ListFormatOptions | IFluentListFormatFunctionItem,
+  ...list: IFluentListFormatFunctionList,
+  options: Intl.ListFormatOptions | IFluentListFormatFunctionListItem,
 ];
 
 export interface IFluentListFormatFunction {
+  (): string;
   (
     ...args: IFluentListFormatFunctionArguments
   ): string;

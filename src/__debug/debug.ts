@@ -12,6 +12,7 @@ import { debugObservableProxy } from './object-proxy/debug-observable-proxy';
 import { debugObservables } from './observables/debug-observables';
 import { debugSignals } from './signals/signals';
 import { debugStore } from './store/debug-store';
+import { debugScope } from './scope/debug-scope';
 
 export function debug(): void {
   // debugLiRXDOM();
@@ -28,4 +29,5 @@ export function debug(): void {
   // debugStore();
   // debugSignals();
   // debugAsyncTask();
+  // debugScope();
 }

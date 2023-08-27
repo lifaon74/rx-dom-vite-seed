@@ -1,6 +1,6 @@
 export interface IListFormatFunction {
   (
-    value: Iterable<string>,
+    list: Iterable<string>,
     options?: Intl.ListFormatOptions,
   ): string;
 }

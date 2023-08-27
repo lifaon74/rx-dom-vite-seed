@@ -157,7 +157,7 @@ function testReactiveForLoopNode(): void {
 
 // function testCustomElementNode(): void {
 //
-//   // function createCustomElement(): VirtualCustomElementNode {
+//   // function createCustomElement(): VirtualComponentNode {
 //   //
 //   // }
 //
@@ -165,9 +165,9 @@ function testReactiveForLoopNode(): void {
 //   //
 //   // customElements.define('mat-button', MatButtonComponent, { extends: 'button' });
 //
-//   class MatButton extends VirtualCustomElementNode<HTMLButtonElement> {
+//   class MatButton extends VirtualComponentNode<HTMLButtonElement> {
 //     constructor(
-//       slots: IVirtualCustomElementNodeSlotsMap,
+//       slots: IVirtualComponentNodeSlotsMap,
 //     ) {
 //       super({
 //         name: 'mat-button',
@@ -187,7 +187,7 @@ function testReactiveForLoopNode(): void {
 //     parentNode: VirtualDOMNode,
 //     $: object,
 //   ): void => {
-//     const buttonTemplate: IVirtualCustomElementNodeSlotTemplate = (
+//     const buttonTemplate: IVirtualComponentNodeSlotTemplate = (
 //       parentNode: VirtualDOMNode,
 //     ): void => {
 //       const node = new VirtualTextNode('toggle');

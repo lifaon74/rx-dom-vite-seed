@@ -1,0 +1,47 @@
+
+
+
+class Value<GValue> {
+  readonly value: GValue;
+
+  constructor(
+    value: GValue
+  ) {
+    this.value = value;
+  }
+
+}
+
+class Scope<GScope> {
+  readonly scope: GScope;
+
+  constructor(
+    scope: GScope
+  ) {
+    this.scope = scope;
+  }
+
+  destroy(): void {
+
+  }
+}
+
+
+/*-------------*/
+
+async function debugScope1() {
+  const scope = new Scope({
+    a: new Value('a'),
+    b: new Value(1),
+  });
+
+
+
+  scope.destroy();
+}
+
+/*-------------*/
+
+export function debugScope(): void {
+  debugScope1();
+}

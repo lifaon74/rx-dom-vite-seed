@@ -1,5 +1,5 @@
 import { ObservableDateTimeFormat } from '../../date-time/observable/observable-date-time-format.class';
-import { ObservableListFormat } from '../../list/observable/observable-number-format.class';
+import { ObservableListFormat } from '../../list/observable/observable-list-format.class';
 import { ObservableNumberFormat } from '../../number/observable/observable-number-format.class';
 import { ObservablePluralRules } from '../../plural-rules/observable/observable-plural-rules.class';
 import { IObservableTranslateFunctionFunctions } from './types/observable-translate-function-functions.type';

@@ -1,33 +1,34 @@
 import { IObservable } from '@lirx/core';
-import { compileReactiveHTMLAsComponentTemplate, createComponent, VirtualCustomElementNode } from '@lirx/dom';
+import { compileReactiveHTMLAsComponentTemplate, Component, VirtualComponentNode, Input, input } from '@lirx/dom';
 
 /** DATA **/
 
-interface IData {
+interface IAppToWebComponentExampleData {
+  readonly value: Input<string>;
+}
+
+interface ITemplateData {
   readonly value$: IObservable<string>;
 }
 
-interface IAppToWebComponentExampleConfig {
-  inputs: [
-    ['value', string],
-  ];
-  data: IData;
-}
+
 
 /** COMPONENT **/
 
-export const AppToWebComponentExampleComponent = createComponent<IAppToWebComponentExampleConfig>({
+export const AppToWebComponentExampleComponent = new Component<HTMLElement, IAppToWebComponentExampleData, ITemplateData>({
   name: 'app-to-web-component',
   template: compileReactiveHTMLAsComponentTemplate({
     html: `
       -{{ $.value$ }}-
   `,
   }),
-  inputs: [
-    ['value'],
-  ],
-  init: (node: VirtualCustomElementNode<IAppToWebComponentExampleConfig>): IData => {
-    const value$ = node.inputs.get$('value');
+  componentData: (): IAppToWebComponentExampleData => {
+    return {
+      value: input<string>(),
+    }
+  },
+  templateData: (node: VirtualComponentNode<HTMLElement, IAppToWebComponentExampleData>): ITemplateData => {
+    const value$ = node.input$('value');
 
     return {
       value$,

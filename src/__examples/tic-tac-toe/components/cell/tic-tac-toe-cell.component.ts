@@ -1,5 +1,5 @@
 import { empty, function$$, IObservable, map$$, switchMap$$ } from '@lirx/core';
-import { compileStyleAsComponentStyle, createComponent, IClassNamesList, VirtualCustomElementNode } from '@lirx/dom';
+import { compileStyleAsComponentStyle, createComponent, IClassNamesList, VirtualComponentNode } from '@lirx/dom';
 import { noop } from '@lirx/utils';
 import { TicTacToeCellState, TicTacToePlayer } from '../../types/types';
 
@@ -30,7 +30,7 @@ export const TicTacToeCellComponent = createComponent<ITicTacToeCellComponentCon
   outputs: [
     'onSelected',
   ],
-  init: (node: VirtualCustomElementNode<ITicTacToeCellComponentConfig>): void => {
+  init: (node: VirtualComponentNode<ITicTacToeCellComponentConfig>): void => {
     // get inputs
     const state$ = node.inputs.get$('state');
     const player$ = node.inputs.get$('player');

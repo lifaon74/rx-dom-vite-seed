@@ -1,23 +1,4 @@
-import {
-  defer,
-  fromArray,
-  fromMutationObserver,
-  IMapFilterMapFunctionReturn,
-  IObservable,
-  IUnsubscribe,
-  MAP_FILTER_DISCARD,
-  mapFilter$$,
-  merge,
-} from '@lirx/core';
-import {
-  IComponent,
-  IComponentConfig,
-  IGenericComponent,
-  IGenericVirtualCustomElementNode,
-  IVirtualCustomElementNodeSlotTemplate, VirtualCustomElementNode,
-  VirtualDOMNode,
-  VirtualRootNode,
-} from '@lirx/dom';
+import { Component, VirtualComponentNode, VirtualRootNode } from '@lirx/dom';
 import { AppToWebComponentExampleComponent } from './component/to-web-component-example.component';
 
 // export function toCustomElement(
@@ -33,14 +14,14 @@ import { AppToWebComponentExampleComponent } from './component/to-web-component-
 //     protected attributeChange$: IObservable<string>;
 //     protected unsubscribeOfAttributeChange!: IUnsubscribe;
 //     protected rootNode: VirtualRootNode<HTMLElement>;
-//     protected node: IGenericVirtualCustomElementNode;
+//     protected node: IGenericVirtualComponentNode;
 //
 //     constructor() {
 //       super();
 //       const html: string = this.innerHTML;
 //       this.innerHTML = '';
 //
-//       const slots = new Map<string, IVirtualCustomElementNodeSlotTemplate>([
+//       const slots = new Map<string, IVirtualComponentNodeSlotTemplate>([
 //         ['*', (parentNode: VirtualDOMNode): void => {
 //           throw 'TODO';
 //         }],
@@ -104,9 +85,8 @@ import { AppToWebComponentExampleComponent } from './component/to-web-component-
 //   return CustomElement;
 // }
 
-
-export function toCustomElement<GConfig extends IComponentConfig>(
-  component: IComponent<GConfig>,
+export function toCustomElement<GElement extends Element, GData extends object>(
+  component: Component<GElement, GData, any>,
   tagName: string = `${component.name}-wrapper`,
 ) {
 
@@ -115,7 +95,7 @@ export function toCustomElement<GConfig extends IComponentConfig>(
       return tagName;
     }
 
-    public readonly node: VirtualCustomElementNode<GConfig>;
+    public readonly node: VirtualComponentNode<GElement, GData>;
 
     protected readonly rootNode: VirtualRootNode<CustomElement>;
 
@@ -145,9 +125,9 @@ export function toWebComponentExample() {
   const tagName: string = AppToWebComponentExampleCustomElement.tagName;
 
   document.body.innerHTML = `
-    <${tagName}></${tagName}>
+    <${tagName} value="7"></${tagName}>
   `;
 
-  const ce = (document.body.firstElementChild as unknown as InstanceType<typeof AppToWebComponentExampleCustomElement>);
-  ce.node.inputs.set('value', `Hello world`);
+  // const ce = (document.body.firstElementChild as unknown as InstanceType<typeof AppToWebComponentExampleCustomElement>);
+  // ce.node.inputs.set('value', `Hello world`);
 }

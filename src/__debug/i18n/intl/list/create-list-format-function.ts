@@ -9,7 +9,7 @@ export class ListFormat {
     options?: Intl.ListFormatOptions,
   ) {
     this.#format = (
-      value: Iterable<string>,
+      list: Iterable<string>,
       _options?: Partial<Intl.ListFormatOptions>,
     ): string => {
       return new Intl.ListFormat(
@@ -18,7 +18,7 @@ export class ListFormat {
           ...options,
           ..._options,
         },
-      ).format(value);
+      ).format(list);
     };
   }
 

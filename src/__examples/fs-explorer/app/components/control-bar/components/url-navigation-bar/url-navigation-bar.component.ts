@@ -21,7 +21,7 @@ import {
   compileReactiveHTMLAsComponentTemplate,
   compileStyleAsComponentStyle,
   createComponent,
-  VirtualCustomElementNode,
+  VirtualComponentNode,
   virtualDOMNodeQuerySelectorOrThrow,
   VirtualReactiveElementNode,
 } from '@lirx/dom';
@@ -41,7 +41,7 @@ import style from './url-navigation-bar.component.scss?inline';
  * COMPONENT: 'app-control-bar'
  */
 
-interface IData {
+interface ITemplateData {
   readonly gt$$: typeof gt$$;
   readonly neq$$: typeof neq$$;
   readonly single: typeof single;
@@ -72,14 +72,14 @@ interface IAppURLNavigationBarComponentConfig {
   outputs: [
     ['url', URL],
   ],
-  data: IData;
+  data: ITemplateData;
 }
 
 export const AppURLNavigationBarComponent = createComponent<IAppURLNavigationBarComponentConfig>({
   name: 'app-url-navigation-bar',
   template: compileReactiveHTMLAsComponentTemplate({
     html,
-    customElements: [
+    components: [
       IconSwapVerticalComponent,
     ],
     modifiers: [
@@ -94,7 +94,7 @@ export const AppURLNavigationBarComponent = createComponent<IAppURLNavigationBar
   outputs: [
     'url',
   ],
-  init: (node: VirtualCustomElementNode<IAppURLNavigationBarComponentConfig>): IData => {
+  init: (node: VirtualComponentNode<IAppURLNavigationBarComponentConfig>): ITemplateData => {
 
     const url$ = node.inputs.get$('url');
     const getURL = node.inputs.getSource('url').getValue;

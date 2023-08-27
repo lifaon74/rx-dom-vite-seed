@@ -1,4 +1,4 @@
 import { IObservable } from '@lirx/core';
-import { IObservableTranslationsEntry } from './observable-translations-entry.type';
+import { IIterableOfObservableTranslationsEntry } from './iterable-of-observable-translations-entry.type';
 
-export type IObservableTranslationsIterable = IObservable<Iterable<IObservableTranslationsEntry>>;
+export type IObservableTranslationsIterable = IObservable<IIterableOfObservableTranslationsEntry>;

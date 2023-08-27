@@ -1,5 +1,5 @@
 import { IObservable, map$$, single, switchMap$$ } from '@lirx/core';
-import { compileStyleAsComponentStyle, createComponent, INJECT_CONTENT_TEMPLATE, VirtualCustomElementNode } from '@lirx/dom';
+import { compileStyleAsComponentStyle, createComponent, INJECT_CONTENT_TEMPLATE, VirtualComponentNode } from '@lirx/dom';
 import { IGenericFormInput } from '../../form-control/form-input/form-input.class';
 
 // @ts-ignore
@@ -30,7 +30,7 @@ export const MatLabelComponent = createComponent<IMatLabelComponentConfig>({
   inputs: [
     ['controller'],
   ],
-  init: (node: VirtualCustomElementNode<IMatLabelComponentConfig>): void => {
+  init: (node: VirtualComponentNode<IMatLabelComponentConfig>): void => {
     const controller$ = node.inputs.get$('controller');
 
     const id$ = map$$(controller$, controller => controller.id);

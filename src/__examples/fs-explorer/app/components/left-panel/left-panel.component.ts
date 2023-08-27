@@ -1,4 +1,4 @@
-import { compileReactiveHTMLAsComponentTemplate, compileStyleAsComponentStyle, createComponent, VirtualCustomElementNode } from '@lirx/dom';
+import { compileReactiveHTMLAsComponentTemplate, compileStyleAsComponentStyle, createComponent, VirtualComponentNode } from '@lirx/dom';
 
 // @ts-ignore
 import html from './left-panel.component.html?raw';
@@ -9,23 +9,23 @@ import style from './left-panel.component.scss?inline';
  * COMPONENT: 'app-main'
  */
 
-interface IData {
+interface ITemplateData {
 
 }
 
 interface IAppMainComponentConfig {
   element: HTMLElement;
-  data: IData;
+  data: ITemplateData;
 }
 
 export const AppMainComponent = createComponent<IAppMainComponentConfig>({
   name: 'app-main',
   template: compileReactiveHTMLAsComponentTemplate({
     html,
-    customElements: [],
+    components: [],
   }),
   styles: [compileStyleAsComponentStyle(style)],
-  init: (node: VirtualCustomElementNode<IAppMainComponentConfig>): IData => {
+  init: (node: VirtualComponentNode<IAppMainComponentConfig>): ITemplateData => {
     return {};
   },
 });

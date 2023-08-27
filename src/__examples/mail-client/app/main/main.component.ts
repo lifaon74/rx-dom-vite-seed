@@ -1,5 +1,5 @@
 import { distinct$$, fromEventTarget, IObservable, IObserver, let$$, map$$, merge, not$$, reference, throttleTime$$ } from '@lirx/core';
-import { compileReactiveHTMLAsComponentTemplate, compileStyleAsComponentStyle, createComponent, VirtualCustomElementNode } from '@lirx/dom';
+import { compileReactiveHTMLAsComponentTemplate, compileStyleAsComponentStyle, createComponent, VirtualComponentNode } from '@lirx/dom';
 import { IconMenuComponent } from '@lirx/mdi';
 import {
   IMatSidenavComponentMode,
@@ -16,7 +16,7 @@ import style from './main.component.scss?inline';
  * COMPONENT: 'app-main'
  */
 
-interface IData {
+interface ITemplateData {
   readonly sidenavOpened$: IObservable<boolean>;
   readonly sidenavMode$: IObservable<IMatSidenavComponentMode>;
   readonly sidenavHasBackdrop$: IObservable<boolean>;
@@ -27,14 +27,14 @@ interface IData {
 
 interface IAppMainComponentConfig {
   element: HTMLElement;
-  data: IData;
+  data: ITemplateData;
 }
 
 export const AppMainComponent = createComponent<IAppMainComponentConfig>({
   name: 'app-main',
   template: compileReactiveHTMLAsComponentTemplate({
     html,
-    customElements: [
+    components: [
       MatSidenavContainerComponent,
       MatToolbarContainerComponent,
       MatToolbarComponent,
@@ -46,7 +46,7 @@ export const AppMainComponent = createComponent<IAppMainComponentConfig>({
     ]
   }),
   styles: [compileStyleAsComponentStyle(style)],
-  init: (node: VirtualCustomElementNode<IAppMainComponentConfig>): IData => {
+  init: (node: VirtualComponentNode<IAppMainComponentConfig>): ITemplateData => {
     const windowSize$ = throttleTime$$(fromEventTarget(window, 'resize'), 100);
 
     // TODO use createWindowSizeObservableInitialized ?

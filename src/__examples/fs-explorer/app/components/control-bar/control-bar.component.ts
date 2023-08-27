@@ -1,5 +1,5 @@
 import { fromEventTarget } from '@lirx/core';
-import { compileReactiveHTMLAsComponentTemplate, compileStyleAsComponentStyle, createComponent, VirtualCustomElementNode } from '@lirx/dom';
+import { compileReactiveHTMLAsComponentTemplate, compileStyleAsComponentStyle, createComponent, VirtualComponentNode } from '@lirx/dom';
 import {
   IconArrowLeftComponent,
   IconArrowRightComponent, IconDotsVerticalComponent,
@@ -19,20 +19,20 @@ import style from './control-bar.component.scss?inline';
  * COMPONENT: 'app-control-bar'
  */
 
-interface IData {
+interface ITemplateData {
 
 }
 
 interface IAppControlBarComponentConfig {
   element: HTMLElement;
-  data: IData;
+  data: ITemplateData;
 }
 
 export const AppControlBarComponent = createComponent<IAppControlBarComponentConfig>({
   name: 'app-control-bar',
   template: compileReactiveHTMLAsComponentTemplate({
     html,
-    customElements: [
+    components: [
       MatIconButtonComponent,
       IconArrowLeftComponent,
       IconArrowRightComponent,
@@ -44,7 +44,7 @@ export const AppControlBarComponent = createComponent<IAppControlBarComponentCon
     ],
   }),
   styles: [compileStyleAsComponentStyle(style)],
-  init: (node: VirtualCustomElementNode<IAppControlBarComponentConfig>): IData => {
+  init: (node: VirtualComponentNode<IAppControlBarComponentConfig>): ITemplateData => {
 
     // SHORTCUTS
 

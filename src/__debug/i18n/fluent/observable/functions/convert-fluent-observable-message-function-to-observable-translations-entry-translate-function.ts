@@ -10,31 +10,41 @@ import {
 } from '../../../intl/translate/observable/types/observable-translate-function-variables.type';
 import {
   createFluentDefaultObservableCallFunctionEntries,
-} from '../../built-in/call-function/built-in/create-fluent-default-observable-call-function-entries';
+} from '../../built-in/call-function/built-in/observable/create-fluent-default-observable-call-function-entries';
+import {
+  convertObservableDateTimeFormatFunctionToFluentObservableDateTimeFormat,
+} from '../../built-in/call-function/built-in/observable/date-time/convert-observable-date-time-format-function-to-fluent-observable-date-time-format';
 import {
   IFluentObservableDateTimeFormatFunction,
-} from '../../built-in/call-function/built-in/date-time/fluent-observable-date-time-format-function.type';
+} from '../../built-in/call-function/built-in/observable/date-time/fluent-observable-date-time-format-function.type';
+import {
+  convertObservableListFormatFunctionToFluentObservableListFormat,
+} from '../../built-in/call-function/built-in/observable/list/convert-observable-list-format-function-to-fluent-observable-list-format';
 import {
   IFluentObservableListFormatFunction,
-} from '../../built-in/call-function/built-in/list/fluent-observable-list-format-function.type';
+} from '../../built-in/call-function/built-in/observable/list/fluent-observable-list-format-function.type';
+import {
+  convertObservableNumberFormatFunctionToFluentObservableNumberFormat,
+} from '../../built-in/call-function/built-in/observable/number/convert-observable-number-format-function-to-fluent-observable-number-format';
 import {
   IFluentObservableNumberFormatFunction,
-} from '../../built-in/call-function/built-in/number/fluent-observable-number-format-function.type';
+} from '../../built-in/call-function/built-in/observable/number/fluent-observable-number-format-function.type';
+import {
+  convertObservablePluralRulesSelectFunctionToFluentObservablePluralRulesSelect,
+} from '../../built-in/call-function/built-in/observable/plural-rules/convert-observable-plural-rules-select-function-to-fluent-observable-plural-rules-select';
 import {
   IFluentObservablePluralRulesSelectFunction,
-} from '../../built-in/call-function/built-in/plural-rules/fluent-observable-plural-rules-select-function.type';
+} from '../../built-in/call-function/built-in/observable/plural-rules/fluent-observable-plural-rules-select-function.type';
 import {
   createFluentCallFunctionFunction,
   IFluentCallFunctionFunction,
 } from '../../built-in/call-function/create-fluent-call-function-function';
-import {
-  createFluentObservableConcatFunction,
-  IFluentObservableConcatFunction,
-} from '../../built-in/concat/create-fluent-observable-concat-function';
+import { createFluentObservableConcatFunction } from '../../built-in/concat/observable/create-fluent-observable-concat-function';
+import { IFluentObservableConcatFunction } from '../../built-in/concat/observable/fluent-observable-concat-function.type';
 import { createFluentGetVariableFunction } from '../../built-in/get-variable/create-fluent-get-variable-function';
-import { IFluentObservableMessageFunction } from '../../built-in/message/fluent-observable-message-function.type';
-import { createFluentObservableSelectFunction } from '../../built-in/select/create-fluent-observable-select-function';
-import { IFluentObservableSelectFunction } from '../../built-in/select/fluent-observable-select-function.type';
+import { IFluentObservableMessageFunction } from '../../built-in/message/observable/fluent-observable-message-function.type';
+import { createFluentObservableSelectFunction } from '../../built-in/select/observable/create-fluent-observable-select-function';
+import { IFluentObservableSelectFunction } from '../../built-in/select/observable/fluent-observable-select-function.type';
 
 export function convertFluentObservableMessageFunctionToObservableTranslationsEntryTranslateFunction(
   fluentMessageFunction: IFluentObservableMessageFunction,
@@ -52,10 +62,10 @@ export function convertFluentObservableMessageFunctionToObservableTranslationsEn
       ...otherFunctions
     }: IObservableTranslateFunctionFunctions = functions;
 
-    const fluentNumberFormat: IFluentObservableNumberFormatFunction = numberFormat;
-    const fluentDateTimeFormat: IFluentObservableDateTimeFormatFunction = dateTimeFormat;
-    const fluentListFormat: IFluentObservableListFormatFunction = listFormat as any; // TODO
-    const fluentPluralRulesSelect: IFluentObservablePluralRulesSelectFunction = pluralRulesSelect;
+    const fluentNumberFormat: IFluentObservableNumberFormatFunction = convertObservableNumberFormatFunctionToFluentObservableNumberFormat(numberFormat);
+    const fluentDateTimeFormat: IFluentObservableDateTimeFormatFunction = convertObservableDateTimeFormatFunctionToFluentObservableDateTimeFormat(dateTimeFormat);
+    const fluentListFormat: IFluentObservableListFormatFunction = convertObservableListFormatFunctionToFluentObservableListFormat(listFormat);
+    const fluentPluralRulesSelect: IFluentObservablePluralRulesSelectFunction = convertObservablePluralRulesSelectFunctionToFluentObservablePluralRulesSelect(pluralRulesSelect);
 
     const concat: IFluentObservableConcatFunction = createFluentObservableConcatFunction({
       fluentNumberFormat,

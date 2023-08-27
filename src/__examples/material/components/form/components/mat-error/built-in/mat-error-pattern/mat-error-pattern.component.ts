@@ -3,7 +3,7 @@ import {
   compileReactiveHTMLAsComponentTemplate,
   compileStyleAsComponentStyle,
   createComponent,
-  VirtualCustomElementNode,
+  VirtualComponentNode,
 } from '@lirx/dom';
 import { IGenericFormInput } from '../../../../form-control/form-input/form-input.class';
 import {
@@ -23,7 +23,7 @@ export type IMatErrorPatternComponentController = IGenericFormInput & {
   pattern$: IObservable<RegExp | undefined>;
 }
 
-interface IData {
+interface ITemplateData {
   pattern$: IObservable<RegExp | undefined>;
 }
 
@@ -32,7 +32,7 @@ interface IMatErrorPatternComponentConfig {
   inputs: [
     ['controller', IMatErrorPatternComponentController],
   ];
-  data: IData;
+  data: ITemplateData;
 }
 
 export const MatErrorPatternComponent = createComponent<IMatErrorPatternComponentConfig>({
@@ -46,7 +46,7 @@ export const MatErrorPatternComponent = createComponent<IMatErrorPatternComponen
   inputs: [
     ['controller'],
   ],
-  init: (node: VirtualCustomElementNode<IMatErrorPatternComponentConfig>): IData => {
+  init: (node: VirtualComponentNode<IMatErrorPatternComponentConfig>): ITemplateData => {
     const controller$ = node.inputs.get$('controller');
 
     matInputStateHasErrorModifierFunction(node, [controller$, 'pattern']);

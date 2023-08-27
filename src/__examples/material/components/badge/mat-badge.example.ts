@@ -1,12 +1,12 @@
 import { signal } from '@lirx/core';
-import { bootstrap, compileReactiveHTMLAsComponentTemplate, compileStyleAsComponentStyle, createComponent } from '@lirx/dom';
+import { bootstrap, compileReactiveHTMLAsComponentTemplate, compileStyleAsComponentStyle, Component } from '@lirx/dom';
 import { MatBadgeModifier } from '@lirx/dom-material';
 
 interface IConfig {
   element: HTMLElement;
 }
 
-const MatBadgeExampleComponent = createComponent<IConfig>({
+const MatBadgeExampleComponent = new Component({
   name: 'mat-badge-example',
   template: compileReactiveHTMLAsComponentTemplate({
     html: `
@@ -28,7 +28,7 @@ const MatBadgeExampleComponent = createComponent<IConfig>({
       padding: 20px;
     }
   `)],
-  init: () => {
+  templateData: () => {
     return {
       dot: signal(false),
     };

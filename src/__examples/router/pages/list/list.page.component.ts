@@ -5,14 +5,14 @@ import { AppMenuPageComponent } from '../components/menu/menu.component';
 
 /** COMPONENT **/
 
-interface IData {
+interface ITemplateData {
   readonly navigation: INavigation;
   readonly canBack$: IObservable<boolean>;
 }
 
 interface IAppListPageComponentConfig {
   element: HTMLElement;
-  data: IData;
+  data: ITemplateData;
 }
 
 export const AppListPageComponent = createComponent<IAppListPageComponentConfig>({
@@ -34,11 +34,11 @@ export const AppListPageComponent = createComponent<IAppListPageComponentConfig>
       <app-menu></app-menu>
       <div rx-router-outlet></div>
     `,
-    customElements: [
+    components: [
       AppMenuPageComponent,
     ],
   }),
-  init: (): IData => {
+  init: (): ITemplateData => {
     const canBack$ = map$$(idle(), () => NAVIGATION.canBack());
     return {
       navigation: NAVIGATION,

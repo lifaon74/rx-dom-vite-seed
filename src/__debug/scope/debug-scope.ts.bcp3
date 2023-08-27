@@ -1,0 +1,226 @@
+type ExploreId = number;
+
+let exploreId: ExploreId = 0;
+
+function getExploreId(): ExploreId {
+  return ++exploreId;
+}
+
+type OnDestroyCallback = (value: any) => void;
+
+class GraphNode {
+  static ROOT: GraphNode = new GraphNode(void 0, () => {});
+
+  readonly value: any;
+  readonly onDestroy: OnDestroyCallback;
+  readonly parents: Set<GraphNode>;
+  readonly children: Set<GraphNode>;
+  exploreId: ExploreId;
+  isRootReachableExplore: boolean;
+
+  constructor(
+    value: any,
+    onDestroy: OnDestroyCallback,
+  ) {
+    this.value = value;
+    this.onDestroy = onDestroy;
+    this.parents = new Set<GraphNode>();
+    this.children = new Set<GraphNode>();
+    this.exploreId = 0;
+    this.isRootReachableExplore = false;
+  }
+
+  // addParent(
+  //   parent: GraphNode,
+  // ): void {
+  //   this.parents.add(parent);
+  //   parent.children.add(this);
+  // }
+  //
+  // removeParent(
+  //   parent: GraphNode,
+  //   exploreId: ExploreId = getExploreId(),
+  // ): void {
+  //   this.parents.delete(parent);
+  //   parent.children.delete(this);
+  //   this.garbageCollect(exploreId);
+  // }
+
+  hasChild(
+    child: GraphNode,
+  ): boolean {
+    return this.children.has(child);
+  }
+
+  addChild(
+    child: GraphNode,
+  ): void {
+    this.children.add(child);
+    child.parents.add(this);
+  }
+
+  removeChild(
+    child: GraphNode,
+    exploreId: ExploreId = getExploreId(),
+  ): void {
+    this.children.delete(child);
+    child.parents.delete(this);
+    child.garbageCollect(exploreId);
+  }
+
+  isRootReachable(
+    exploreId: ExploreId,
+  ): boolean {
+    if (this === GraphNode.ROOT) {
+      return true;
+    } else {
+      if (this.exploreId !== exploreId) {
+        this.exploreId = exploreId;
+        this.isRootReachableExplore = false;
+
+        let result: IteratorResult<GraphNode>;
+        while (!(result = this.parents[Symbol.iterator]().next()).done) {
+          if (result.value.value.isRootReachable(exploreId)) {
+            this.isRootReachableExplore = true;
+            break;
+          }
+        }
+      }
+      return this.isRootReachableExplore;
+    }
+  }
+
+  garbageCollect(
+    exploreId: ExploreId,
+  ): void {
+    if (!this.isRootReachable(exploreId)) {
+      this.onDestroy(this.value);
+      let result: IteratorResult<GraphNode>;
+      while (!(result = this.children[Symbol.iterator]().next()).done) {
+        this.removeChild(result.value);
+      }
+    }
+  }
+}
+
+type ContextOnDestroyCallback = (self: any) => void;
+
+class Context {
+  readonly graphNode: GraphNode;
+
+  constructor(
+    onDestroy: ContextOnDestroyCallback,
+  ) {
+    this.graphNode = new GraphNode(this, onDestroy);
+  }
+}
+
+class Value<GValue> extends Context {
+  readonly value: GValue;
+  readonly destroy: (value: GValue) => void;
+
+  constructor(
+    value: GValue,
+    destroy: (value: GValue) => void,
+  ) {
+    super((self: this): void => {
+      console.log('destroy value');
+      self.destroy(self.value);
+    });
+    this.value = value;
+    this.destroy = destroy;
+  }
+
+  addContext(
+    context: Context | null,
+  ): this {
+    if (context === null) {
+      context.graphNode.addChild(this.graphNode);
+    }
+    return this;
+  }
+
+  removeContext(
+    context: Context,
+  ): void {
+    context.graphNode.removeChild(this.graphNode);
+  }
+}
+
+class Scope extends Context {
+  static ROOT_SCOPE = new Scope(GraphNode.)
+  constructor(
+    parentScope: Scope,
+  ) {
+    super((self: this): void => {
+      console.log('destroy scope');
+      self.destroy(self.value);
+    });
+  }
+
+  destroy(): void {
+    Array.from(this.values).forEach((value: Value<any>) => {
+      value.removeOwner(this);
+    });
+  }
+}
+
+class Object extends Value<void> {
+  properties: Map<string, Value<any>>;
+
+  constructor(
+    owner: Scope,
+  ) {
+    super(owner, void 0, () => {
+      Array.from(this.properties).forEach(() => {
+
+      });
+    });
+    this.properties = new Map<string, Value<any>>();
+  }
+
+  setProperty(
+    key: string,
+    value: Value<any>,
+  ): void {
+    this.properties.set(key, value);
+    value.addOwner(this.owners);
+  }
+}
+
+// class Closure<GArgument> extends Value<any> {
+//   readonly scope: Scope;
+//
+//   constructor(
+//     scope: Scope,
+//     fnc: () => void,
+//   ) {
+//     super(
+//       scope,
+//       fnc,
+//     );
+//   }
+// }
+
+/*-------------*/
+
+async function debugScope1() {
+  const scope = new Scope();
+
+  const a = new Value( 'a', () => console.log('destroy A'));
+  const b = new Value(1, () => console.log('destroy 1'));
+
+  const ctx = new Object(scope);
+
+  // const c = new Closure(scope, () => {
+  //
+  // });
+
+  scope.destroy();
+}
+
+/*-------------*/
+
+export function debugScope(): void {
+  debugScope1();
+}

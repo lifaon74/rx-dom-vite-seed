@@ -17,7 +17,7 @@ export const AppNotFoundPageComponent = createComponent<IAppNotFoundPageComponen
         Home
       </v-link>
     `,
-    customElements: [
+    components: [
       VirtualLinkComponent,
     ],
   }),

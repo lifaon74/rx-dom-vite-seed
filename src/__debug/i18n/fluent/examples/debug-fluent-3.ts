@@ -1,10 +1,10 @@
 import { $log, map$$, signal, single, string$$ } from '@lirx/core';
 import { createDateTimeFormatFunction } from '../../intl/date-time/date-time-format.class';
-import { LOCALES$ } from '../../intl/locale/locales.constants';
+import {  LOCALES } from '../../intl/locale/locales.constants';
 import { ObservableTranslations } from '../../intl/translate/observable/observable-translations.class';
 import {
   convertObjectOfObservableLikesToSignalTranslateVariables,
-} from '../../intl/translate/signal/functions/convert-object-of-observable-likes-to-signal-translate-variables';
+} from '../../intl/translate/__signal/functions/convert-object-of-observable-likes-to-signal-translate-variables';
 import { Translations } from '../../intl/translate/translations.class';
 import { ITranslationsEntry } from '../../intl/translate/types/class/translations-entry.type';
 import { ITranslateFunctionFunctions } from '../../intl/translate/types/translate-function-functions.type';
@@ -16,8 +16,8 @@ import {
   convertListFormatFunctionToFluentListFormat,
 } from '../built-in/call-function/built-in/list/convert-list-format-function-to-fluent-list-format';
 import { createFluentMessageOptions } from '../built-in/message/create-fluent-message-options';
-import { FluentLoaderSignalTranslationsStore } from '../signal/fluent-loader-signal-translations-store.class';
-import { FluentSignalTranslationsStore } from '../signal/fluent-signal-translations-store.class';
+import { FluentLoaderSignalTranslationsStore } from '../__signal/fluent-loader-signal-translations-store.class';
+import { FluentSignalTranslationsStore } from '../__signal/fluent-signal-translations-store.class';
 
 import messages from './samples/01/sample-01.en';
 
@@ -150,7 +150,7 @@ function debugFluentStore4(): void {
     photoCount,
     userGender,
     duration,
-    LOCALES$,
+    LOCALES,
   });
 }
 

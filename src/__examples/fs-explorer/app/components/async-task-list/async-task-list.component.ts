@@ -1,4 +1,4 @@
-import { compileReactiveHTMLAsComponentTemplate, compileStyleAsComponentStyle, createComponent, VirtualCustomElementNode } from '@lirx/dom';
+import { compileReactiveHTMLAsComponentTemplate, compileStyleAsComponentStyle, createComponent, VirtualComponentNode } from '@lirx/dom';
 import { IObservable, single } from '@lirx/core';
 import {
   AppAsyncTaskComponent,
@@ -21,25 +21,25 @@ export interface IAppAsyncTaskListComponentTask {
  * COMPONENT: 'app-async-task-list'
  */
 
-interface IData {
+interface ITemplateData {
   readonly tasks$: IObservable<readonly IAppAsyncTaskListComponentTask[]>;
 }
 
 interface IAppAsyncTaskListComponentConfig {
   element: HTMLElement;
-  data: IData;
+  data: ITemplateData;
 }
 
 export const AppAsyncTaskListComponent = createComponent<IAppAsyncTaskListComponentConfig>({
   name: 'app-async-task-list',
   template: compileReactiveHTMLAsComponentTemplate({
     html,
-    customElements: [
+    components: [
       AppAsyncTaskComponent,
     ],
   }),
   styles: [compileStyleAsComponentStyle(style)],
-  init: (node: VirtualCustomElementNode<IAppAsyncTaskListComponentConfig>): IData => {
+  init: (node: VirtualComponentNode<IAppAsyncTaskListComponentConfig>): ITemplateData => {
 
     const tasks$ = single<readonly IAppAsyncTaskListComponentTask[]>([
       {

@@ -1,4 +1,4 @@
-import { compileStyleAsComponentStyle, createComponent, INJECT_CONTENT_TEMPLATE, VirtualCustomElementNode } from '@lirx/dom';
+import { compileStyleAsComponentStyle, createComponent, INJECT_CONTENT_TEMPLATE, VirtualComponentNode } from '@lirx/dom';
 
 // @ts-ignore
 import style from './mat-errors-container.component.scss?inline';
@@ -17,7 +17,7 @@ export const MatErrorsContainerComponent = createComponent<IMatErrorsContainerCo
   styles: [
     compileStyleAsComponentStyle(style),
   ],
-  init: (node: VirtualCustomElementNode<IMatErrorsContainerComponentConfig>): void => {
+  init: (node: VirtualComponentNode<IMatErrorsContainerComponentConfig>): void => {
   },
 });
 

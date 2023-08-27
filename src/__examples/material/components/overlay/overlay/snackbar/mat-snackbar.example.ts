@@ -1,12 +1,4 @@
-import { single } from '@lirx/core';
-import { VirtualCustomElementNode } from '@lirx/dom';
-import {
-  IMatSnackbarComponentConfig,
-  IMatSnackbarData,
-  MatOverlay,
-  MatSnackbarController,
-  MatSnackbarQueueController,
-} from '@lirx/dom-material';
+import { openMatSnackbar } from '@lirx/dom-material';
 
 /*----------------------------*/
 
@@ -26,42 +18,16 @@ function matSnackbarExample1(): void {
   openButton.innerText = 'open';
   document.body.appendChild(openButton);
 
-  let snackbar: MatOverlay<VirtualCustomElementNode<IMatSnackbarComponentConfig>, IMatSnackbarData> | undefined;
-
-  openButton.onclick = () => {
-    if (snackbar === void 0) {
-      snackbar = MatSnackbarController.open(
-        single({
-          message: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas tincidunt',
-          horizontalPosition: 'left',
-          verticalPosition: 'bottom',
-          actionText: 'Click me',
-          onClickAction: () => {
-            snackbar?.close();
-          },
-        }),
-      );
-    } else {
-      snackbar.close();
-      snackbar = void 0;
-    }
-  };
-}
-
-function matSnackbarExample2(): void {
-
-  const openButton = document.createElement('button');
-  openButton.innerText = 'open';
-  document.body.appendChild(openButton);
-
   const open = () => {
-    const openPromise = MatSnackbarQueueController.openStatic({
+    const openPromise = openMatSnackbar({
       message: getRandomText(),
-      actionText: 'click me',
+      horizontalPosition: 'left',
+      verticalPosition: 'bottom',
+      actionText: 'Click me',
       onClickAction: () => {
         openPromise.then((snackbar) => snackbar.close());
       },
-    }, { displayDuration: 10000 });
+    }, { displayDuration: 10000, queueStrategy: 'none' });
   };
 
   openButton.onclick = open;
@@ -71,5 +37,4 @@ function matSnackbarExample2(): void {
 
 export function matSnackbarExample(): void {
   matSnackbarExample1();
-  // matSnackbarExample2();
 }

@@ -11,7 +11,7 @@ export function examples(): void {
   // mailClientExample();
   // matIconsSearchExample();
   // routerExample();
-  materialExample();
   // ticTacToeExample();
   // fsExplorerExample();
+  materialExample();
 }

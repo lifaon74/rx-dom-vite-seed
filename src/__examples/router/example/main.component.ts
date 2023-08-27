@@ -13,7 +13,7 @@ import {
   compileReactiveHTMLAsComponentTemplate,
   compileStyleAsComponentStyle,
   createComponent,
-  VirtualCustomElementNode,
+  VirtualComponentNode,
 } from '@lirx/dom';
 import { MatProgressBarComponent, NODE_REFERENCE_MODIFIER } from '@lirx/dom-material';
 import { createRXRouter, IRXRouter, IRXRouterNavigationState, IRXRouterOutletElement, NAVIGATION } from '@lirx/router';
@@ -38,14 +38,14 @@ function createFakeProgressObservable(
 
 /** COMPONENT **/
 
-interface IData {
+interface ITemplateData {
   readonly $routerOutletElement: IObserver<IRXRouterOutletElement>;
   readonly progress$: IObservable<number>;
 }
 
 interface IAppMainComponentConfig {
   element: HTMLElement;
-  data: IData;
+  data: ITemplateData;
 }
 
 export const AppMainComponent = createComponent<IAppMainComponentConfig>({
@@ -62,7 +62,7 @@ export const AppMainComponent = createComponent<IAppMainComponentConfig>({
         #ref="$.$routerOutletElement"
       ></div>
     `,
-    customElements: [
+    components: [
       MatProgressBarComponent,
     ],
     modifiers: [
@@ -91,7 +91,7 @@ export const AppMainComponent = createComponent<IAppMainComponentConfig>({
       display: none;
     }
   `)],
-  init: (node: VirtualCustomElementNode<IAppMainComponentConfig>): IData => {
+  init: (node: VirtualComponentNode<IAppMainComponentConfig>): ITemplateData => {
     // const routes = APP_ROUTES_ASYNC;
     const routes = APP_ROUTES;
 

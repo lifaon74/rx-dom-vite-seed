@@ -1,13 +1,13 @@
-import { IObservable, map$$, mapDistinct$$, shareRL$$, switchMap$$ } from '@lirx/core';
+import { distinct$$, IObservable, map$$, shareRL$$, switchMap$$ } from '@lirx/core';
 import { ILocalesList } from '../../locale/locales-list.type';
-import { LOCALES$ } from '../../locale/locales.constants';
+import { LOCALES } from '../../locale/locales.constants';
 import { IObservableNumberFormatFunction } from './types/observable-number-format-function.type';
 
 export class ObservableNumberFormat {
   readonly #format: IObservableNumberFormatFunction;
 
   constructor(
-    locales$: IObservable<ILocalesList> = LOCALES$,
+    locales$: IObservable<ILocalesList> = LOCALES.observe,
     options?: Intl.NumberFormatOptions,
   ) {
     this.#format = (
@@ -25,11 +25,13 @@ export class ObservableNumberFormat {
       });
 
       return shareRL$$(
-        switchMap$$(format$, (format: Intl.NumberFormat): IObservable<string> => {
-          return mapDistinct$$(value$, (value: number): string => {
-            return format.format(value);
-          });
-        }),
+        distinct$$(
+          switchMap$$(format$, (format: Intl.NumberFormat): IObservable<string> => {
+            return map$$(value$, (value: number): string => {
+              return format.format(value);
+            });
+          }),
+        ),
       );
     };
   }

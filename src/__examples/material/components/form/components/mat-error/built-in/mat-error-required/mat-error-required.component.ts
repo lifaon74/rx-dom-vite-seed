@@ -3,7 +3,7 @@ import {
   compileReactiveHTMLAsComponentTemplate,
   compileStyleAsComponentStyle,
   createComponent,
-  VirtualCustomElementNode,
+  VirtualComponentNode,
 } from '@lirx/dom';
 import { IGenericFormInput } from '../../../../form-control/form-input/form-input.class';
 import {
@@ -37,7 +37,7 @@ export const MatErrorRequiredComponent = createComponent<IMatErrorRequiredCompon
   inputs: [
     ['controller'],
   ],
-  init: (node: VirtualCustomElementNode<IMatErrorRequiredComponentConfig>): void => {
+  init: (node: VirtualComponentNode<IMatErrorRequiredComponentConfig>): void => {
     const controller$ = node.inputs.get$('controller');
 
     matInputStateHasErrorModifierFunction(node, [controller$, 'required']);

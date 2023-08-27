@@ -51,7 +51,7 @@ const MatInputTextExampleComponent = createComponent<IMatInputTextComponentConfi
         >RESET</button>
       </form>
     `,
-    customElements: [
+    components: [
       MatInputContainerComponent,
       MatLabelComponent,
       MatInputTextComponent,

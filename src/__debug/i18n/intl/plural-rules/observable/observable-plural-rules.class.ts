@@ -1,13 +1,13 @@
-import { IObservable, map$$, mapDistinct$$, shareRL$$, switchMap$$ } from '@lirx/core';
+import { distinct$$, IObservable, map$$, shareRL$$, switchMap$$ } from '@lirx/core';
 import { ILocalesList } from '../../locale/locales-list.type';
-import { LOCALES$ } from '../../locale/locales.constants';
+import { LOCALES } from '../../locale/locales.constants';
 import { IObservablePluralRulesSelectFunction } from './types/observable-plural-rules-select-function.type';
 
 export class ObservablePluralRules {
   readonly #select: IObservablePluralRulesSelectFunction;
 
   constructor(
-    locales$: IObservable<ILocalesList> = LOCALES$,
+    locales$: IObservable<ILocalesList> = LOCALES.observe,
     options?: Intl.PluralRulesOptions,
   ) {
     this.#select = (
@@ -25,11 +25,13 @@ export class ObservablePluralRules {
       });
 
       return shareRL$$(
-        switchMap$$(pluralRules$, (pluralRules: Intl.PluralRules): IObservable<Intl.LDMLPluralRule> => {
-          return mapDistinct$$(value$, (value: number): Intl.LDMLPluralRule => {
-            return pluralRules.select(value);
-          });
-        }),
+        distinct$$(
+          switchMap$$(pluralRules$, (pluralRules: Intl.PluralRules): IObservable<Intl.LDMLPluralRule> => {
+            return map$$(value$, (value: number): Intl.LDMLPluralRule => {
+              return pluralRules.select(value);
+            });
+          }),
+        ),
       );
     };
   }

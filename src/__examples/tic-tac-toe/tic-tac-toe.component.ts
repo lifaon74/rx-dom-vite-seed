@@ -3,7 +3,7 @@ import {
   compileReactiveHTMLAsComponentTemplate,
   compileStyleAsComponentStyle,
   createComponent,
-  VirtualCustomElementNode,
+  VirtualComponentNode,
   VirtualDOMNode,
   virtualNodeEffect,
 } from '@lirx/dom';
@@ -30,7 +30,7 @@ interface IOnSelected {
   ): IObserver<void>;
 }
 
-interface IData {
+interface ITemplateData {
   readonly matrix: ISignal<TicTacToeMatrix>;
   readonly player: ISignal<TicTacToePlayer>;
   readonly $$onSelected: IOnSelected;
@@ -39,19 +39,19 @@ interface IData {
 
 interface ITicTacToeComponentConfig {
   element: HTMLElement;
-  data: IData;
+  data: ITemplateData;
 }
 
 export const TicTacToeComponent = createComponent<ITicTacToeComponentConfig>({
   name: 'app-tic-tac-toe',
   template: compileReactiveHTMLAsComponentTemplate({
     html,
-    customElements: [
+    components: [
       TicTacToeCellComponent,
     ],
   }),
   styles: [compileStyleAsComponentStyle(style)],
-  init: (node: VirtualCustomElementNode<ITicTacToeComponentConfig>): IData => {
+  init: (node: VirtualComponentNode<ITicTacToeComponentConfig>): ITemplateData => {
     const matrix = signal<TicTacToeMatrix>(createTicTacToeMatrix());
     const player = signal<TicTacToePlayer>('player-1');
     const winner = computed(() => getTicTacToeMatrixWinner(matrix()));

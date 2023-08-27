@@ -35,7 +35,7 @@ import {
   createComponent,
   IClassNamesList,
   ISetStylePropertyOrNull,
-  VirtualCustomElementNode,
+  VirtualComponentNode,
   VirtualElementNode,
 } from '@lirx/dom';
 import { NODE_REFERENCE_MODIFIER } from '@lirx/dom-material';
@@ -82,7 +82,7 @@ type ISelectedFiles = Set<string>;
  * COMPONENT: 'app-files-list'
  */
 
-interface IData {
+interface ITemplateData {
   readonly $filesContainer: IObserver<VirtualElementNode<HTMLElement>>;
   readonly files$: IObservable<IFilesListExtended>;
   readonly isFileSelected$$: (id: string) => IObservable<boolean>;
@@ -102,14 +102,14 @@ interface IAppFilesListComponentConfig {
   outputs: [
     ['selectedFiles', ReadonlySet<IFileEntry>],
   ];
-  data: IData;
+  data: ITemplateData;
 }
 
 export const AppFilesListComponent = createComponent<IAppFilesListComponentConfig>({
   name: 'app-files-list',
   template: compileReactiveHTMLAsComponentTemplate({
     html,
-    customElements: [],
+    components: [],
     modifiers: [
       NODE_REFERENCE_MODIFIER,
     ],
@@ -123,7 +123,7 @@ export const AppFilesListComponent = createComponent<IAppFilesListComponentConfi
   outputs: [
     'selectedFiles',
   ],
-  init: (node: VirtualCustomElementNode<IAppFilesListComponentConfig>): IData => {
+  init: (node: VirtualComponentNode<IAppFilesListComponentConfig>): ITemplateData => {
     const dummyFiles = Array.from({ length: 100 }, (_, index: number): IFileEntry => {
       return {
         id: String(index),
@@ -926,7 +926,7 @@ type IGetPointerSelectAreaObservablesResultDataKeys =
   | 'pointerSelectAreaStyleHeight$'
   ;
 
-interface IGetPointerSelectAreaObservablesResult extends Pick<IData, IGetPointerSelectAreaObservablesResultDataKeys> {
+interface IGetPointerSelectAreaObservablesResult extends Pick<ITemplateData, IGetPointerSelectAreaObservablesResultDataKeys> {
 }
 
 function getPointerSelectAreaObservables(

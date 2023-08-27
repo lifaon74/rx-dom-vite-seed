@@ -1,10 +1,14 @@
 import { IListFormatFunction } from '../../../../../intl/list/types/list-format-function.type';
 import {
   IFluentListFormatFunction,
-  IFluentListFormatFunctionArguments,
-  IFluentListFormatFunctionItem,
+  IFluentListFormatFunctionArguments, IFluentListFormatFunctionList,
+  IFluentListFormatFunctionListItem,
 } from './fluent-list-format-function.type';
 
+/**
+ * @deprecated
+ * TODO
+ */
 export function convertListFormatFunctionToFluentListFormat(
   listFormat: IListFormatFunction,
 ): IFluentListFormatFunction {
@@ -37,10 +41,10 @@ function normalizeFluentListFormatFunctionArguments(
   let options: Intl.ListFormatOptions | undefined;
 
   if (typeof args[args.length - 1] === 'string') {
-    value = normalizeFluentListFormatFunctionValues(args as readonly IFluentListFormatFunctionItem[]);
+    value = convertFluentListFormatFunctionListToArrayOfString(args as readonly IFluentListFormatFunctionListItem[]);
     options = void 0;
   } else {
-    value = normalizeFluentListFormatFunctionValues(args.slice(0, -1) as readonly IFluentListFormatFunctionItem[]);
+    value = convertFluentListFormatFunctionListToArrayOfString(args.slice(0, -1) as readonly IFluentListFormatFunctionListItem[]);
     options = args[args.length - 1] as Intl.ListFormatOptions;
   }
 
@@ -50,12 +54,12 @@ function normalizeFluentListFormatFunctionArguments(
   };
 }
 
-function normalizeFluentListFormatFunctionValues(
-  values: readonly IFluentListFormatFunctionItem[],
+function convertFluentListFormatFunctionListToArrayOfString(
+  list: IFluentListFormatFunctionList,
 ): Iterable<string> {
   const _values: string[] = [];
-  for (let i = 0, l = values.length; i < l; i++) {
-    const value: IFluentListFormatFunctionItem = values[i];
+  for (let i = 0, l = list.length; i < l; i++) {
+    const value: IFluentListFormatFunctionListItem = list[i];
     if (typeof value === 'string') {
       _values.push(value);
     } else {

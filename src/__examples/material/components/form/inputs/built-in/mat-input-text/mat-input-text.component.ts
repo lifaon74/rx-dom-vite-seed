@@ -1,5 +1,5 @@
 import { $$map, IObservable, IObserver, map$$, single, switchMap$$ } from '@lirx/core';
-import { compileReactiveHTMLAsComponentTemplate, compileStyleAsComponentStyle, createComponent, VirtualCustomElementNode } from '@lirx/dom';
+import { compileReactiveHTMLAsComponentTemplate, compileStyleAsComponentStyle, createComponent, VirtualComponentNode } from '@lirx/dom';
 import { IGenericFormInputText } from '../../../form-control/form-input/built-in/form-input-text/form-input-text.class';
 import { IFormInputValue } from '../../../form-control/form-input/types/form-input-value.type';
 import { INVALID_TYPE_TOKEN } from '../../../form-control/tokens/invalid-type.token';
@@ -23,7 +23,7 @@ export type IMatInputTextComponentType =
   // | 'tel'
 ;
 
-interface IData {
+interface ITemplateData {
   readonly controller$: IObservable<IGenericFormInputText>;
   readonly type$: IObservable<IMatInputTextComponentType>;
   readonly value$: IObservable<string>;
@@ -40,7 +40,7 @@ interface IMatInputTextComponentConfig {
     ['controller', IGenericFormInputText],
     ['type', IMatInputTextComponentType],
   ];
-  data: IData;
+  data: ITemplateData;
 }
 
 export const MatInputTextComponent = createComponent<IMatInputTextComponentConfig>({
@@ -58,7 +58,7 @@ export const MatInputTextComponent = createComponent<IMatInputTextComponentConfi
     ['controller'],
     ['type', 'text'],
   ],
-  init: (node: VirtualCustomElementNode<IMatInputTextComponentConfig>): IData => {
+  init: (node: VirtualComponentNode<IMatInputTextComponentConfig>): ITemplateData => {
     const controller$ = node.inputs.get$('controller');
     const type$ = node.inputs.get$('type');
 
