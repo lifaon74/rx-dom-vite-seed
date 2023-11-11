@@ -1,0 +1,457 @@
+import { Selector, Store, StoreAction, Mapper, StoreView, StoreReducer } from '@lirx/store';
+import { fromSelfEventTarget, filter$$, switchMap$$, IObservable, fromEventTarget, takeUntil$$, first$$ } from '@lirx/core';
+import { IUnsubscribe } from '@lirx/unsubscribe';
+
+/** TYPES **/
+
+export interface IFileEntry {
+  readonly id: string;
+  readonly name: string;
+  readonly previewURL: string;
+  readonly size: string;
+  readonly modified: string;
+}
+
+export type IFileList = readonly IFileEntry[];
+
+// export interface IFileEntryExtended extends IFileEntry {
+//   readonly $reference$: IMulticastReplayLastSource<VirtualElementNode<HTMLElement>>;
+// }
+//
+// export type IFilesListExtended = readonly IFileEntryExtended[];
+
+export type ISelectedFileIds = ReadonlySet<string>;
+
+/** STORE **/
+
+/* STATE */
+
+export interface IFileListStoreState {
+  readonly container: HTMLElement;
+  readonly files: IFileList;
+  readonly selectedFileIds: ISelectedFileIds;
+  readonly currentFileId: string | undefined;
+}
+
+/* ACTIONS */
+
+export const setFileContainerAction = StoreAction.defer<IFileListStoreState, (container: HTMLElement) => void>((state: IFileListStoreState, container: HTMLElement): IFileListStoreState => {
+  return {
+    ...state,
+    container,
+  };
+});
+
+export const selectAllFilesAction = new StoreAction<IFileListStoreState, []>((state: IFileListStoreState): IFileListStoreState => {
+  return {
+    ...state,
+    selectedFileIds: new Set<string>(
+      state.files.map(({ id }: IFileEntry): string => id),
+    ),
+    currentFileId: void 0,
+  };
+});
+
+export const selectFileAction = new StoreAction<IFileListStoreState, [id: string]>(
+  (
+    state: IFileListStoreState,
+    id: string,
+  ): IFileListStoreState => {
+    return {
+      ...state,
+      selectedFileIds: new Set<string>([id]),
+      currentFileId: id,
+    };
+  },
+);
+
+export const deselectFileAction = new StoreAction<IFileListStoreState, [id: string]>(
+  (
+    state: IFileListStoreState,
+    id: string,
+  ): IFileListStoreState => {
+    const selectedFileIds: Set<string> = new Set<string>(state.selectedFileIds);
+    selectedFileIds.delete(id);
+
+    return {
+      ...state,
+      selectedFileIds,
+      currentFileId: void 0,
+    };
+  },
+);
+
+
+/* SELECTORS */
+
+export const containerSelector = new StoreReducer<IFileListStoreState, () => HTMLElement>(({ container }: IFileListStoreState): HTMLElement => {
+  return container;
+});
+
+export const filesSelector = new Selector<IFileListStoreState, IFileList>(({ files }: IFileListStoreState): IFileList => {
+  return files;
+});
+
+export const selectedFileIdsSelector = new Selector<IFileListStoreState, ISelectedFileIds>(({ selectedFileIds }: IFileListStoreState): ISelectedFileIds => {
+  return selectedFileIds;
+});
+
+/* MAPPERS */
+
+export const isFileSelectedMapper = new Mapper<IFileListStoreState, [id: string], boolean>(({ selectedFileIds }: IFileListStoreState, id: string): boolean => {
+  return selectedFileIds.has(id);
+});
+
+/* MISC */
+
+function isPrimaryPointerButton(
+  event: MouseEvent,
+): boolean {
+  return event.button === 0;
+}
+
+const pointerDownWindow$ = fromEventTarget<'pointerdown', PointerEvent>(window, 'pointerdown');
+const pointerMoveWindow$ = fromEventTarget<'pointermove', PointerEvent>(window, 'pointermove');
+const pointerUpWindow$ = fromEventTarget<'pointerup', PointerEvent>(window, 'pointerup');
+
+
+export interface ISetHTMLElementOfFileFunction {
+  (
+    id: string,
+    element: HTMLElement,
+  ): IUnsubscribe;
+}
+
+export const setHTMLElementOfFileView = new StoreView<Store<IFileListStoreState>, ISetHTMLElementOfFileFunction>(
+  (
+    store: Store<IFileListStoreState>,
+  ): ISetHTMLElementOfFileFunction => {
+    const selectFile = selectFileAction.create(store);
+    const deselectFile = deselectFileAction.create(store);
+    // const selectedFileIds$ = selectedFileIdsSelector.create(store);
+    const getSelectedFileIds = () => selectedFileIdsSelector.select(store);
+
+    return (
+      id: string,
+      element: HTMLElement,
+    ): IUnsubscribe => {
+      const pointerDownFile$ = filter$$(
+        fromEventTarget<'pointerdown', PointerEvent>(element, 'pointerdown'),
+        isPrimaryPointerButton,
+      );
+      const dragStartFile$ = fromEventTarget<'dragstart', Event>(element, 'dragstart');
+
+      const selectThisFile = (): void => {
+        selectFile(id);
+      };
+
+      const selectFileRange = (): void => {
+        // if (getCurrentFileIndex() === -1) {
+        //   selectThisFile();
+        // } else {
+        //   $selectedFiles(
+        //     new Set(getFilesBetweenIndexes(getCurrentFileIndex(), index)),
+        //   );
+        // }
+      };
+
+      const deselectThisFile = () => {
+        deselectFile(id);
+      };
+
+      const appendThisFile = (): void => {
+        // $selectedFiles(
+        //   new Set([
+        //     ...getSelectedFiles(),
+        //     fileId,
+        //   ]),
+        // );
+        // $currentFileIndex(index);
+      };
+
+      const appendFileRange = (): void => {
+        // if (getCurrentFileIndex() === -1) {
+        //   selectThisFile();
+        // } else {
+        //   $selectedFiles(
+        //     new Set([
+        //       ...getSelectedFiles(),
+        //       ...getFilesBetweenIndexes(getCurrentFileIndex(), index),
+        //     ]),
+        //   );
+        // }
+      };
+
+      const pointerUpUntilDrag$ = takeUntil$$(first$$(pointerUpWindow$), first$$(dragStartFile$));
+
+      let _unsubscribeOfPointerUpUntilDrag: IUnsubscribe | undefined;
+
+      const unsubscribeOfPointerUpUntilDrag = (): void => {
+        if (_unsubscribeOfPointerUpUntilDrag !== void 0) {
+          _unsubscribeOfPointerUpUntilDrag();
+          _unsubscribeOfPointerUpUntilDrag = void 0;
+        }
+      };
+
+      const unsubscribeOfPointerDownFile = pointerDownFile$((event: PointerEvent): void => {
+        unsubscribeOfPointerUpUntilDrag();
+        const selectedFileIds: ISelectedFileIds = getSelectedFileIds();
+
+        // fs.read(new URL(fileId), new Uint8Array(1e6), { start: 0, end: 5 })($log); // TODO
+
+        if (selectedFileIds.has(id)) {
+          _unsubscribeOfPointerUpUntilDrag = pointerUpUntilDrag$((event: PointerEvent): void => {
+            unsubscribeOfPointerUpUntilDrag();
+            if (event.ctrlKey) {
+              deselectThisFile();
+            } else {
+              if (event.shiftKey) {
+                selectFileRange();
+              } else {
+                selectThisFile();
+              }
+            }
+          });
+        } else {
+          if (event.ctrlKey) {
+            if (event.shiftKey) {
+              appendFileRange();
+            } else {
+              appendThisFile();
+            }
+          } else {
+            if (event.shiftKey) {
+              selectFileRange();
+            } else {
+              selectThisFile();
+            }
+          }
+        }
+      });
+
+      return (): void => {
+        unsubscribeOfPointerDownFile();
+        unsubscribeOfPointerUpUntilDrag();
+      };
+    };
+  },
+);
+
+// export interface IOnPointerDownFileActionFunction {
+//   (
+//     event: PointerEvent,
+//     id: string,
+//   ): void;
+// }
+//
+// export const onPointerDownFileAction = new StoreView<Store<IFileListStoreState>, IOnPointerDownFileActionFunction>(
+//   (
+//     store: Store<IFileListStoreState>,
+//   ): IOnPointerDownFileActionFunction => {
+//     const index: number = files.findIndex((file: IFileEntry): boolean => {
+//       return file.id === id;
+//     });
+//
+//     return {
+//       ...state,
+//     };
+//   },
+// );
+
+/** HELPERS **/
+
+export function createFileListStore(
+  container: HTMLElement,
+): Store<IFileListStoreState> {
+  const dummyFiles = Array.from({ length: 100 }, (_, index: number): IFileEntry => {
+    return {
+      id: String(index),
+      name: `file-${index}.txt`,
+      previewURL: `/assets/images/0${Math.floor(Math.random() * 3 + 1)}.jpg`,
+      size: '5KB',
+      modified: 'Today',
+    };
+  });
+
+  const store = Store.create<IFileListStoreState>({
+    container,
+    files: [],
+    selectedFileIds: new Set<string>(),
+    currentFileId: void 0,
+  });
+
+  setupFileListStore(
+    store,
+  );
+
+  store.$state({
+    ...store.state,
+    files: dummyFiles,
+  });
+
+  return store;
+}
+
+export function setupFileListStore(
+  store: Store<IFileListStoreState>,
+): void {
+  setupFileListStoreKeyBoardListener(
+    store,
+  );
+
+  // setupFileListOnClickFileListener(
+  //   store,
+  // );
+}
+
+/* KEYBOARD */
+
+function setupFileListStoreKeyBoardListener(
+  store: Store<IFileListStoreState>,
+): IUnsubscribe {
+  const container$ = containerSelector.create(store);
+  const selectAllFiles = selectAllFilesAction.create(store);
+
+  const ctrlA$ = switchMap$$(container$, (container): IObservable<KeyboardEvent> => {
+    return filter$$(
+      fromSelfEventTarget<'keydown', KeyboardEvent>(container, 'keydown'),
+      (event: KeyboardEvent): boolean => {
+        return event.ctrlKey
+          && (event.key === 'a');
+      },
+    );
+  });
+
+  return ctrlA$((event: KeyboardEvent): void => {
+    event.preventDefault();
+    selectAllFiles();
+  });
+}
+
+// function setupFileListOnClickFileListener(
+//   store: Store<IFileListStoreState>,
+// ): IUnsubscribe {
+//   const getFilesBetweenIndexes = (
+//     a: number,
+//     b: number,
+//   ): string[] => {
+//     if (a > b) {
+//       [a, b] = [b, a];
+//     }
+//
+//     const output: string[] = [];
+//
+//     for (let i = a; i <= b; i++) {
+//       output.push(files[i][0]);
+//     }
+//
+//     return output;
+//   };
+//
+//   return mergeUnsubscribeFunctions(
+//     files.map(([fileId, fileElement]: IFileIdWithElement, index: number): IUnsubscribe => {
+//       const pointerDownFile$ = filter$$(
+//         fromEventTarget<'pointerdown', PointerEvent>(fileElement, 'pointerdown'),
+//         isPrimaryPointerButton,
+//       );
+//       const dragStartFile$ = fromEventTarget<'dragstart', Event>(fileElement, 'dragstart');
+//
+//       const selectThisFile = (): void => {
+//         $selectedFiles(new Set([fileId]));
+//         $currentFileIndex(index);
+//       };
+//
+//       const selectFileRange = (): void => {
+//         if (getCurrentFileIndex() === -1) {
+//           selectThisFile();
+//         } else {
+//           $selectedFiles(
+//             new Set(getFilesBetweenIndexes(getCurrentFileIndex(), index)),
+//           );
+//         }
+//       };
+//
+//       const deselectThisFile = () => {
+//         const newSelectedFiles = new Set(getSelectedFiles());
+//         newSelectedFiles.delete(fileId);
+//         $selectedFiles(newSelectedFiles);
+//         $currentFileIndex(-1);
+//       };
+//
+//       const appendThisFile = (): void => {
+//         $selectedFiles(
+//           new Set([
+//             ...getSelectedFiles(),
+//             fileId,
+//           ]),
+//         );
+//         $currentFileIndex(index);
+//       };
+//
+//       const appendFileRange = (): void => {
+//         if (getCurrentFileIndex() === -1) {
+//           selectThisFile();
+//         } else {
+//           $selectedFiles(
+//             new Set([
+//               ...getSelectedFiles(),
+//               ...getFilesBetweenIndexes(getCurrentFileIndex(), index),
+//             ]),
+//           );
+//         }
+//       };
+//
+//       const pointerUpUntilDrag$ = takeUntil$$(first$$(pointerUpWindow$), first$$(dragStartFile$));
+//
+//       let _unsubscribeOfPointerUpUntilDrag: IUnsubscribe | undefined;
+//
+//       const unsubscribeOfPointerUpUntilDrag = (): void => {
+//         if (_unsubscribeOfPointerUpUntilDrag !== void 0) {
+//           _unsubscribeOfPointerUpUntilDrag();
+//           _unsubscribeOfPointerUpUntilDrag = void 0;
+//         }
+//       };
+//
+//       const unsubscribeOfPointerDownFile = pointerDownFile$((event: PointerEvent): void => {
+//         unsubscribeOfPointerUpUntilDrag();
+//         const selectedFiles: ISelectedFileIds = getSelectedFiles();
+//
+//         // fs.read(new URL(fileId), new Uint8Array(1e6), { start: 0, end: 5 })($log); // TODO
+//
+//         if (selectedFiles.has(fileId)) {
+//           _unsubscribeOfPointerUpUntilDrag = pointerUpUntilDrag$((event: PointerEvent): void => {
+//             unsubscribeOfPointerUpUntilDrag();
+//             if (event.ctrlKey) {
+//               deselectThisFile();
+//             } else {
+//               if (event.shiftKey) {
+//                 selectFileRange();
+//               } else {
+//                 selectThisFile();
+//               }
+//             }
+//           });
+//         } else {
+//           if (event.ctrlKey) {
+//             if (event.shiftKey) {
+//               appendFileRange();
+//             } else {
+//               appendThisFile();
+//             }
+//           } else {
+//             if (event.shiftKey) {
+//               selectFileRange();
+//             } else {
+//               selectThisFile();
+//             }
+//           }
+//         }
+//       });
+//
+//       return () => {
+//         unsubscribeOfPointerDownFile();
+//         unsubscribeOfPointerUpUntilDrag();
+//       };
+//     }),
+//   );
+// }

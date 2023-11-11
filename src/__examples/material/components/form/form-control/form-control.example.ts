@@ -69,6 +69,35 @@ async function formControlExample4() {
   const a = group.get('abc').name;
 }
 
+async function formControlExample5() {
+  // TODO continue here
+
+  /*
+  séparer les inputs des validateurs:
+    inputs:
+      - text input:
+        - inputs:
+          - value: string
+          - valid: boolean
+        - outputs:
+          - valueChange: string
+      - number input => utilise un text input mais avec un style different
+        - inputs:
+          - value: number
+          - valid: boolean
+        - outputs:
+          - valueChange: string
+
+    validateurs:
+      - min validateur =>
+   */
+
+  interface IValidator {
+    (
+      input: any,
+    ): string[]; // list of errors translated
+  }
+}
 /*------------------------------*/
 
 export async function formControlExample() {

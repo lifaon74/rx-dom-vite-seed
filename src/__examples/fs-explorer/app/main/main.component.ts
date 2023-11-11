@@ -1,13 +1,11 @@
-import { compileReactiveHTMLAsComponentTemplate, compileStyleAsComponentStyle, createComponent, VirtualComponentNode } from '@lirx/dom';
-import { AppAsyncTaskListComponent } from '../components/async-task-list/async-task-list.component';
+import { compileReactiveHTMLAsComponentTemplate, compileStyleAsComponentStyle, Component } from '@lirx/dom';
+import { AppFileListComponent } from '../components/file-list/file-list.component';
 import { AppControlBarComponent } from '../components/control-bar/control-bar.component';
-import { AppFilesListComponent } from '../components/files-list/files-list.component';
 
 // @ts-ignore
 import html from './main.component.html?raw';
 // @ts-ignore
 import style from './main.component.scss?inline';
-
 
 /*
 DOC:
@@ -18,28 +16,16 @@ https://support.microsoft.com/en-us/windows/keyboard-shortcuts-in-windows-dcc61a
  * COMPONENT: 'app-main'
  */
 
-interface ITemplateData {
-
-}
-
-interface IAppMainComponentConfig {
-  element: HTMLElement;
-  data: ITemplateData;
-}
-
-export const AppMainComponent = createComponent<IAppMainComponentConfig>({
+export const AppMainComponent = new Component<HTMLElement, object, object>({
   name: 'app-main',
   template: compileReactiveHTMLAsComponentTemplate({
     html,
     components: [
       AppControlBarComponent,
-      AppFilesListComponent,
+      AppFileListComponent,
       // AppAsyncTaskListComponent, // TODO
     ],
   }),
   styles: [compileStyleAsComponentStyle(style)],
-  init: (node: VirtualComponentNode<IAppMainComponentConfig>): ITemplateData => {
-    return {};
-  },
 });
 

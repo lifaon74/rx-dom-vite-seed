@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<propfind xmlns="DAV:">
+    <prop>
+        <resourcetype/>
+        <displayname/>
+        <creationdate/>
+        <getlastmodified/>
+        <supportedlock/>
+        <lockdiscovery/>
+        <quota-available-bytes/>
+        <quota-used-bytes/>
+        <checked-in/>
+        <checked-out/>
+    </prop>
+</propfind>
+

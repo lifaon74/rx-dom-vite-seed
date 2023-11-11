@@ -57,6 +57,7 @@ const config = {
   server: {
     // https: true,
     // host: true,
+    port: '8080',
   },
   optimizeDeps: {
     include: [

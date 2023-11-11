@@ -5,7 +5,7 @@ import {
   IFileSystemReadFunction,
   IFileSystemReadFunctionNotifications,
   IFileSystemReadOptions,
-  urlToPath,
+  urlToPath, IURI,
 } from '@uni-fs/core';
 import {
   googleDriveDownloadFile,
@@ -18,8 +18,8 @@ import {
 } from '../../../../api/google/wrap/map-options-with-google-identity-service-token-loader-full';
 import {
   wrapFunctionWithGoogleIdentityServiceTokenLoaderFull,
-} from '../../../../api/google/wrap/wrap-function-with-google-identity-service-token-loader-full';
-import { googleDriveProtocolGuard } from '../../internal/google-drive-protocol-guard';
+} from '../../../../api/google/wrap/wrap-function-with-google-identity-service-token-loader';
+import { googleDriveSchemeGuard } from '../../internal/google-drive-scheme-guard';
 
 /*----------*/
 
@@ -39,15 +39,15 @@ export function createGoogleDriveFileSystemReadFunction(
   options: ICreateGoogleDriveFileSystemReadFunctionOptions,
 ): IFileSystemReadFunction {
   return (
-    url: URL,
+    uri: string,
     buffer: Uint8Array,
     {
       start,
       end,
     }: IFileSystemReadOptions = {},
   ): IObservable<IFileSystemReadFunctionNotifications> => {
-    return googleDriveProtocolGuard(url, (url: URL): IObservable<IFileSystemReadFunctionNotifications> => {
-      const path: Path = urlToPath(url);
+    return googleDriveSchemeGuard(uri, (uri: IURI): IObservable<IFileSystemReadFunctionNotifications> => {
+      const path: Path = urlToPath(uri);
       const fileId: string = path.basenameOrThrow();
 
       const googleDriveGetFileOptions = {

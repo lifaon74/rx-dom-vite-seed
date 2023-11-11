@@ -10,12 +10,16 @@ import { matProgressBarExample } from './components/progress/progress-bar/mat-pr
 import { matProgressRingExample } from './components/progress/progress-ring/mat-progress-ring.example';
 import { matSidenavContainerExample } from './components/sidenav-container/mat-sidenav-container.example';
 import { matSkeletonExample } from './components/skeleton/mat-skeleton.example';
+import { bootstrap } from '@lirx/dom';
+import { AppMainComponent } from './app/main/main.component';
 
 /**
  * https://mui.com/material-ui/react-snackbar/#api
  * https://material.angular.io/components/snack-bar/overview
  */
 export function materialExample(): void {
+  // bootstrap(AppMainComponent);
+
   // matBadgeExample();
   // matRippleExample();
   // matButtonExample();

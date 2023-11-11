@@ -36,6 +36,7 @@
     "@lirx/mdi": "latest",
     "@lirx/router": "latest",
     "@lirx/store": "latest",
+    "@uni-fs/core": "latest",
     "messageformat": "4.0.0-1",
     "tslib": "^2.5.0"
   }

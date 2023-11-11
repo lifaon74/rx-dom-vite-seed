@@ -1,0 +1,564 @@
+import {
+  fromSelfEventTarget,
+  filter$$,
+  switchMap$$,
+  IObservable,
+  fromEventTarget,
+  IObserver,
+  let$$,
+  $$distinct,
+  mapDistinct$$, ISignal, PureComputedSignal, isReadonlySignal, takeUntil$$, first$$, reference, merge, map$$,
+} from '@lirx/core';
+import { IUnsubscribe, mergeUnsubscribeFunctions } from '@lirx/unsubscribe';
+import { PureSignal } from '@lirx/core';
+import { setSymmetricDifference } from '../../../../misc/set-operations';
+
+/** TYPES **/
+
+export interface IFileEntry {
+  readonly id: string;
+  readonly name: string;
+  readonly previewURL: string;
+  readonly size: string;
+  readonly modified: string;
+}
+
+export type IFileList = readonly IFileEntry[];
+
+export type ISelectedFileIds = ReadonlySet<string>;
+
+/** FUNCTIONS **/
+
+/* POSITION */
+
+type IPosition = [
+  x: number,
+  y: number,
+];
+
+function getElementScrollPosition(
+  element: HTMLElement,
+): IPosition {
+  return [
+    element.scrollLeft,
+    element.scrollTop,
+  ];
+}
+
+function getMousePosition(
+  event: MouseEvent,
+): IPosition {
+  return [
+    event.clientX,
+    event.clientY,
+  ];
+}
+
+function getElementPosition(
+  element: HTMLElement,
+): IPosition {
+  const { left, top } = element.getBoundingClientRect();
+  return [left, top];
+}
+
+function isPrimaryPointerButton(
+  event: MouseEvent,
+): boolean {
+  return event.button === 0;
+}
+
+function isPointerOnElementContent(
+  event: MouseEvent,
+  element: HTMLElement,
+): boolean {
+  const { left: xe, top: ye } = element.getBoundingClientRect();
+  const xp: number = event.clientX;
+  const yp: number = event.clientY;
+  const we: number = element.clientWidth;
+  const he: number = element.clientHeight;
+  return (
+    ((xe <= xp) && (xp <= (xe + we)))
+    && ((ye <= yp) && (yp <= (ye + he)))
+  );
+}
+
+const pointerDownWindow$ = fromEventTarget<'pointerdown', PointerEvent>(window, 'pointerdown');
+const pointerMoveWindow$ = fromEventTarget<'pointermove', PointerEvent>(window, 'pointermove');
+const pointerUpWindow$ = fromEventTarget<'pointerup', PointerEvent>(window, 'pointerup');
+
+/** CLASS **/
+
+export class FileListManager {
+  readonly #files: PureSignal<IFileList>;
+  readonly #selectedFileIds: PureSignal<ISelectedFileIds>;
+  readonly #currentFileId: PureSignal<string | undefined>;
+
+  constructor() {
+    this.#files = new PureSignal<IFileList>([]);
+    this.#selectedFileIds = new PureSignal<ISelectedFileIds>(new Set<string>());
+    this.#currentFileId = new PureSignal<string | undefined>(void 0);
+  }
+
+  get files$(): IObservable<IFileList> {
+    return this.#files.toObservable();
+  }
+
+  get selectedFileIds$(): IObservable<ISelectedFileIds> {
+    return this.#selectedFileIds.toObservable();
+  }
+
+  /* MUTATE */
+
+  #getFileIds(
+    files: IFileList,
+  ): string[] {
+    return files.map(({ id }: IFileEntry): string => id);
+  }
+
+  #getFileIndex(
+    files: IFileList,
+    _id: string,
+  ): number {
+    return files.findIndex(({ id }: IFileEntry): boolean => id === _id);
+  }
+
+  #getFileIdsBetweenIndexes(
+    a: number,
+    b: number,
+  ): string[] {
+    if (a > b) {
+      [a, b] = [b, a];
+    }
+    return this.#getFileIds(this.#files.get().slice(a, b + 1));
+  };
+
+  #getFileIdsBetweenIds(
+    a: string,
+    b: string,
+  ): string[] {
+    return this.#getFileIdsBetweenIndexes(
+      this.#getFileIndex(this.#files.get(), a),
+      this.#getFileIndex(this.#files.get(), b),
+    );
+  };
+
+  setFiles(
+    files: IFileList,
+  ): void {
+    this.#files.set(files);
+  }
+
+  selectAllFiles(): void {
+    this.#selectedFileIds.set(
+      new Set<string>(
+        this.#getFileIds(this.#files.get()),
+      ),
+    );
+    this.#currentFileId.set(void 0);
+  }
+
+  selectFile(
+    id: string,
+    append: boolean,
+  ): void {
+    if (append) {
+      this.#selectedFileIds.mutate<Set<string>>((selectedFileIds: Set<string>): void => {
+        selectedFileIds.add(id);
+      });
+    } else {
+      this.#selectedFileIds.set(
+        new Set<string>([id]),
+      );
+    }
+    this.#currentFileId.set(id);
+  }
+
+  selectFilesBetweenCurrentSelectedFileAndId(
+    id: string,
+    append: boolean,
+  ): void {
+    const currentFileId: string | undefined = this.#currentFileId.get();
+
+    if (currentFileId === void 0) {
+      this.selectFile(id, false);
+    } else {
+      const selectedFileIds: string[] = this.#getFileIdsBetweenIds(currentFileId, id);
+
+      this.#selectedFileIds.set(
+        new Set(
+          append
+            ? [
+              ...this.#selectedFileIds.get(),
+              ...selectedFileIds,
+            ]
+            : selectedFileIds,
+        ),
+      );
+    }
+  }
+
+  deselectFile(
+    id: string,
+  ): void {
+    this.#selectedFileIds.mutate<Set<string>>((selectedFileIds: Set<string>): void => {
+      selectedFileIds.delete(id);
+    });
+    this.#currentFileId.set(void 0);
+  }
+
+  isFileSelected(
+    id: string,
+  ): PureComputedSignal<boolean> {
+    return new PureComputedSignal<boolean>((): boolean => {
+      return this.#selectedFileIds.get().has(id);
+    });
+  }
+
+  /* LISTENERS */
+
+  startKeyBoardListener(
+    container: HTMLElement,
+  ): IUnsubscribe {
+    return mergeUnsubscribeFunctions([
+      this.startKeyBoardCtrlAListener(container),
+    ]);
+  }
+
+  startKeyBoardCtrlAListener(
+    container: HTMLElement,
+  ): IUnsubscribe {
+    const ctrlA$ = filter$$(
+      fromSelfEventTarget<'keydown', KeyboardEvent>(container, 'keydown'),
+      (event: KeyboardEvent): boolean => {
+        return event.ctrlKey
+          && (event.key === 'a');
+      },
+    );
+
+    return ctrlA$((event: KeyboardEvent): void => {
+      event.preventDefault();
+      this.selectAllFiles();
+    });
+  }
+
+  startPointerDownFileListener(
+    id: string,
+    element: Element,
+  ): IUnsubscribe {
+    const pointerDownFile$ = filter$$(
+      fromEventTarget<'pointerdown', PointerEvent>(element, 'pointerdown'),
+      isPrimaryPointerButton,
+    );
+    const dragStartFile$ = fromEventTarget<'dragstart', Event>(element, 'dragstart');
+
+    const selectThisFile = (): void => {
+      this.selectFile(id, false);
+    };
+
+    const selectFileRange = (): void => {
+      this.selectFilesBetweenCurrentSelectedFileAndId(id, false);
+    };
+
+    const deselectThisFile = (): void => {
+      this.deselectFile(id);
+    };
+
+    const appendThisFile = (): void => {
+      this.selectFile(id, true);
+    };
+
+    const appendFileRange = (): void => {
+      this.selectFilesBetweenCurrentSelectedFileAndId(id, true);
+    };
+
+    const pointerUpUntilDrag$ = takeUntil$$(first$$(pointerUpWindow$), first$$(dragStartFile$));
+
+    let _unsubscribeOfPointerUpUntilDrag: IUnsubscribe | undefined;
+
+    const unsubscribeOfPointerUpUntilDrag = (): void => {
+      if (_unsubscribeOfPointerUpUntilDrag !== void 0) {
+        _unsubscribeOfPointerUpUntilDrag();
+        _unsubscribeOfPointerUpUntilDrag = void 0;
+      }
+    };
+
+    const unsubscribeOfPointerDownFile = pointerDownFile$((event: PointerEvent): void => {
+      unsubscribeOfPointerUpUntilDrag();
+      const selectedFileIds: ISelectedFileIds = this.#selectedFileIds.get();
+
+      // fs.read(new URL(fileId), new Uint8Array(1e6), { start: 0, end: 5 })($log); // TODO
+
+      if (selectedFileIds.has(id)) {
+        _unsubscribeOfPointerUpUntilDrag = pointerUpUntilDrag$((event: PointerEvent): void => {
+          unsubscribeOfPointerUpUntilDrag();
+          if (event.ctrlKey) {
+            deselectThisFile();
+          } else {
+            if (event.shiftKey) {
+              selectFileRange();
+            } else {
+              selectThisFile();
+            }
+          }
+        });
+      } else {
+        if (event.ctrlKey) {
+          if (event.shiftKey) {
+            appendFileRange();
+          } else {
+            appendThisFile();
+          }
+        } else {
+          if (event.shiftKey) {
+            selectFileRange();
+          } else {
+            selectThisFile();
+          }
+        }
+      }
+    });
+
+    return (): void => {
+      unsubscribeOfPointerDownFile();
+      unsubscribeOfPointerUpUntilDrag();
+    };
+  }
+
+
+  startPointerSelectAreaListener(
+    container: HTMLElement,
+  ): IUnsubscribe {
+    const pointerDownContainer$ = filter$$(
+      fromSelfEventTarget<'pointerdown', PointerEvent>(container, 'pointerdown'),
+      (event: PointerEvent): boolean => {
+        return isPrimaryPointerButton(event)
+          && isPointerOnElementContent(event, container);
+      },
+    );
+
+    const getContainerScrollPosition = (): IPosition => {
+      return getElementScrollPosition(container);
+    };
+
+    const scrollContainer$ = fromSelfEventTarget<'scroll', Event>(container, 'scroll');
+
+    const scrollContainerPosition$ = merge([
+      reference(getContainerScrollPosition),
+      map$$(
+        scrollContainer$,
+        getContainerScrollPosition,
+      ),
+    ]);
+
+    let _unsubscribeOfCurrentPositions: IUnsubscribe | undefined;
+
+    const unsubscribeOfCurrentPositions = (): void => {
+      if (_unsubscribeOfCurrentPositions !== void 0) {
+        _unsubscribeOfCurrentPositions();
+        _unsubscribeOfCurrentPositions = void 0;
+      }
+    };
+
+    let _unsubscribeOfPointerUpWindow: IUnsubscribe | undefined;
+
+    const unsubscribeOfPointerUpWindow = (): void => {
+      if (_unsubscribeOfPointerUpWindow !== void 0) {
+        _unsubscribeOfPointerUpWindow();
+        _unsubscribeOfPointerUpWindow = void 0;
+      }
+    };
+
+    const unsubscribeOfPointerDownContainer = pointerDownContainer$((event: PointerEvent): void => {
+      event.preventDefault();
+      container.focus();
+
+      const initialPointerPosition: IPosition = getMousePosition(event);
+      const initialScrollPosition: IPosition = getContainerScrollPosition();
+      const initialElementPosition: IPosition = getElementPosition(container);
+
+      this.#currentFileId.set(void 0);
+
+      let onCurrentPositionChange: IObserver<ISelectedFileIds>;
+
+      if (event.ctrlKey) {
+        const initialSelectedFiles: ISelectedFileIds = this.#selectedFileIds.get();
+
+        onCurrentPositionChange = (selectedFiles: ISelectedFileIds): void => {
+          this.#selectedFileIds.set(setSymmetricDifference(selectedFiles, initialSelectedFiles));
+        };
+      } else {
+        onCurrentPositionChange = (selectedFiles: ISelectedFileIds): void => {
+          this.#selectedFileIds.set(selectedFiles);
+        };
+      }
+
+      const currentPositions$ = combineLatestSpread(pointerWindowPosition$, scrollContainerPosition$);
+
+      _unsubscribeOfCurrentPositions = currentPositions$(
+        ([
+           currentPointerPosition,
+           currentScrollPosition,
+         ]: readonly [IPosition, IPosition],
+        ): void => {
+          const pointerSelectArea: IPointerSelectArea = computePointerSelectArea(
+            initialPointerPosition,
+            initialScrollPosition,
+            initialElementPosition,
+            currentPointerPosition,
+            currentScrollPosition,
+          );
+
+          $pointerSelectArea(pointerSelectArea);
+
+          const selectedFiles: ISelectedFileIds = computeSelectedFilesFromPointerSelectArea(
+            files,
+            pointerSelectArea,
+          );
+
+          onCurrentPositionChange(selectedFiles);
+        },
+      );
+
+      _unsubscribeOfPointerUpWindow = pointerUpWindow$(() => {
+        unsubscribeOfCurrentPositions();
+        unsubscribeOfPointerUpWindow();
+        $pointerSelectArea(null);
+      });
+    });
+
+    return (): void => {
+      unsubscribeOfPointerDownContainer();
+      unsubscribeOfCurrentPositions();
+      unsubscribeOfPointerUpWindow();
+    };
+  }
+}
+
+
+export class FileListPointerSelectAreaListener {
+
+  constructor(
+    container: HTMLElement,
+  ) {
+  }
+
+  start(): IUnsubscribe {
+    const pointerDownContainer$ = filter$$(
+      fromSelfEventTarget<'pointerdown', PointerEvent>(container, 'pointerdown'),
+      (event: PointerEvent): boolean => {
+        return isPrimaryPointerButton(event)
+          && isPointerOnElementContent(event, container);
+      },
+    );
+
+    const getContainerScrollPosition = (): IPosition => {
+      return getElementScrollPosition(container);
+    };
+
+    const scrollContainer$ = fromSelfEventTarget<'scroll', Event>(container, 'scroll');
+
+    const scrollContainerPosition$ = merge([
+      reference(getContainerScrollPosition),
+      map$$(
+        scrollContainer$,
+        getContainerScrollPosition,
+      ),
+    ]);
+
+    let _unsubscribeOfCurrentPositions: IUnsubscribe | undefined;
+
+    const unsubscribeOfCurrentPositions = (): void => {
+      if (_unsubscribeOfCurrentPositions !== void 0) {
+        _unsubscribeOfCurrentPositions();
+        _unsubscribeOfCurrentPositions = void 0;
+      }
+    };
+
+    let _unsubscribeOfPointerUpWindow: IUnsubscribe | undefined;
+
+    const unsubscribeOfPointerUpWindow = (): void => {
+      if (_unsubscribeOfPointerUpWindow !== void 0) {
+        _unsubscribeOfPointerUpWindow();
+        _unsubscribeOfPointerUpWindow = void 0;
+      }
+    };
+
+    const unsubscribeOfPointerDownContainer = pointerDownContainer$((event: PointerEvent): void => {
+      event.preventDefault();
+      container.focus();
+
+      const initialPointerPosition: IPosition = getMousePosition(event);
+      const initialScrollPosition: IPosition = getContainerScrollPosition();
+      const initialElementPosition: IPosition = getElementPosition(container);
+
+      this.#currentFileId.set(void 0);
+
+      let onCurrentPositionChange: IObserver<ISelectedFileIds>;
+
+      if (event.ctrlKey) {
+        const initialSelectedFiles: ISelectedFileIds = this.#selectedFileIds.get();
+
+        onCurrentPositionChange = (selectedFiles: ISelectedFileIds): void => {
+          this.#selectedFileIds.set(setSymmetricDifference(selectedFiles, initialSelectedFiles));
+        };
+      } else {
+        onCurrentPositionChange = (selectedFiles: ISelectedFileIds): void => {
+          this.#selectedFileIds.set(selectedFiles);
+        };
+      }
+
+      const currentPositions$ = combineLatestSpread(pointerWindowPosition$, scrollContainerPosition$);
+
+      _unsubscribeOfCurrentPositions = currentPositions$(
+        ([
+           currentPointerPosition,
+           currentScrollPosition,
+         ]: readonly [IPosition, IPosition],
+        ): void => {
+          const pointerSelectArea: IPointerSelectArea = computePointerSelectArea(
+            initialPointerPosition,
+            initialScrollPosition,
+            initialElementPosition,
+            currentPointerPosition,
+            currentScrollPosition,
+          );
+
+          $pointerSelectArea(pointerSelectArea);
+
+          const selectedFiles: ISelectedFileIds = computeSelectedFilesFromPointerSelectArea(
+            files,
+            pointerSelectArea,
+          );
+
+          onCurrentPositionChange(selectedFiles);
+        },
+      );
+
+      _unsubscribeOfPointerUpWindow = pointerUpWindow$(() => {
+        unsubscribeOfCurrentPositions();
+        unsubscribeOfPointerUpWindow();
+        $pointerSelectArea(null);
+      });
+    });
+
+    return (): void => {
+      unsubscribeOfPointerDownContainer();
+      unsubscribeOfCurrentPositions();
+      unsubscribeOfPointerUpWindow();
+    };
+  }
+}
+
+
+export class FileListKeyBoardCtrlAListener {
+
+  constructor(
+    container$: IObservable<HTMLElement>,
+  ) {
+  }
+
+  start(): IUnsubscribe {
+
+  }
+}
+

@@ -1,12 +1,10 @@
-import { compileReactiveHTMLAsComponentTemplate, createComponent } from '@lirx/dom';
+import { compileReactiveHTMLAsComponentTemplate, Component } from '@lirx/dom';
 import { VirtualLinkComponent } from '@lirx/router';
 
 /** COMPONENT **/
 
-interface IAppNotFoundPageComponentConfig {
-}
 
-export const AppNotFoundPageComponent = createComponent<IAppNotFoundPageComponentConfig>({
+export const AppNotFoundPageComponent = new Component({
   name: 'app-not-found-page',
   template: compileReactiveHTMLAsComponentTemplate({
     html: `

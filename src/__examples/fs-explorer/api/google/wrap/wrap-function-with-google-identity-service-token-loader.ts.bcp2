@@ -1,0 +1,48 @@
+import { AsyncTask, Abortable, IAsyncTaskConstraint, IAbortableOptions } from '@lirx/async-task';
+import { loadGoogleIdentityService, IGoogleIdentityService } from '../load-google-identity-service';
+import { getGoogleIdentityServiceToken, IGetGoogleIdentityServiceToken } from '../get-google-identity-service-token';
+
+export interface IWrapFunctionWithGoogleIdentityServiceTokenLoaderInputFunction<GOptions, GReturn extends IAsyncTaskConstraint<GReturn>> {
+  (
+    options: IWrapFunctionWithGoogleIdentityServiceTokenLoaderInputOptions<GOptions>,
+  ): AsyncTask<GReturn>,
+}
+
+export type IWrapFunctionWithGoogleIdentityServiceTokenLoaderInputOptions<GOptions> = GOptions & Pick<IGetGoogleIdentityServiceToken, 'gis'> & {
+  readonly token: string;
+};
+
+export interface IWrapFunctionWithGoogleIdentityServiceTokenLoaderOutputFunction<GOptions, GReturn extends IAsyncTaskConstraint<GReturn>> {
+  (
+    options: GOptions,
+  ): AsyncTask<GReturn>,
+}
+
+export type IWrapFunctionWithGoogleIdentityServiceTokenLoaderOutputOptions = IAbortableOptions & Omit<IGetGoogleIdentityServiceToken, 'gis'>;
+
+export function wrapFunctionWithGoogleIdentityServiceTokenLoader<GOptions extends IWrapFunctionWithGoogleIdentityServiceTokenLoaderOutputOptions, GReturn extends IAsyncTaskConstraint<GReturn>>(
+  fnc: IWrapFunctionWithGoogleIdentityServiceTokenLoaderInputFunction<GOptions, GReturn>,
+): IWrapFunctionWithGoogleIdentityServiceTokenLoaderOutputFunction<GOptions, GReturn> {
+  return (
+    {
+      abortable,
+      ...options
+    }: GOptions,
+  ): AsyncTask<GReturn> => {
+    return loadGoogleIdentityService(abortable)
+      .successful((gis: IGoogleIdentityService, abortable: Abortable): any => {
+        return getGoogleIdentityServiceToken({
+          ...options,
+          gis,
+          abortable,
+        })
+          .successful((token: string): any => {
+            return fnc({
+              ...options,
+              gis,
+              token,
+            } as any);
+          });
+      });
+  };
+}

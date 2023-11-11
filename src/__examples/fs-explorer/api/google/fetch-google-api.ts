@@ -1,4 +1,6 @@
-export interface IFetchGoogleAPIOptions extends RequestInit {
+import { AsyncTask, asyncFetch, IAbortableOptions, IAsyncTaskConstraint } from '@lirx/async-task';
+
+export interface IFetchGoogleAPIOptions extends Omit<RequestInit, 'signal'>, IAbortableOptions {
   url: URL | string;
   apiKey: string;
   token: string;
@@ -10,9 +12,10 @@ export function fetchGoogleAPI(
     apiKey,
     token,
     headers,
+    abortable,
     ...options
   }: IFetchGoogleAPIOptions,
-): Promise<Response> {
+): AsyncTask<Response> {
   const _url: URL = (typeof url === 'string')
     ? new URL(url)
     : url;
@@ -24,10 +27,10 @@ export function fetchGoogleAPI(
     ['authorization', `Bearer ${token}`],
   ]);
 
-  return fetch(_url.href, {
+  return asyncFetch(_url.href, {
     ...options,
     headers: _headers,
-  });
+  }, abortable);
 }
 
 function extractHeaders(
@@ -38,26 +41,21 @@ function extractHeaders(
   } else if (Array.isArray(headers)) {
     return headers as [string, string][];
   } else if (headers instanceof Headers) {
-    return Array.from(headers as unknown as Iterable<[string, string]>);
+    return Array.from(headers[Symbol.iterator]());
   } else {
     return Object.entries(headers) as [string, string][];
   }
 }
 
-export function fetchJSONGoogleAPI<GData>(
+export function fetchJSONGoogleAPI<GData extends IAsyncTaskConstraint<GData>>(
   options: IFetchGoogleAPIOptions,
-): Promise<GData> {
+): AsyncTask<GData> {
   return fetchGoogleAPI(options)
-    .then((response: Response): Promise<GData> => {
+    .successful((response: Response): Promise<GData> => {
       if (response.ok) {
         return response.json();
       } else {
         throw new Error(`Google API error`);
-        // return response.json()
-        //   .then((data: any) => {
-        //     console.log(data);
-        //     throw new Error(`Network error`);
-        //   });
       }
     });
 }

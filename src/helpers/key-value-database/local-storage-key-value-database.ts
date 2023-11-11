@@ -1,7 +1,6 @@
 import { KeyValueDatabase } from './key-value-database';
 
 export class LocalStorageKeyValueDatabase<GValue> extends KeyValueDatabase<GValue> {
-
   has(
     key: string,
   ): boolean {
@@ -45,4 +44,4 @@ export class LocalStorageKeyValueDatabase<GValue> extends KeyValueDatabase<GValu
   }
 }
 
-export const SHARED_LOCAL_STORAGE_KEY_VALUE_DATABASE = new LocalStorageKeyValueDatabase<unknown>();
+export const SHARED_LOCAL_STORAGE_KEY_VALUE_DATABASE = new LocalStorageKeyValueDatabase<any>();

@@ -1,3 +1,5 @@
+@use '~@lirx/dom-material/src/themes/mat.theme.dark' as math-theme-dark;
+
 * {
   &,
   &::before,
@@ -26,5 +28,22 @@ body {
 
 body {
   overflow: auto;
+
+  //&.theme--dark {
+  //  @include math-theme-dark.mat-theme--dark;
+  //
+  //  background-color: #222;
+  //}
 }
 
+table, caption, tbody, tfoot, thead, tr, th, td {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  vertical-align: middle;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}

@@ -12,6 +12,6 @@ export function examples(): void {
   // matIconsSearchExample();
   // routerExample();
   // ticTacToeExample();
-  // fsExplorerExample();
-  materialExample();
+  fsExplorerExample();
+  // materialExample();
 }

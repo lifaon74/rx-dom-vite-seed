@@ -1,0 +1,92 @@
+<button
+  class="swap-view-icon"
+  [title]="'Toggle view\nALT + T'"
+  (click)="$.onClickSwapViewIcon"
+>
+  <icon-swap-vertical></icon-swap-vertical>
+</button>
+
+<form
+  class="raw-uri"
+  (submit)="$.onSubmit"
+>
+  <input
+    tabindex="0"
+    [value]="$.inputValue"
+    (input)="$.onInputValueChange"
+    (blur)="$.onInputBlur"
+  >
+</form>
+
+
+<div
+  class="parsed-uri"
+  tabindex="-1"
+>
+  <button
+    class="origin"
+    (click)="$.onClickOrigin"
+  >
+    <div class="scheme-with-separator">
+      <div class="leaf scheme">{{ => $.parsedURI().scheme }}</div>
+      <div class="leaf separator">:</div>
+    </div>
+
+    <div
+      class="authority"
+      *if="=> $.parsedURI().authority"
+    >
+      <div class="leaf separator">//</div>
+      <div
+        class="userinfo-with-separator"
+        *if="=> $.parsedURI().authority.userinfo"
+      >
+        <div class="leaf userinfo">{{ => $.parsedURI().authority.userinfo }}</div>
+        <div class="leaf separator">@</div>
+      </div>
+      <div class="leaf host">{{ => $.parsedURI().authority.host }}</div>
+      <div
+        class="port-with-separator"
+        *if="=> $.parsedURI().authority.port"
+      >
+        <div class="leaf separator">:</div>
+        <div class="leaf port">{{ => $.parsedURI().authority.port }}</div>
+      </div>
+    </div>
+  </button>
+
+  <div class="path">
+    <div
+      class="path-segment-with-separator"
+      *for="let segment of $.uriPathSegments; index$ as index$"
+    >
+      <div class="leaf separator">/</div>
+      <button
+        class="leaf path-segment-segment"
+        {click}="$.onClickPathSegment(index$)"
+        [disabled]="segment === ''"
+      >{{ segment }}</button>
+    </div>
+  </div>
+
+  <div
+    class="query-with-separator"
+    *if="=> $.parsedURI().query"
+  >
+    <div class="leaf separator">?</div>
+    <div class="leaf query">{{ => $.parsedURI().query }}</div>
+  </div>
+
+  <div
+    class="fragment-with-separator"
+    *if="=> $.parsedURI().fragment"
+  >
+    <div class="leaf separator">#</div>
+    <div class="leaf fragment">{{ => $.parsedURI().fragment }}</div>
+  </div>
+
+</div>
+
+
+<div class="scroll-shadows"></div>
+

@@ -1,21 +1,18 @@
 import { $log, idle, IObservable, map$$ } from '@lirx/core';
-import { compileReactiveHTMLAsComponentTemplate, createComponent } from '@lirx/dom';
-import { INavigation, NAVIGATION } from '@lirx/router';
+import { compileReactiveHTMLAsComponentTemplate, Component } from '@lirx/dom';
 import { AppMenuPageComponent } from '../components/menu/menu.component';
+import { RX_NAVIGATION } from '@lirx/router';
+import { RXNavigation } from '@lirx/router/src/rx-navigation/rx-navigation.class';
 
 /** COMPONENT **/
 
 interface ITemplateData {
-  readonly navigation: INavigation;
+  readonly navigation: RXNavigation;
   readonly canBack$: IObservable<boolean>;
 }
 
-interface IAppListPageComponentConfig {
-  element: HTMLElement;
-  data: ITemplateData;
-}
 
-export const AppListPageComponent = createComponent<IAppListPageComponentConfig>({
+export const AppListPageComponent = new Component<HTMLElement, object, ITemplateData>({
   name: 'app-list-page',
   template: compileReactiveHTMLAsComponentTemplate({
     html: `
@@ -32,16 +29,16 @@ export const AppListPageComponent = createComponent<IAppListPageComponentConfig>
       </div>
       
       <app-menu></app-menu>
-      <div rx-router-outlet></div>
+      <div router-outlet></div>
     `,
     components: [
       AppMenuPageComponent,
     ],
   }),
-  init: (): ITemplateData => {
-    const canBack$ = map$$(idle(), () => NAVIGATION.canBack());
+  templateData: (): ITemplateData => {
+    const canBack$ = map$$(idle(), () => RX_NAVIGATION.canBack());
     return {
-      navigation: NAVIGATION,
+      navigation: RX_NAVIGATION,
       canBack$,
     };
   },

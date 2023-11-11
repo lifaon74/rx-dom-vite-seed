@@ -1,0 +1,300 @@
+import { fromEventTarget, IObserver, map$$, signal, effect, computed, IReadonlySignal, IObservable, switchMap$$ } from '@lirx/core';
+import {
+  compileReactiveHTMLAsComponentTemplate,
+  compileStyleAsComponentStyle,
+  VirtualComponentNode,
+  virtualDOMNodeQuerySelectorOrThrow,
+  VirtualReactiveElementNode,
+  Output,
+  Component,
+  output,
+  IClassNamesList,
+  SignalInput,
+  signalInput,
+} from '@lirx/dom';
+import { ElementReferenceModifier } from '@lirx/dom-material';
+import { IconSwapVerticalComponent } from '@lirx/mdi';
+import {
+  LocalStorageKeyValueDatabase,
+  SHARED_LOCAL_STORAGE_KEY_VALUE_DATABASE,
+} from '../../../../../../../helpers/key-value-database/local-storage-key-value-database';
+import { IUnsubscribe } from '@lirx/unsubscribe';
+import { parseURI } from './uri/parse-uri';
+import { IURI } from './uri/uri.type';
+
+// @ts-ignore
+import html from './uri-navigation-bar.component.html?raw';
+// @ts-ignore
+import style from './uri-navigation-bar.component.scss?inline';
+import { serializeURI } from './uri/serialize-uri';
+
+
+// export type IMultiMapResult<GMapFunctions extends readonly IMapFunction<any, any>[]> = {
+//   [GKey in keyof GMapFunctions]: GMapFunctions[GKey] extends IMapFunction<any, infer GOut>
+//     ? IObservable<GOut>
+//     : never;
+// };
+//
+// export type A = any;
+//
+// export function mapSplit<GIn, GOut extends readonly any[]>(
+//   subscribe: IObservable<GIn>,
+//   length: number,
+//   mapFunction: IMapFunction<GIn, GOut>,
+// ): IMultiMapResult<GMapFunctions> {
+//   return mapFunctions.map((mapFunction: IMapFunction<GIn, any>): IObservable<any> => {
+//     return mapObservable(subscribe, mapFunction);
+//   }) as IMultiMapResult<GMapFunctions>;
+// }
+
+/**
+ * COMPONENT: 'app-control-bar'
+ */
+
+export interface IAppURINavigationBarComponentData {
+  readonly uri: SignalInput<IURI>;
+  readonly uriChange: Output<IURI>;
+}
+
+type IAppURINavigationBarView =
+  | 'raw'
+  | 'parsed'
+  ;
+
+interface ITemplateData {
+  //
+  readonly onClickSwapViewIcon: IObserver<Event>;
+  //
+  readonly inputValue: IReadonlySignal<string>;
+  readonly onInputValueChange: IObserver<Event>;
+  readonly onInputBlur: IObserver<Event>;
+  readonly onSubmit: IObserver<Event>;
+  //
+  readonly parsedURI: IReadonlySignal<IURI>;
+  readonly uriPathSegments: IReadonlySignal<readonly string[]>;
+  // readonly uriHasAuthority$: IObservable<boolean>;
+  // readonly uriHasUserinfo$: IObservable<boolean>;
+  // readonly uriUserinfo$: IObservable<string | undefined>;
+  // readonly uriUsername$: IObservable<string>;
+  // readonly uriPassword$: IObservable<string>;
+  // readonly uriHostname$: IObservable<string>;
+  // readonly uriPort$: IObservable<string>;
+  // readonly uriPathSegments$: IObservable<readonly string[]>;
+  // readonly uriSearchSegments$: IObservable<readonly [string, string][]>;
+  // readonly uriHash$: IObservable<string>;
+  readonly onClickOrigin: IObserver<Event>;
+  readonly onClickPathSegment: (index$: IObservable<number>) => IObservable<IObserver<MouseEvent>>;
+}
+
+export const AppURINavigationBarComponent = new Component<HTMLElement, IAppURINavigationBarComponentData, ITemplateData>({
+  name: 'app-uri-navigation-bar',
+  template: compileReactiveHTMLAsComponentTemplate({
+    html,
+    components: [
+      IconSwapVerticalComponent,
+    ],
+    modifiers: [
+      ElementReferenceModifier,
+    ],
+  }),
+  styles: [compileStyleAsComponentStyle(style)],
+  componentData: (): IAppURINavigationBarComponentData => {
+    return {
+      // uri: input<URI>(new URI('https://a:b@c.d:123/xefsefsef/ybhfdthfzn/zgmug/?o=p&z#q=s')),
+      uri: signalInput<IURI>('google-drive://a:b@c.d:123/xefsefsef/ybhfdthfzn/zgmug/?o=p&z#q=s'),
+      uriChange: output<IURI>(),
+    };
+  },
+  templateData: (node: VirtualComponentNode<HTMLElement, IAppURINavigationBarComponentData>): ITemplateData => {
+
+    // URI
+    const parsedURI = node.inputs.uri.signal;
+    const rawURI = computed((): string => serializeURI(parsedURI()));
+
+    const $uriChange = node.$output('uriChange');
+
+    // VIEW
+    const viewKey: string = 'uri-navigation-bar-view';
+
+    const db: LocalStorageKeyValueDatabase<IAppURINavigationBarView> = SHARED_LOCAL_STORAGE_KEY_VALUE_DATABASE as LocalStorageKeyValueDatabase<IAppURINavigationBarView>;
+
+    const view = signal<IAppURINavigationBarView>(db.get(viewKey) ?? 'raw');
+
+    node.onConnected((): IUnsubscribe => {
+      return effect((): void => {
+        db.set(viewKey, view());
+      });
+    });
+
+    node.onConnected((): IUnsubscribe => {
+      return fromEventTarget<'keydown', KeyboardEvent>(document, 'keydown')((event: KeyboardEvent): void => {
+        if (event.altKey && (event.key === 't')) {
+          onClickSwapViewIcon();
+        }
+      });
+    });
+
+    node.setReactiveClassNamesList(map$$(view.toObservable(), (view: IAppURINavigationBarView): IClassNamesList => {
+      return new Set<string>([
+        `view-${view}`,
+      ]);
+    }));
+
+    const onClickSwapViewIcon = (): void => {
+      view.set((view() === 'raw') ? 'parsed' : 'raw');
+    };
+
+    // SHORTCUTS
+
+    node.onConnected((): IUnsubscribe => {
+      return fromEventTarget<'keydown', KeyboardEvent>(document, 'keydown')((event: KeyboardEvent): void => {
+        if (event.altKey && (event.key === 'd')) {
+          event.preventDefault();
+          virtualDOMNodeQuerySelectorOrThrow<VirtualReactiveElementNode<HTMLElement>>(node, '[tabindex="0"]').elementNode.focus();
+        }
+      });
+    });
+
+    // INPUT
+
+    const inputValue = signal<string>('');
+
+    node.onConnected((): IUnsubscribe => {
+      return effect((): void => {
+        inputValue.set(rawURI());
+      }, { signalWriteMode: 'allow' }); // WARN
+    });
+
+    const inputURI = computed((): IURI => parseURI(inputValue()));
+
+    const isInputURIValid = computed((): boolean => {
+      try {
+        inputURI();
+        return true;
+      } catch {
+        return false;
+      }
+    });
+
+    node.setReactiveClass('valid', isInputURIValid.toObservable());
+
+    const onInputValueChange = (event: Event): void => {
+      inputValue.set((event.target as HTMLInputElement).value);
+    };
+
+    const onInputBlur = (): void => {
+      inputValue.set(rawURI());
+    };
+
+    const onSubmit = (event: Event): void => {
+      event.preventDefault();
+
+      if (isInputURIValid()) {
+        parsedURI.set(inputURI());
+      }
+    };
+
+    const uriPathSegments = computed((): string[] => extractPathSegmentsOfURI(parsedURI()));
+
+    // URI PARTS
+    // const uriObject$ = shareRL$$(map$$(uri$, (uri: string): URI => new URI(uri)));
+    //
+    // const [
+    //   uriScheme$,
+    //   uriHasAuthority$,
+    // ] = multiMapS$$(
+    //   uriObject$,
+    //   uri => uri.scheme,
+    //   uri => (uri.authority !== void 0),
+    //   uri => uri.authority?.userinfo !== void 0,
+    // );
+
+    // const uriScheme$ = map$$(uriObject$, (uri: URI): string => uri.scheme);
+    // const uriHasAuthority$ = map$$(uriObject$, (uri: URI): boolean => (uri.authority !== void 0));
+    // const uriHasUserinfo$ = map$$(uriObject$, (uri: URI): boolean => (uri.authority?.userinfo !== void 0));
+    // const uriUserinfo$ = map$$(uriObject$, (uri: URI): string | undefined => uri.authority?.userinfo);
+
+    // const uriPassword$ = map$$(uri$, (uri: URI): string => uri.password);
+    // const uriHostname$ = map$$(uri$, (uri: URI): string => uri.hostname);
+    // const uriPort$ = map$$(uri$, (uri: URI): string => uri.port);
+    //
+    // const uriPathSegments$ = map$$(uri$, extractPathSegmentsOfURI);
+    //
+    // const uriHash$ = map$$(uri$, (uri: URI): string => uri.hash);
+    //
+    // const uriSearchSegments$ = map$$(uri$, (uri: URI): readonly [string, string][] => {
+    //   return Array.from(uri.searchParams[Symbol.iterator]());
+    // });
+    //
+    const onClickOrigin = (): void => {
+      $uriChange({
+        ...parsedURI(),
+        path: '/',
+      });
+    };
+
+    const onClickPathSegment = (
+      index$: IObservable<number>,
+    ): IObservable<IObserver<MouseEvent>> => {
+      return map$$(index$, (index: number): IObserver<MouseEvent> => {
+        return () => {
+          const segments: string[] = extractPathSegmentsOfURI(parsedURI());
+
+          $uriChange({
+            ...parsedURI(),
+            path: `/${segments.slice(0, index + 1).join('/')}`,
+          });
+        };
+      });
+    };
+    // const $onClickPathSegment = (
+    //   index$: IObservable<number>,
+    // ): void => {
+    //   const index: number = readObservableValue(index$, () => {
+    //     throw new Error(`cannot read index$`);
+    //   });
+    //
+    //   const uri: URI = getURI();
+    //
+    //   const segments: string[] = extractPathSegmentsOfURI(uri);
+    //
+    //   const newURI: URI = new URI(uri);
+    //   newURI.pathname = `/${segments.slice(0, index + 1).join('/')}`;
+    //   $uri(newURI);
+    // };
+
+    return {
+      onClickSwapViewIcon,
+      //
+      inputValue,
+      onInputValueChange,
+      onInputBlur,
+      onSubmit,
+      //
+      parsedURI,
+      uriPathSegments,
+      onClickOrigin,
+      onClickPathSegment,
+    };
+  },
+});
+
+/** FUNCTIONS **/
+
+// function extractPathSegmentsOfURI(uri: URI): string[] {
+//   return uri.path.split('/')
+//     .filter((segment: string): boolean => {
+//       return segment !== '';
+//     });
+// }
+
+function extractPathSegmentsOfURI(uri: URI): string[] {
+  const segments: string[] = uri.path.split('/');
+  if (
+    (segments.length > 1)
+    && (segments[0] === '')
+  ) {
+    segments.shift();
+  }
+  return segments;
+}

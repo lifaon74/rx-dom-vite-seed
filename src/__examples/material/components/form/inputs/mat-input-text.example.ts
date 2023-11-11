@@ -1,5 +1,5 @@
 import { IObservable, single } from '@lirx/core';
-import { bootstrap, compileReactiveHTMLAsComponentTemplate, createComponent } from '@lirx/dom';
+import { bootstrap, compileReactiveHTMLAsComponentTemplate } from '@lirx/dom';
 import { MatFlatButtonSecondaryModifier } from '@lirx/dom-material';
 import { MatErrorPatternComponent } from '../components/mat-error/built-in/mat-error-pattern/mat-error-pattern.component';
 import { MatErrorRequiredComponent } from '../components/mat-error/built-in/mat-error-required/mat-error-required.component';

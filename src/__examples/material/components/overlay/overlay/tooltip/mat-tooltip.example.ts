@@ -15,7 +15,7 @@ const MyTooltip = new Component({
       </rx-template>
       
       <button
-        #mat-tooltip-trigger="{ content: tooltipContent, placement: 'left' }"
+        #mat-tooltip-trigger="{ content: tooltipContent, placement: 'right', displayDelay: 0, }"
       >
         Click me
       </button>

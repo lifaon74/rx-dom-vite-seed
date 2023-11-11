@@ -23,14 +23,14 @@ $control-bar-icon-background-color-focus: rgba(#fff, 0.15);
 
 
   & > .button-container {
-    --mat-icon-button-color: #{$control-bar-icon-color};
-    --mat-icon-button-background-color: transparent;
+    --mat-button-color: #{$control-bar-icon-color};
+    --mat-button-background-color: transparent;
 
-    --mat-icon-button-color-hover: #{$control-bar-icon-color-hover};
-    --mat-icon-button-background-color-hover: #{$control-bar-icon-background-color-hover};
+    --mat-button-color--hover: #{$control-bar-icon-color-hover};
+    --mat-button-background-color--hover: #{$control-bar-icon-background-color-hover};
 
-    --mat-icon-button-color-focus: #{$control-bar-icon-color-focus};
-    --mat-icon-button-background-color-focus: #{$control-bar-icon-background-color-focus};
+    --mat-button-color--focused: #{$control-bar-icon-color-focus};
+    --mat-button-background-color--focused: #{$control-bar-icon-background-color-focus};
   }
 
   & > .navigation-bar {

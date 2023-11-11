@@ -1,12 +1,10 @@
-import { compileReactiveHTMLAsComponentTemplate, createComponent } from '@lirx/dom';
+import { compileReactiveHTMLAsComponentTemplate, Component } from '@lirx/dom';
 import { AppMenuPageComponent } from '../components/menu/menu.component';
 
 /** COMPONENT **/
 
-interface IAppHomePageComponentConfig {
-}
 
-export const AppHomePageComponent = createComponent<IAppHomePageComponentConfig>({
+export const AppHomePageComponent = new Component({
   name: 'app-home-page',
   template: compileReactiveHTMLAsComponentTemplate({
     html: `

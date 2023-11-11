@@ -1,5 +1,3 @@
-import { ICanActivateFunctionReturn, ICanActivateFunctionReturnedValue, IRXRoutesList, navigateTo } from '@lirx/router';
-import { IObservable, switchMap$$, single, singleN, timeout } from '@lirx/core';
 import { AppSubListPageComponent } from '../pages/sub-list/sub-list.page.component';
 import { AppHomePageComponent } from '../pages/home/home.page.component';
 import { AppProductPageComponent } from '../pages/product/product.page.component';
@@ -7,8 +5,10 @@ import { AppListPageComponent } from '../pages/list/list.page.component';
 import { AppNotFoundPageComponent } from '../pages/404/not-found.page.component';
 import { createSlugs } from '../slugs/create-slugs';
 import { SLUGS } from './slugs';
+import { ILiRxRouteListLike, RedirectError } from '@lirx/router';
+import { toPromise, timeout } from '@lirx/core';
 
-const listChildRoutes: IRXRoutesList = [
+const listChildRoutes: ILiRxRouteListLike = [
   {
     path: '/',
   },
@@ -18,7 +18,7 @@ const listChildRoutes: IRXRoutesList = [
   },
 ];
 
-export const APP_ROUTES: IRXRoutesList = [
+export const APP_ROUTES: ILiRxRouteListLike = [
   {
     path: '/home',
     component: AppHomePageComponent,
@@ -33,8 +33,8 @@ export const APP_ROUTES: IRXRoutesList = [
     children: [
       {
         path: '/async',
-        canActivate: () => {
-          return switchMap$$(timeout(2000), () => singleN<ICanActivateFunctionReturnedValue>(true));
+        loadData: () => {
+          return toPromise(timeout(2000));
         },
         children: listChildRoutes,
       },
@@ -43,7 +43,9 @@ export const APP_ROUTES: IRXRoutesList = [
   },
   {
     path: '/forbidden',
-    canActivate: navigateTo('/home'),
+    loadData: () => {
+      throw new RedirectError('/home');
+    },
   },
   ...createSlugs(SLUGS, '/slugs'),
   {
@@ -51,3 +53,4 @@ export const APP_ROUTES: IRXRoutesList = [
     component: AppNotFoundPageComponent,
   },
 ];
+

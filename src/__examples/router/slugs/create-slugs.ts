@@ -1,5 +1,4 @@
-import { ICanActivateFunctionReturn, IRouteParams, IRXRoute, IRXRoutesList, normalizeRoutePath } from '@lirx/router';
-import { singleN } from '@lirx/core';
+import { IRouteParams, normalizeRoutePath, ILiRxRouteListLike, ILiRxRouteLike, RedirectError } from '@lirx/router';
 
 export type IRXRouteSlug = [
   target: string,
@@ -9,14 +8,14 @@ export type IRXRouteSlug = [
 export function createSlugs(
   slugs: IRXRouteSlug[],
   prefix: string = '',
-): IRXRoutesList {
+): ILiRxRouteListLike {
   return slugs
-    .flatMap(([target, slugs]: IRXRouteSlug): IRXRoute[] => {
+    .flatMap(([target, slugs]: IRXRouteSlug): ILiRxRouteLike[] => {
       const _target: string = normalizeRoutePath(target);
-      return slugs.map((slug: string): IRXRoute => {
+      return slugs.map((slug: string): ILiRxRouteLike => {
         return {
           path: `${prefix}${slug}`,
-          canActivate: (params: IRouteParams): ICanActivateFunctionReturn => {
+          loadData: (params: IRouteParams): void => {
             const url: string = _target.replace(
               new RegExp('(^|\\/):([\\w\\-]+)($|\\/)', 'g'),
               (match: string, start: string, id: string, end: string) => {
@@ -28,8 +27,7 @@ export function createSlugs(
               },
             );
 
-            return singleN({
-              url,
+            throw new RedirectError(url, {
               transparent: true,
             });
           },

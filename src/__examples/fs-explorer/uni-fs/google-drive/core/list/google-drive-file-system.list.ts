@@ -1,142 +1,105 @@
 import {
-  fromArrayN,
-  fromPromiseFactory,
-  fulfilled$$$,
-  IFromPromiseFactoryObservableNotifications,
-  IObservable,
-  pipe$$,
-  singleN,
-} from '@lirx/core';
-import {
   IFileSystemEntryWithMetadata,
   IFileSystemListFunction,
-  IFileSystemListFunctionNotifications,
-  IFileSystemListFunctionOptions,
+  IFileSystemListOptions,
   IFileSystemTypes,
-  IFileSystemTypesSet,
+  IURI,
+  serializeURI,
 } from '@uni-fs/core';
 import { GOOGLE_DRIVE_DEFAULT_SCOPE_CONSTANT } from '../../../../api/google/drive/google-drive-default-scope.constant';
-import { googleDriveListFiles } from '../../../../api/google/drive/list-files/google-drive-list-files';
-import { IGoogleDriveAPIFile, IGoogleDriveAPIFilesList } from '../../../../api/google/drive/list-files/google-drive-list-files.interfaces';
+import { googleDriveListAllFiles } from '../../../../api/google/drive/list-files/google-drive-list-files';
+import { IGoogleDriveAPIFile } from '../../../../api/google/drive/list-files/google-drive-list-files.interfaces';
 import {
-  wrapFunctionWithGoogleIdentityServiceTokenLoaderFull,
-} from '../../../../api/google/wrap/wrap-function-with-google-identity-service-token-loader-full';
-import { googleDriveProtocolGuard } from '../../internal/google-drive-protocol-guard';
-import { IGoogleDriveFileSystemMetadata } from '../metadata/google-drive-file-system.metadata.type';
-import { IGoogleDriveFileSystemListConfig } from './google-drive-file-system.list.config';
+  runFunctionWithGoogleIdentityServiceTokenLoader,
+} from '../../../../api/google/wrap/wrap-function-with-google-identity-service-token-loader';
+import { googleDriveSchemeGuard } from '../../internal/google-drive-scheme-guard';
+import { IGoogleDriveFileSystemMetadata } from '../../shared/google-drive-file-system.metadata.type';
+import { AsyncTask, Abortable, IAsyncTaskInput } from '@lirx/async-task';
+import { Path } from '@lifaon/path';
+import { convertURIPathToPath } from '../../../../misc/convert-uri-path-to-path';
 
 /*---*/
 
-export type IGoogleDriveFileSystemListFunctionNotifications = IFileSystemListFunctionNotifications<IGoogleDriveFileSystemListConfig>;
-
 export interface ICreateGoogleDriveFileSystemListFunctionOptions {
-  clientId: string;
-  apiKey: string;
+  readonly clientId: string;
+  readonly apiKey: string;
 }
 
 export function createGoogleDriveFileSystemListFunction(
   options: ICreateGoogleDriveFileSystemListFunctionOptions,
-): IFileSystemListFunction<IGoogleDriveFileSystemListConfig> {
+): IFileSystemListFunction<IGoogleDriveFileSystemMetadata> {
   return (
-    url: URL,
     {
+      uri,
       withMetadata = false,
       search,
-      inParents = [],
-    }: IFileSystemListFunctionOptions = {},
-  ): IObservable<IGoogleDriveFileSystemListFunctionNotifications> => {
-    return googleDriveProtocolGuard(url, (url: URL): IObservable<IGoogleDriveFileSystemListFunctionNotifications> => {
-      const _inParents: string = (inParents.length === 0)
-        ? 'root'
-        : inParents.join(',');
+      abortable,
+    }: IFileSystemListOptions,
+  ): AsyncTask<readonly IFileSystemEntryWithMetadata<IGoogleDriveFileSystemMetadata>[]> => {
+    return googleDriveSchemeGuard(uri, (uri: IURI, abortable: Abortable): IAsyncTaskInput<readonly IFileSystemEntryWithMetadata<IGoogleDriveFileSystemMetadata>[]> => {
 
-      const googleDriveListFilesOptions = {
+      const path: Path = convertURIPathToPath(uri);
+
+      const id: string = path.isRoot()
+        ? 'root'
+        : path.segments[path.segments.length - 1];
+
+      return runFunctionWithGoogleIdentityServiceTokenLoader(googleDriveListAllFiles, {
         ...options,
         scope: GOOGLE_DRIVE_DEFAULT_SCOPE_CONSTANT,
         pageSize: 1000,
-        // fields: '*',
-        fields: 'files(id, name, createdTime, mimeType, modifiedTime, quotaBytesUsed, thumbnailLink), nextPageToken',
+        fields: '*',
+        // fields: 'files(id, name, createdTime, mimeType, modifiedTime, quotaBytesUsed, thumbnailLink), nextPageToken',
         // https://developers.google.com/drive/api/guides/search-files#node.js
         // https://developers.google.com/drive/api/guides/ref-search-terms
-        query: `"${_inParents}" in parents and trashed = false${search === void 0 ? '' : ` and name contains ${search.replace('\'', '\\\\')}`}`,
-      };
+        query: `"${id}" in parents and trashed = false${search === void 0 ? '' : ` and name contains ${search.replace('\'', '\\\\')}`}`,
+        abortable,
+      })
+        .successful((files: IGoogleDriveAPIFile[]): readonly IFileSystemEntryWithMetadata<IGoogleDriveFileSystemMetadata>[] => {
+          return files.map((child: IGoogleDriveAPIFile): IFileSystemEntryWithMetadata<IGoogleDriveFileSystemMetadata> => {
+            // console.log(child);
 
-      const _googleDriveListFiles = wrapFunctionWithGoogleIdentityServiceTokenLoaderFull(googleDriveListFiles);
+            // `${uri.scheme}${JSON.stringify([...path, child.id])}`
+            const childURI: IURI = {
+              ...uri,
+              path: path.concat(child.id).toString(),
+            };
 
-      const doRequest = (
-        files: IGoogleDriveAPIFile[] = [],
-        pageToken?: string,
-      ): IObservable<IFromPromiseFactoryObservableNotifications<IGoogleDriveAPIFile[]>> => {
-        return pipe$$(
-          fromPromiseFactory<IGoogleDriveAPIFilesList>(() => {
-            return _googleDriveListFiles({
-              ...googleDriveListFilesOptions,
-              pageToken,
-            });
-          }),
-          [
-            fulfilled$$$((data: IGoogleDriveAPIFilesList): IObservable<IFromPromiseFactoryObservableNotifications<IGoogleDriveAPIFile[]>> => {
-              const _files: IGoogleDriveAPIFile[] = [...files, ...data.files];
-              if (data.nextPageToken) {
-                return doRequest(
-                  _files,
-                  data.nextPageToken,
-                );
-              } else {
-                return singleN(_files);
+            const types = new Set<IFileSystemTypes>();
+
+            if (child.mimeType === 'application/vnd.google-apps.folder') {
+              types.add('collection');
+            }
+
+            if ('thumbnailLink' in child) {
+              types.add('file');
+            }
+
+            const name: string = child.name;
+            const birthTime: number = Date.parse(child.createdTime);
+            const mimeType: string = child.mimeType;
+            const modificationTime: number = Date.parse(child.modifiedTime);
+            const size: number = Number(child.quotaBytesUsed);
+            const thumbnailLink: string | undefined = child.thumbnailLink;
+
+            const metadata: IGoogleDriveFileSystemMetadata | undefined = withMetadata
+              ? {
+                types,
+                name,
+                birthTime,
+                mimeType,
+                modificationTime,
+                size,
+                thumbnailLink,
               }
-            }),
-          ],
-        );
-      };
+              : void 0;
 
-      const request$ = doRequest();
-
-      return pipe$$(request$, [
-        fulfilled$$$(
-          (files: IGoogleDriveAPIFile[]): IObservable<IGoogleDriveFileSystemListFunctionNotifications> => {
-            return fromArrayN(
-              files.map((child: IGoogleDriveAPIFile): IFileSystemEntryWithMetadata<IGoogleDriveFileSystemMetadata> => {
-                // console.log(child);
-
-                const childURL: URL = new URL(`${url.protocol}${child.id}`);
-
-                const types: IFileSystemTypesSet = new Set<IFileSystemTypes>();
-                if (child.mimeType === 'application/vnd.google-apps.folder') {
-                  types.add('directory');
-                }
-                if ('thumbnailLink' in child) {
-                  types.add('file');
-                }
-
-                const name: string = child.name;
-                const birthTime: number = Date.parse(child.createdTime);
-                const mimeType: string = child.mimeType;
-                const modificationTime: number = Date.parse(child.modifiedTime);
-                const size: number = Number(child.quotaBytesUsed);
-                const thumbnailLink: string | undefined = child.thumbnailLink;
-
-                const metadata: IGoogleDriveFileSystemMetadata | null = withMetadata
-                  ? {
-                    types,
-                    name,
-                    birthTime,
-                    mimeType,
-                    modificationTime,
-                    size,
-                    thumbnailLink,
-                  }
-                  : null;
-
-                return {
-                  url: childURL,
-                  metadata,
-                };
-              }),
-            );
-          },
-        ),
-      ]);
-    });
+            return {
+              uri: serializeURI(childURI),
+              metadata,
+            };
+          });
+        });
+    }, abortable);
   };
 }

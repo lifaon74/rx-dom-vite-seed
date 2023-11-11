@@ -6,7 +6,7 @@ import {
   IFileSystemWriteFunctionNotifications,
   IFileSystemWriteOptions,
 } from '@uni-fs/core';
-import { GOOGLE_DRIVE_FILE_SYSTEM_PROTOCOLS } from '../get-protocols/google-drive-file-system.protocols.constant';
+import { GOOGLE_DRIVE_FILE_SYSTEM_SCHEMES } from '../../shared/google-drive-file-system.schemes.constant';
 
 export const googleDriveFileSystemWrite: IFileSystemWriteFunction = function googleDriveFileSystemWrite(
   url: URL,
@@ -16,7 +16,7 @@ export const googleDriveFileSystemWrite: IFileSystemWriteFunction = function goo
     truncateMode,
   }: IFileSystemWriteOptions = {},
 ): IObservable<IFileSystemWriteFunctionNotifications> {
-  return ensureURLIsSupportedAndCastToPathObservable(GOOGLE_DRIVE_FILE_SYSTEM_PROTOCOLS, url, (path: Path): IObservable<IFileSystemWriteFunctionNotifications> => {
+  return ensureURLIsSupportedAndCastToPathObservable(GOOGLE_DRIVE_FILE_SYSTEM_SCHEMES, url, (path: Path): IObservable<IFileSystemWriteFunctionNotifications> => {
     return writeFile(path, buffer, truncateMode, 0o0777, start);
   });
 };

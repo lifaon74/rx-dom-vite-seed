@@ -1,0 +1,51 @@
+:host {
+  display: block;
+  padding: 40px;
+  font-size: 0;
+
+  table {
+    tr {
+      & > th,
+      & > td {
+        text-align: center;
+        padding: 8px;
+        vertical-align: middle;
+
+        border-style: solid;
+        border-color: #ddd;
+
+        &:first-child {
+          text-align: left;
+        }
+
+        &:not(:last-child) {
+          border-right-width: 1px;
+        }
+
+        &.mat-button-type,
+        &.mat-button-color {
+          color: #333;
+          font-size: 16px;
+          line-height: 30px;
+        }
+      }
+
+      &:not(:last-child) {
+        & > th,
+        & > td {
+          border-bottom-width: 1px;
+        }
+      }
+
+      &.group-row {
+        & > th,
+        & > td {
+          text-align: center;
+          color: #666;
+          font-size: 16px;
+          line-height: 30px;
+        }
+      }
+    }
+  }
+}

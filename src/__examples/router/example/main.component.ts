@@ -7,17 +7,19 @@ import {
   map$$,
   switchMap$$,
   single,
-  timeout, IUnsubscribeOfObservable,
+  timeout,
+  IUnsubscribeOfObservable,
 } from '@lirx/core';
 import {
   compileReactiveHTMLAsComponentTemplate,
   compileStyleAsComponentStyle,
-  createComponent,
   VirtualComponentNode,
+  Component,
+  VirtualDOMNode,
 } from '@lirx/dom';
-import { MatProgressBarComponent, NODE_REFERENCE_MODIFIER } from '@lirx/dom-material';
-import { createRXRouter, IRXRouter, IRXRouterNavigationState, IRXRouterOutletElement, NAVIGATION } from '@lirx/router';
+import { MatProgressBarComponent, NodeReferenceModifier } from '@lirx/dom-material';
 import { APP_ROUTES } from './routes';
+import { LiRxRouter, createLiRxRouteList, ILiRxRouterState } from '@lirx/router';
 import { APP_ROUTES_ASYNC } from './routes-async';
 
 function createFakeProgressObservable(
@@ -39,16 +41,11 @@ function createFakeProgressObservable(
 /** COMPONENT **/
 
 interface ITemplateData {
-  readonly $routerOutletElement: IObserver<IRXRouterOutletElement>;
+  readonly $routerOutletElement: IObserver<VirtualDOMNode>;
   readonly progress$: IObservable<number>;
 }
 
-interface IAppMainComponentConfig {
-  element: HTMLElement;
-  data: ITemplateData;
-}
-
-export const AppMainComponent = createComponent<IAppMainComponentConfig>({
+export const AppMainComponent = new Component<HTMLElement, object, ITemplateData>({
   name: 'app-main',
   template: compileReactiveHTMLAsComponentTemplate({
     html: `
@@ -58,7 +55,7 @@ export const AppMainComponent = createComponent<IAppMainComponentConfig>({
       ></mat-progress-bar>
 
       <div
-        rx-router-outlet
+        router-outlet
         #ref="$.$routerOutletElement"
       ></div>
     `,
@@ -66,7 +63,7 @@ export const AppMainComponent = createComponent<IAppMainComponentConfig>({
       MatProgressBarComponent,
     ],
     modifiers: [
-      NODE_REFERENCE_MODIFIER,
+      NodeReferenceModifier,
     ],
   }),
   styles: [compileStyleAsComponentStyle(`
@@ -91,28 +88,28 @@ export const AppMainComponent = createComponent<IAppMainComponentConfig>({
       display: none;
     }
   `)],
-  init: (node: VirtualComponentNode<IAppMainComponentConfig>): ITemplateData => {
+  templateData: (node: VirtualComponentNode<HTMLElement, object>): ITemplateData => {
     // const routes = APP_ROUTES_ASYNC;
     const routes = APP_ROUTES;
 
-    const { emit: $routerOutletElement, subscribe: routerOutletElement$ } = createUnicastReplayLastSource<IRXRouterOutletElement>();
+    const { emit: $routerOutletElement, subscribe: routerOutletElement$ } = createUnicastReplayLastSource<VirtualDOMNode>();
 
-    let router: IRXRouter;
+    let router: LiRxRouter;
     let unsubscribeLoading: IUnsubscribeOfObservable;
 
-    const progress$ = switchMap$$(routerOutletElement$, (routerOutletElement: IRXRouterOutletElement): IObservable<number> => {
+    const progress$ = switchMap$$(routerOutletElement$, (routerOutletElement: VirtualDOMNode): IObservable<number> => {
       if (router !== void 0) {
         router.destroy();
       }
 
-      router = createRXRouter({
-        routes,
+      router = new LiRxRouter({
+        routes: createLiRxRouteList(routes),
         routerOutletElement,
       });
 
       router.error$($log);
 
-      const loading$ = switchMap$$(router.state$, (state: IRXRouterNavigationState) => {
+      const loading$ = switchMap$$(router.state$, (state: ILiRxRouterState) => {
         return (state === 'updating')
           ? map$$(timeout(200), () => true)
           : single(false);

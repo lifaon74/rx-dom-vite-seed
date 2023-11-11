@@ -1,0 +1,46 @@
+<mat-classic-page-layout $[breakpoint]="950">
+  <div
+    *slot="sidenav"
+    class="main-component-mat-sidenav-container-sidenav-slot"
+  >
+    <div class="header">
+    </div>
+
+    <div class="body">
+      <mat-nav-list>
+        <v-link
+          #mat-nav-list-item
+          $[to]="'/components/badge'"
+          [attr.selected]="$.isButtonSelected$$('mat-badge-page')"
+        >
+          Badge
+        </v-link>
+        <v-link
+          #mat-nav-list-item
+          $[to]="'/components/button'"
+          [attr.selected]="$.isButtonSelected$$('mat-button-page')"
+        >
+          Button
+        </v-link>
+      </mat-nav-list>
+    </div>
+
+    <div class="footer">
+
+    </div>
+  </div>
+
+  <div
+    *slot="toolbar"
+    class="main-component-mat-toolbar-container-toolbar-slot"
+  >
+
+  </div>
+
+  <rx-slot name="content">
+    <div #ref="$.$routerOutlet" router-outlet></div>
+  </rx-slot>
+
+</mat-classic-page-layout>
+
+

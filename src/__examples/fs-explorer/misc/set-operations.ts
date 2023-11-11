@@ -18,7 +18,7 @@
 // }
 
 export function setIntersection<GValue>(
-  ...sets: readonly Set<GValue>[]
+  ...sets: readonly ReadonlySet<GValue>[]
 ): Set<GValue> {
   const length: number = sets.length;
 
@@ -28,7 +28,7 @@ export function setIntersection<GValue>(
     const output: Set<GValue> = new Set<GValue>(sets[0]);
 
     for (let i = 1; i < length; i++) {
-      const set: Set<GValue> = sets[i];
+      const set: ReadonlySet<GValue> = sets[i];
       const iterator: Iterator<GValue> = output.values();
       let result: IteratorResult<GValue>;
       while (!(result = iterator.next()).done) {
@@ -64,13 +64,13 @@ export function setIntersection<GValue>(
 // }
 
 export function setUnion<GValue>(
-  ...sets: readonly Set<GValue>[]
+  ...sets: readonly ReadonlySet<GValue>[]
 ): Set<GValue> {
   const length: number = sets.length;
   const output: Set<GValue> = new Set<GValue>();
 
   for (let i = 0; i < length; i++) {
-    const set: Set<GValue> = sets[i];
+    const set: ReadonlySet<GValue> = sets[i];
     const iterator: Iterator<GValue> = set.values();
     let result: IteratorResult<GValue>;
     while (!(result = iterator.next()).done) {
@@ -99,7 +99,7 @@ export function setUnion<GValue>(
 // }
 
 export function setDifference<GValue>(
-  ...sets: readonly Set<GValue>[]
+  ...sets: readonly ReadonlySet<GValue>[]
 ): Set<GValue> {
   const length: number = sets.length;
 
@@ -109,7 +109,7 @@ export function setDifference<GValue>(
     const output: Set<GValue> = new Set<GValue>(sets[0]);
 
     for (let i = 1; i < length; i++) {
-      const set: Set<GValue> = sets[i];
+      const set: ReadonlySet<GValue> = sets[i];
       const iterator: Iterator<GValue> = set.values();
       let result: IteratorResult<GValue>;
       while (!(result = iterator.next()).done) {
@@ -148,13 +148,13 @@ export function setDifference<GValue>(
 
 
 export function setSymmetricDifference<GValue>(
-  ...sets: readonly Set<GValue>[]
+  ...sets: readonly ReadonlySet<GValue>[]
 ): Set<GValue> {
   const length: number = sets.length;
   const output: Set<GValue> = new Set<GValue>();
 
   for (let i = 0; i < length; i++) {
-    const set: Set<GValue> = sets[i];
+    const set: ReadonlySet<GValue> = sets[i];
     const iterator: Iterator<GValue> = set.values();
     let result: IteratorResult<GValue>;
     while (!(result = iterator.next()).done) {

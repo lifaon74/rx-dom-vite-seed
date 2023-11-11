@@ -1,0 +1,192 @@
+$uri-navigation-bar-height: 36px;
+$uri-navigation-bar-background-color: #232729;
+$uri-navigation-bar-color: #eee;
+$uri-navigation-bar-color--invalid: #ad5353;
+$uri-navigation-bar-horizontal-padding: 8px;
+
+$uri-navigation-bar-swap-icon-color: $uri-navigation-bar-color;
+$uri-navigation-bar-swap-icon-color--hover: #4ebddf;
+$uri-navigation-bar-swap-icon-color--focused: #5cd9ab;
+$uri-navigation-bar-swap-icon-width: 30px;
+$uri-navigation-bar-swap-icon-size: 20px;
+
+$uri-navigation-bar-part-height: 22px;
+$uri-navigation-bar-part-color: #9ca4ff;
+$uri-navigation-bar-part-color--hover: #4ebddf;
+$uri-navigation-bar-part-color--focused: #5cd9ab;
+
+:host {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: $uri-navigation-bar-height;
+  border: 1px solid #1c2021;
+  border-radius: 3px;
+  background-color: $uri-navigation-bar-background-color;
+  overflow: hidden;
+  font-size: 0;
+
+  $vertical-padding: (($uri-navigation-bar-height - $uri-navigation-bar-part-height) * 0.5);
+
+  button {
+    // reset button's style
+    background: none;
+    font-family: inherit;
+    font-size: inherit;
+    margin: 0;
+    text-transform: none;
+    border-style: none;
+    padding: 0;
+  }
+
+  & > .swap-view-icon,
+  & > .raw-uri,
+  & > .parsed-uri,
+  & > .scroll-shadows {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+  }
+
+  & > .swap-view-icon {
+    left: 0;
+    width: $uri-navigation-bar-swap-icon-width;
+    cursor: pointer;
+
+    & > svg {
+      position: absolute;
+      fill: $uri-navigation-bar-swap-icon-color;
+      width: $uri-navigation-bar-swap-icon-size;
+      height: $uri-navigation-bar-swap-icon-size;
+      top: ($uri-navigation-bar-height - $uri-navigation-bar-swap-icon-size) * 0.5;
+      left: ($uri-navigation-bar-swap-icon-width - $uri-navigation-bar-swap-icon-size) * 0.5;
+    }
+
+    &:hover {
+      & > svg {
+        fill: $uri-navigation-bar-swap-icon-color--hover;
+      }
+    }
+
+    &:focus-visible {
+      & > svg {
+        fill: $uri-navigation-bar-swap-icon-color--focused;
+      }
+    }
+  }
+
+  & > .raw-uri,
+  & > .parsed-uri,
+  & > .scroll-shadows {
+    right: 0;
+    left: $uri-navigation-bar-swap-icon-width - $uri-navigation-bar-horizontal-padding;
+  }
+
+  & > .raw-uri {
+    & > input {
+      position: absolute;
+      inset: 0;
+      background-color: transparent;
+      color: $uri-navigation-bar-color;
+      font-size: 14px;
+      border: 0;
+      padding: ($vertical-padding + 1px) $uri-navigation-bar-horizontal-padding ($vertical-padding - 1px);
+      line-height: $uri-navigation-bar-part-height;
+      text-overflow: ellipsis;
+
+      &::selection {
+        color: #185007;
+        background-color: rgb(255 255 255 / 0.9);
+      }
+    }
+  }
+
+  & > .parsed-uri {
+    overflow-x: auto;
+    //overflow-x: overlay;
+    overflow-y: hidden;
+
+    padding: $vertical-padding $uri-navigation-bar-horizontal-padding;
+    white-space: nowrap;
+    color: $uri-navigation-bar-color;
+
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;  /* Firefox */
+
+    &::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+
+    * {
+      display: contents;
+    }
+
+    button {
+      cursor: pointer;
+      color: $uri-navigation-bar-part-color;
+
+      &:hover    {
+        color: $uri-navigation-bar-part-color--hover;
+      }
+
+      &:focus-visible {
+        color: $uri-navigation-bar-part-color--focused;
+      }
+    }
+
+    button,
+    .leaf {
+      display: inline-block;
+      vertical-align: top;
+    }
+
+    .leaf {
+      height: $uri-navigation-bar-part-height;
+      font-size: 14px;
+      line-height: $uri-navigation-bar-part-height;
+      user-select: none;
+    }
+  }
+
+  & > .scroll-shadows {
+    pointer-events: none;
+
+    &::before,
+    &::after {
+      content: '';
+      display: block;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: $uri-navigation-bar-horizontal-padding * 1.1;
+      background-image: linear-gradient(90deg, rgba($uri-navigation-bar-background-color, 1) 0%, rgba($uri-navigation-bar-background-color, 0) 100%);
+    }
+
+    &::before {
+      left: 0;
+    }
+
+    &::after {
+      right: 0;
+      transform: rotate(180deg);
+    }
+  }
+
+  &:not(.valid) {
+    border-color: $uri-navigation-bar-color--invalid;
+  }
+
+  &.view-raw {
+    & > .parsed-uri {
+      display: none;
+    }
+  }
+
+  &.view-parsed {
+    & > .raw-uri {
+      display: none;
+    }
+  }
+}

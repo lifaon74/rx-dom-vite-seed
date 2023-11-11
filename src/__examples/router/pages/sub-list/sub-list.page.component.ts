@@ -1,11 +1,10 @@
-import { compileReactiveHTMLAsComponentTemplate, createComponent } from '@lirx/dom';
+import { compileReactiveHTMLAsComponentTemplate, Component } from '@lirx/dom';
 
 /** COMPONENT **/
 
-interface IAppSubListPageComponentConfig {
-}
 
-export const AppSubListPageComponent = createComponent<IAppSubListPageComponentConfig>({
+
+export const AppSubListPageComponent = new Component({
   name: 'app-sub-list-page',
   template: compileReactiveHTMLAsComponentTemplate({
     html: `

@@ -8,6 +8,6 @@ export function matOverlayExample(): void {
   // matDialogExample();
   // matSnackbarExample();
   // matFloatingExample();
-  // matMenuExample();
-  matTooltipExample();
+  matMenuExample();
+  // matTooltipExample();
 }

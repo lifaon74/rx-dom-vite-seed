@@ -2,7 +2,8 @@ import { arrayToString } from '../../../helpers/array-to-string';
 import { booleanToString } from '../../../helpers/boolean-to-string';
 import { numberToString } from '../../../helpers/number-to-string';
 import { fetchJSONGoogleAPI, IFetchGoogleAPIOptions } from '../../fetch-google-api';
-import { IGoogleDriveAPIFilesList } from './google-drive-list-files.interfaces';
+import { IGoogleDriveAPIFilesList, IGoogleDriveAPIFile } from './google-drive-list-files.interfaces';
+import { AsyncTask, IOptionalAbortableOptions, IAbortableOptions, Abortable, IAsyncTaskInput } from '@lirx/async-task';
 
 /**
  * API DOC: https://developers.google.com/drive/api/v3/reference/files/list
@@ -41,7 +42,7 @@ export type IGoogleDriveListFilesOptionsSpaceKeys =
   | 'appDataFolder'
   ;
 
-export interface IGoogleDriveListFilesOptions extends Pick<IFetchGoogleAPIOptions, 'apiKey' | 'token'> {
+export interface IGoogleDriveListFilesOptions extends Omit<IFetchGoogleAPIOptions, 'url'> {
   corpora?: IGoogleDriveListFilesOptionsCorporaKeys;
   driveId?: string;
   fields?: string;
@@ -70,7 +71,7 @@ export function googleDriveListFiles(
     supportsAllDrives,
     ...options
   }: IGoogleDriveListFilesOptions,
-): Promise<IGoogleDriveAPIFilesList> {
+): AsyncTask<IGoogleDriveAPIFilesList> {
   const url: URL = new URL('https://www.googleapis.com/drive/v3/files');
 
   if (corpora !== void 0) {
@@ -132,4 +133,48 @@ export function googleDriveListFiles(
   });
 }
 
+/*-------*/
 
+export type IGoogleDriveListAllFilesOptions = Omit<IGoogleDriveListFilesOptions, 'pageToken'>;
+
+export function googleDriveListAllFiles(
+  {
+    abortable,
+    ...options
+  }: IGoogleDriveListAllFilesOptions,
+): AsyncTask<IGoogleDriveAPIFile[]> {
+  interface IDoRequestOptions extends IAbortableOptions {
+    readonly files?: IGoogleDriveAPIFile[];
+    readonly pageToken?: string;
+  }
+
+  const doRequest = (
+    {
+      files = [],
+      pageToken,
+      abortable,
+    }: IDoRequestOptions,
+  ): AsyncTask<IGoogleDriveAPIFile[]> => {
+    return googleDriveListFiles({
+      ...options,
+      pageToken,
+      abortable,
+    })
+      .successful((data: IGoogleDriveAPIFilesList, abortable: Abortable): IAsyncTaskInput<IGoogleDriveAPIFile[]> => {
+        const _files: IGoogleDriveAPIFile[] = [...files, ...data.files];
+        if (data.nextPageToken) {
+          return doRequest({
+            files: _files,
+            pageToken: data.nextPageToken,
+            abortable,
+          });
+        } else {
+          return _files;
+        }
+      });
+  };
+
+  return doRequest({
+    abortable,
+  });
+}

@@ -1,0 +1,36 @@
+<mat-sidenav-container
+  $[opened]="$.sidenavOpened$"
+  $[mode]="$.sidenavMode$"
+  $[hasBackdrop]="$.sidenavHasBackdrop$"
+  $(userClose)="$.onUserCloseSidenav"
+>
+  <rx-slot proxy="sidenav"></rx-slot>
+
+  <mat-toolbar-container
+    *slot="content"
+    class="main-component-mat-sidenav-container-content-slot"
+  >
+    <mat-toolbar
+      *slot="toolbar"
+      class="main-component-mat-toolbar-container-toolbar-slot"
+    >
+      <button
+        #mat-icon-button
+        *if="$.menuButtonVisible$"
+        (click)="$.onClickMenuButton"
+      >
+        <rx-inject-slot name="menu-button">
+          <icon-menu></icon-menu>
+        </rx-inject-slot>
+      </button>
+
+      <rx-inject-slot name="toolbar"></rx-inject-slot>
+    </mat-toolbar>
+
+
+    <rx-slot proxy="content"></rx-slot>
+  </mat-toolbar-container>
+
+</mat-sidenav-container>
+
+

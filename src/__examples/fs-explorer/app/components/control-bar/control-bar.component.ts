@@ -1,14 +1,16 @@
+import { IUnsubscribe } from '@lirx/unsubscribe';
 import { fromEventTarget } from '@lirx/core';
-import { compileReactiveHTMLAsComponentTemplate, compileStyleAsComponentStyle, createComponent, VirtualComponentNode } from '@lirx/dom';
+import { compileReactiveHTMLAsComponentTemplate, compileStyleAsComponentStyle, VirtualComponentNode, Component } from '@lirx/dom';
 import {
   IconArrowLeftComponent,
-  IconArrowRightComponent, IconDotsVerticalComponent,
+  IconArrowRightComponent,
+  IconDotsVerticalComponent,
   IconFormatListBulletedSquareComponent,
   IconMagnifyComponent,
   IconViewGridComponent,
 } from '@lirx/mdi';
-import { MatIconButtonComponent } from '@lirx/dom-material';
-import { AppURLNavigationBarComponent } from './components/url-navigation-bar/url-navigation-bar.component';
+import { AppURINavigationBarComponent } from './components/uri-navigation-bar/uri-navigation-bar.component';
+import { MatIconButtonModifier } from '@lirx/dom-material';
 
 // @ts-ignore
 import html from './control-bar.component.html?raw';
@@ -19,60 +21,54 @@ import style from './control-bar.component.scss?inline';
  * COMPONENT: 'app-control-bar'
  */
 
-interface ITemplateData {
-
-}
-
-interface IAppControlBarComponentConfig {
-  element: HTMLElement;
-  data: ITemplateData;
-}
-
-export const AppControlBarComponent = createComponent<IAppControlBarComponentConfig>({
+export const AppControlBarComponent = new Component<HTMLElement, object, object>({
   name: 'app-control-bar',
   template: compileReactiveHTMLAsComponentTemplate({
     html,
     components: [
-      MatIconButtonComponent,
       IconArrowLeftComponent,
       IconArrowRightComponent,
       IconMagnifyComponent,
       IconFormatListBulletedSquareComponent,
       IconViewGridComponent,
       IconDotsVerticalComponent,
-      AppURLNavigationBarComponent,
+      AppURINavigationBarComponent,
+    ],
+    modifiers: [
+      MatIconButtonModifier,
     ],
   }),
   styles: [compileStyleAsComponentStyle(style)],
-  init: (node: VirtualComponentNode<IAppControlBarComponentConfig>): ITemplateData => {
+  templateData: (node: VirtualComponentNode<HTMLElement, object>): void => {
 
     // SHORTCUTS
 
-    const keyDownDocument$ = node.onConnected$(fromEventTarget<'keydown', KeyboardEvent>(document, 'keydown'));
+    node.onConnected((): IUnsubscribe => {
+      const keyDownDocument$ = fromEventTarget<'keydown', KeyboardEvent>(document, 'keydown');
 
-    keyDownDocument$((event: KeyboardEvent): void => {
-      if (event.ctrlKey && (event.key === 'f')) {
-        event.preventDefault();
-        // TODO open search
-      }
+      return keyDownDocument$((event: KeyboardEvent): void => {
+        if (event.ctrlKey && (event.key === 'f')) {
+          event.preventDefault();
+          // TODO open search
+        }
+      });
+
+      // keyDownDocument$((event: KeyboardEvent): void => {
+      //   console.log(event.key);
+      //   if (event.altKey && (event.key === 'ArrowRight')) {
+      //     event.preventDefault();
+      //     // TODO open next folder
+      //   }
+      // });
+      //
+      // keyDownDocument$((event: KeyboardEvent): void => {
+      //   if (event.altKey && (event.key === 'ArrowLeft')) {
+      //     event.preventDefault();
+      //     // TODO open previous folder
+      //   }
+      // });
     });
 
-    // keyDownDocument$((event: KeyboardEvent): void => {
-    //   console.log(event.key);
-    //   if (event.altKey && (event.key === 'ArrowRight')) {
-    //     event.preventDefault();
-    //     // TODO open next folder
-    //   }
-    // });
-    //
-    // keyDownDocument$((event: KeyboardEvent): void => {
-    //   if (event.altKey && (event.key === 'ArrowLeft')) {
-    //     event.preventDefault();
-    //     // TODO open previous folder
-    //   }
-    // });
-
-    return {};
   },
 });
 

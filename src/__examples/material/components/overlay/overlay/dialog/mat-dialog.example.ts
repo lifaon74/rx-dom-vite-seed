@@ -4,11 +4,11 @@ import {
   IMatDialogComponentCloseType,
   MatButtonModifier,
   MatDialogComponent,
-  createMatDialogFactory,
   MatFlatButtonPrimaryModifier,
   IHavingMatOverlayInput,
   createMatOverlayCloseObserver,
   matOverlayInput,
+  MatDialogFactory,
 } from '@lirx/dom-material';
 
 /*----------------------------*/
@@ -89,7 +89,7 @@ const MyModalComponent = new Component<HTMLElement, IComponentData, ITemplateDat
 // type B = IMatOverlayFactoryOpenOptionsFromData<never>;
 // type D = C<never>;
 
-const openMyModal = createMatDialogFactory(MyModalComponent, {
+const MyModalComponentFactory = new MatDialogFactory(MyModalComponent, {
   animationDuration: 150,
 });
 
@@ -101,7 +101,7 @@ export function matDialogExample(): void {
   document.body.appendChild(button);
 
   const open = () => {
-    const instance = openMyModal();
+    const instance = MyModalComponentFactory.open();
 
     instance.node.data.text.emit('Hello world!'.repeat(200));
 
