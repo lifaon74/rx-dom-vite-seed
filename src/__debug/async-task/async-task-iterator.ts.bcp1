@@ -55,15 +55,9 @@ import { noop } from '@lirx/utils';
 /*---------*/
 
 export interface IAsyncTaskGeneratorAwaitToken<GValue extends IAsyncTaskConstraint<GValue>> {
-  type: 'await';
-  factory: IAsyncTaskFactory<GValue>;
+  readonly type: 'await';
+  readonly factory: IAsyncTaskFactory<GValue>;
 }
-
-// export interface IAsyncTaskGeneratorAwaitFunction<GValue extends IAsyncTaskConstraint<GValue>> {
-//   (
-//     factory: IAsyncTaskFactory<GValue>,
-//   ): IAsyncTaskGeneratorAwaitToken<GValue>;
-// }
 
 export function AWAIT<GValue extends IAsyncTaskConstraint<GValue>>(
   factory: IAsyncTaskFactory<GValue>,
@@ -77,15 +71,9 @@ export function AWAIT<GValue extends IAsyncTaskConstraint<GValue>>(
 /*--*/
 
 export interface IAsyncTaskGeneratorYieldToken<GValue extends IAsyncTaskConstraint<GValue>> {
-  type: 'yield';
-  factory: IAsyncTaskFactory<GValue>;
+  readonly type: 'yield';
+  readonly factory: IAsyncTaskFactory<GValue>;
 }
-
-// export interface IAsyncTaskGeneratorYieldFunction<GValue extends IAsyncTaskConstraint<GValue>> {
-//   (
-//     factory: IAsyncTaskFactory<GValue>,
-//   ): IAsyncTaskGeneratorYieldToken<GValue>
-// }
 
 export function YIELD<GValue extends IAsyncTaskConstraint<GValue>>(
   factory: IAsyncTaskFactory<GValue>,
@@ -103,15 +91,15 @@ export type IAsyncTaskGeneratorValue<GValue extends IAsyncTaskConstraint<GValue>
   | IAsyncTaskGeneratorYieldToken<GValue>
   ;
 
-export type IAsyncTaskGenerator<GValue extends IAsyncTaskConstraint<GValue>> = Generator<IAsyncTaskGeneratorValue<GValue>, any, any>;
-
+export type IAsyncTaskGenerator<GValue extends IAsyncTaskConstraint<GValue>, GReturn> =
+  Generator<IAsyncTaskGeneratorValue<GValue>, GReturn, any>;
 
 /*--*/
 
-export interface IAsyncTaskIterator<GValue extends IAsyncTaskConstraint<GValue>> {
+export interface IAsyncTaskIterator<GValue extends IAsyncTaskConstraint<GValue>, GReturn> {
   next(
     abortable: Abortable,
-  ): AsyncTask<IteratorResult<GValue>>;
+  ): AsyncTask<IteratorResult<GValue, GReturn>>;
 
   // return?(value?: TReturn | PromiseLike<TReturn>): Promise<IteratorResult<T, TReturn>>;
   // throw?(e?: any): Promise<IteratorResult<T, TReturn>>;
@@ -123,16 +111,16 @@ export interface IAsyncTaskIterator<GValue extends IAsyncTaskConstraint<GValue>>
 INFO: if an async generator throws, the next promise throws, but not the following promises. The iterator is done if it throws.
  */
 
-export function createAsyncTaskIterator<GValue extends IAsyncTaskConstraint<GValue>>(
-  iterator: IAsyncTaskGenerator<GValue>,
-): IAsyncTaskIterator<GValue> {
-  let queue: AsyncTask<IteratorResult<GValue>> | undefined;
-  let pendingIteratorResult: IteratorResult<IAsyncTaskGeneratorValue<GValue>> | undefined;
+export function createAsyncTaskIterator<GValue extends IAsyncTaskConstraint<GValue>, GReturn>(
+  iterator: IAsyncTaskGenerator<GValue, GReturn>,
+): IAsyncTaskIterator<GValue, GReturn> {
+  let queue: AsyncTask<IteratorResult<GValue, GReturn>> | undefined;
+  let pendingIteratorResult: IteratorResult<IAsyncTaskGeneratorValue<GValue>, GReturn> | undefined;
 
   const processIteratorResult = (
-    result: IteratorResult<IAsyncTaskGeneratorValue<GValue>>,
+    result: IteratorResult<IAsyncTaskGeneratorValue<GValue>, GReturn>,
     abortable: Abortable,
-  ): AsyncTask<IteratorResult<GValue>> => {
+  ): AsyncTask<IteratorResult<GValue, GReturn>> => {
     if (result.done) {
       return AsyncTask.success(result, abortable);
     } else {
@@ -141,7 +129,10 @@ export function createAsyncTaskIterator<GValue extends IAsyncTaskConstraint<GVal
 
       return AsyncTask.fromFactory(factory, abortable)
         .then(
-          (value: unknown, abortable: Abortable): IteratorResult<GValue> | AsyncTask<IteratorResult<GValue>> => {
+          (
+            value: unknown,
+            abortable: Abortable,
+          ): IteratorResult<GValue, GReturn> | AsyncTask<IteratorResult<GValue, GReturn>> => {
             pendingIteratorResult = void 0;
             switch (type) {
               case 'yield':
@@ -165,7 +156,7 @@ export function createAsyncTaskIterator<GValue extends IAsyncTaskConstraint<GVal
 
   const _continue = (
     abortable: Abortable,
-  ): AsyncTask<IteratorResult<GValue>> => {
+  ): AsyncTask<IteratorResult<GValue, GReturn>> => {
     return processIteratorResult(
       (pendingIteratorResult === void 0)
         ? iterator.next()
@@ -176,14 +167,14 @@ export function createAsyncTaskIterator<GValue extends IAsyncTaskConstraint<GVal
 
   const next = (
     abortable: Abortable,
-  ): AsyncTask<IteratorResult<GValue>> => {
+  ): AsyncTask<IteratorResult<GValue, GReturn>> => {
     return queue = (
       (queue === void 0)
         ? _continue(abortable)
-        : (queue as AsyncTask<IteratorResult<GValue>>)
-          .settled((_, abortable: Abortable): AsyncTask<IteratorResult<GValue>> => {
+        : AsyncTask.switchAbortable(queue, abortable)
+          .settled((_, abortable: Abortable): AsyncTask<IteratorResult<GValue, GReturn>> => {
             return _continue(abortable);
-          }, abortable)
+          })
     );
   };
 

@@ -19,7 +19,7 @@ import {
 } from '@lirx/dom';
 import { MatProgressBarComponent, NodeReferenceModifier } from '@lirx/dom-material';
 import { APP_ROUTES } from './routes';
-import { LiRxRouter, createLiRxRouteList, ILiRxRouterState } from '@lirx/router';
+import { LiRxRouter, ILiRxRouterState, LiRxRouteList } from '@lirx/router';
 import { APP_ROUTES_ASYNC } from './routes-async';
 
 function createFakeProgressObservable(
@@ -103,7 +103,7 @@ export const AppMainComponent = new Component<HTMLElement, object, ITemplateData
       }
 
       router = new LiRxRouter({
-        routes: createLiRxRouteList(routes),
+        routes: LiRxRouteList.from(routes),
         routerOutletElement,
       });
 

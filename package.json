@@ -27,6 +27,7 @@
     "@lifaon/path": "latest",
     "@lirx/animations": "latest",
     "@lirx/async-task": "latest",
+    "@lirx/async-store": "latest",
     "@lirx/core": "latest",
     "@lirx/utils": "latest",
     "@lirx/unsubscribe": "latest",

@@ -1,0 +1,254 @@
+import { Abortable, AsyncTask, IAsyncTaskConstraint, IAsyncTaskFactory, IAsyncTaskInput } from '@lirx/async-task';
+import { noop } from '@lirx/utils';
+
+// export interface IAsyncTaskGeneratorFunction<GValue extends IAsyncTaskConstraint<GValue>, GReturn = any, GNext = unknown> {
+//   (
+//     abortable: () => Abortable,
+//   ): AsyncGenerator<AsyncTask<GValue>, GReturn, GNext>;
+// }
+
+// export interface IAsyncTaskIterator<GValue extends IAsyncTaskConstraint<GValue>, GReturn = any, GNext = unknown> {
+//   next(
+//     abortable: Abortable,
+//   ): AsyncTask<IteratorResult<GValue, GReturn>>;
+//
+//   // return?(value?: TReturn | PromiseLike<TReturn>): Promise<IteratorResult<T, TReturn>>;
+//   // throw?(e?: any): Promise<IteratorResult<T, TReturn>>;
+// }
+//
+// export interface IGetAbortableFunction {
+//   (): Abortable;
+// }
+//
+// export interface IAsyncTaskIteratorFunction<GValue extends IAsyncTaskConstraint<GValue>, GReturn = any, GNext = unknown> {
+//   (
+//     abortable: IGetAbortableFunction,
+//   ): AsyncIterator<GValue, GReturn, GNext>;
+// }
+//
+// export function abc<GValue extends IAsyncTaskConstraint<GValue>, GReturn = any, GNext = unknown>(
+//   iteratorFunction: IAsyncTaskIteratorFunction<GValue, GReturn, GNext>,
+// ): IAsyncTaskIterator<GValue, GReturn, GNext> {
+//
+//   let iterator!: AsyncIterator<GValue, GReturn, GNext>;
+//   let abortable!: Abortable;
+//
+//   const getAbortable = () => abortable;
+//
+//   const next = (
+//     _abortable: Abortable,
+//   ): AsyncTask<IteratorResult<GValue, GReturn>> => {
+//     abortable = _abortable;
+//
+//     if (iterator === void 0) {
+//       iterator = iteratorFunction(getAbortable);
+//     }
+//
+//     return iterator.next();
+//   };
+//
+//   return {
+//     next,
+//   };
+// }
+
+/*---------*/
+
+export interface IAsyncTaskGeneratorSharedToken<GType extends string> {
+  readonly type: GType;
+}
+
+export type IGenericAsyncTaskGeneratorSharedToken = IAsyncTaskGeneratorSharedToken<any>;
+
+/*---------*/
+
+export interface IAsyncTaskGeneratorAwaitToken<GValue extends IAsyncTaskConstraint<GValue>> extends IAsyncTaskGeneratorSharedToken<'await'> {
+  readonly factory: IAsyncTaskFactory<GValue>;
+}
+
+export function AWAIT<GValue extends IAsyncTaskConstraint<GValue>>(
+  factory: IAsyncTaskFactory<GValue>,
+): IAsyncTaskGeneratorAwaitToken<GValue> {
+  return {
+    type: 'await',
+    factory,
+  };
+}
+
+export function isAsyncTaskGeneratorAwaitToken<GValue extends IAsyncTaskConstraint<GValue>>(
+  input: IGenericAsyncTaskGeneratorSharedToken,
+): input is IAsyncTaskGeneratorAwaitToken<GValue> {
+  return input.type === 'await';
+}
+
+/*--*/
+
+export interface IAsyncTaskGeneratorYieldToken<GValue extends IAsyncTaskConstraint<GValue>> extends IAsyncTaskGeneratorSharedToken<'yield'> {
+  readonly factory: IAsyncTaskFactory<GValue>;
+}
+
+export function YIELD<GValue extends IAsyncTaskConstraint<GValue>>(
+  factory: IAsyncTaskFactory<GValue>,
+): IAsyncTaskGeneratorYieldToken<GValue> {
+  return {
+    type: 'yield',
+    factory,
+  };
+}
+
+export function isAsyncTaskGeneratorYieldToken<GValue extends IAsyncTaskConstraint<GValue>>(
+  input: IGenericAsyncTaskGeneratorSharedToken,
+): input is IAsyncTaskGeneratorYieldToken<GValue> {
+  return input.type === 'yield';
+}
+
+/*--*/
+
+export type IAsyncTaskGeneratorValue<GValue extends IAsyncTaskConstraint<GValue>> =
+  | IAsyncTaskGeneratorAwaitToken<any>
+  | IAsyncTaskGeneratorYieldToken<GValue>
+  ;
+
+export type IAsyncTaskGenerator<GValue extends IAsyncTaskConstraint<GValue>, GReturn, GNext> =
+  Generator<IAsyncTaskGeneratorValue<GValue>, GReturn, GNext>;
+
+/*--*/
+
+export interface IAsyncTaskIterator<GValue extends IAsyncTaskConstraint<GValue>, GReturn, GNext> {
+  next(
+    abortable: Abortable,
+  ): AsyncTask<IteratorResult<GValue, GReturn>>;
+
+  next(
+    value: GNext,
+    abortable: Abortable,
+  ): AsyncTask<IteratorResult<GValue, GReturn>>;
+
+  return(
+    value: GReturn,
+    abortable: Abortable,
+  ): AsyncTask<IteratorResult<GValue, GReturn>>;
+
+  throw(
+    error: any,
+    abortable: Abortable,
+  ): AsyncTask<IteratorResult<GValue, GReturn>>;
+}
+
+/*--*/
+
+/*
+INFO: if an async generator throws, the next promise throws, but not the following promises. The iterator is done if it throws.
+ */
+
+export function createAsyncTaskIterator<GValue extends IAsyncTaskConstraint<GValue>, GReturn, GNext>(
+  iterator: IAsyncTaskGenerator<GValue, GReturn, GNext>,
+): IAsyncTaskIterator<GValue, GReturn, GNext> {
+  let queue: AsyncTask<IteratorResult<GValue, GReturn>> | undefined;
+
+  const _iterate = (
+    iterate: (abortable: Abortable) => IteratorResult<IAsyncTaskGeneratorValue<GValue>, GReturn>,
+    abortable: Abortable,
+  ): AsyncTask<IteratorResult<GValue, GReturn>> => {
+    return AsyncTask.fromFactory<IteratorResult<IAsyncTaskGeneratorValue<GValue>, GReturn>>(iterate, abortable)
+      .successful((
+        result: IteratorResult<IAsyncTaskGeneratorValue<GValue>, GReturn>,
+        abortable: Abortable,
+      ): IAsyncTaskInput<IteratorResult<GValue, GReturn>> => {
+        if (result.done) {
+          return result;
+        } else {
+          const token: IAsyncTaskGeneratorValue<GValue> = result.value;
+
+          if (isAsyncTaskGeneratorYieldToken(token)) {
+            return AsyncTask.fromFactory(token.factory, abortable)
+              .then(
+                (
+                  value: GValue,
+                  abortable: Abortable,
+                ): IteratorResult<GValue, GReturn> => {
+                  return {
+                    done: false,
+                    value: value,
+                  };
+                },
+                (
+                  error: unknown,
+                  abortable: Abortable,
+                ): AsyncTask<IteratorResult<GValue, GReturn>> => {
+                  return _iterate(
+                    () => iterator.throw(error),
+                    abortable,
+                  );
+                },
+              );
+          } else if (isAsyncTaskGeneratorAwaitToken(token)) {
+            return AsyncTask.fromFactory(token.factory, abortable)
+              .then(
+                (
+                  value: GValue,
+                  abortable: Abortable,
+                ): AsyncTask<IteratorResult<GValue, GReturn>> => {
+                  return _iterate(
+                    () => iterator.next(value),
+                    abortable,
+                  );
+                },
+                (
+                  error: unknown,
+                  abortable: Abortable,
+                ): AsyncTask<IteratorResult<GValue, GReturn>> => {
+                  return _iterate(
+                    () => iterator.throw(error),
+                    abortable,
+                  );
+                },
+              );
+          } else {
+            return AsyncTask.error(
+              new Error(`Unknown type: ${token.type}`),
+              abortable,
+            );
+          }
+        }
+      });
+  };
+
+  const _iterateWithQueue = (
+    iterate: (abortable: Abortable) => IteratorResult<IAsyncTaskGeneratorValue<GValue>, GReturn>,
+    abortable: Abortable,
+  ): AsyncTask<IteratorResult<GValue, GReturn>> => {
+    return queue = (
+      (queue === void 0)
+        ? _iterate(iterate, abortable)
+        : AsyncTask.switchAbortable(queue, abortable)
+          .settled((_, abortable: Abortable): AsyncTask<IteratorResult<GValue, GReturn>> => {
+            return _iterate(iterate, abortable);
+          })
+    );
+  };
+
+  return {
+    next: (
+      ...args: any[]
+    ): AsyncTask<IteratorResult<GValue, GReturn>> => {
+      if (args.length === 1) {
+        return _iterateWithQueue(() => iterator.next(), args[0]);
+      } else {
+        return _iterateWithQueue(() => iterator.next(args[0]), args[1]);
+      }
+    },
+    return: (
+      value: GReturn,
+      abortable: Abortable,
+    ): AsyncTask<IteratorResult<GValue, GReturn>> => {
+      return _iterateWithQueue(() => iterator.return(value), abortable);
+    },
+    throw: (
+      error: any,
+      abortable: Abortable,
+    ): AsyncTask<IteratorResult<GValue, GReturn>> => {
+      return _iterateWithQueue(() => iterator.throw(error), abortable);
+    },
+  };
+}

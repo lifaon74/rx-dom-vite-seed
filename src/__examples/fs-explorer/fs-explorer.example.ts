@@ -7,16 +7,13 @@ import {
 } from './api/google/wrap/wrap-function-with-google-identity-service-token-loader';
 import { asyncFetchWithoutCors } from '../../helpers/get-cors-proxy-url';
 import {
-  placeFloatingOnBottomStartAndShrinkEnd,
   placeFloatingOnBest,
-  placeFloatingOnTopStartAndShrinkEnd,
   createFloatingMinSizeRelativeToContainerFromDomRect,
-  createReferenceRelativeToContainerFromDomRects,
+  createReferenceBoxRelativeToContainerFromDomRects,
   convertPlacedFloatingToCssTranslate,
   convertPlacedFloatingToCssTransformOrigin,
   convertPlacedFloatingToCssMaxSize,
-  placeFloatingOnTopEndAndShrinkStart,
-  placeFloatingOnTopStartAndPushEnd,
+  placeFloating, def, ghi, b, a,
 } from './app/components/file-list/store/floating';
 
 // export async function debugGoogleDriveFS1() {
@@ -119,60 +116,122 @@ async function debugWebDAV() {
 function debugFloatingArea() {
   document.body.style.overflow = 'auto';
 
-  const dummy = (color: string, width: number, height: number, left: number, top: number) => {
+  const dummy = (name: string, color: string, width: number, height: number, left: number, top: number) => {
     const element = document.createElement('div');
+    element.innerText = name;
     Object.assign(element.style, {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
       position: 'absolute',
       backgroundColor: color,
       width: `${width}px`,
       height: `${height}px`,
       left: `${left}px`,
       top: `${top}px`,
+      pointerEvents: 'none',
     });
     document.body.appendChild(element);
     return element;
   };
 
-  const bottom = dummy('black', 1, 1, 1, 6000);
-  const right = dummy('black', 1, 1, 6000, 1);
-  const dummyA = dummy('red', 100, 60, 400, 400);
-  const dummyB = dummy('green', 80, 50, 0, 0);
+  const bottom = dummy('bottom', 'black', 1, 1, 1, 6000);
+  const right = dummy('right', 'black', 1, 1, 6000, 1);
+  const reference = dummy('reference', 'red',100, 60, 400, 400);
+  const floating = dummy('floating', 'green', 80, 50, 0, 0);
+  const maxFloating = dummy('', 'rgba(0, 0, 0, 0.1)', 80, 50, 0, 0);
+
+  const container = document.body;
+
+  const minSize = {
+    minWidth: floating.offsetWidth,
+    minHeight: floating.offsetHeight,
+  };
 
   const update = () => {
-    const container = document.body;
-    const reference = dummyA;
-    const floating = dummyB;
     const containerRect = container.getBoundingClientRect();
     const referenceRect = reference.getBoundingClientRect();
 
-    const result = placeFloatingOnBest(
-      createReferenceRelativeToContainerFromDomRects(
-        containerRect,
-        referenceRect,
-      ),
-      createFloatingMinSizeRelativeToContainerFromDomRect(
-        containerRect,
-        {
-          minWidth: floating.offsetWidth,
-          minHeight: floating.offsetHeight,
-        },
-      ),
-      [
-        placeFloatingOnTopStartAndPushEnd,
-        // placeFloatingOnTopEndAndShrinkStart,
-        // placeFloatingOnTopStartAndShrinkEnd,
-        // placeFloatingOnBottomStartAndShrinkEnd,
-      ],
-    );
+    // top-left
+    // const a = def({
+    //   anchorPositionRelativeToReference: [0, 0], // top-left of the reference
+    //   anchorPositionRelativeToFloating: [0, 1], // bottom-left of the floating
+    // });
 
-    const maxSize = convertPlacedFloatingToCssMaxSize(result, containerRect);
-    Object.assign(floating.style, {
-      position: 'fixed',
-      translate: convertPlacedFloatingToCssTranslate(result, containerRect).join(' '),
-      transformOrigin: convertPlacedFloatingToCssTransformOrigin(result).join(' '),
-      maxWidth: maxSize[0],
-      maxHeight: maxSize[1],
+    // console.log(b(-2, [10, 3]));
+    // console.log(a(-2, [10, 3]));
+    // console.log(a(-0.5, [10, 3]));
+    const a = ghi({
+      anchorPositionRelativeToFloating: -1, // left of floating
+      anchorPositionRelativeToContainer: (1 / 5) * 2 - 1,// (1 / 5),
+      // anchorPositionRelativeToContainer: -0.5,
+      floatingMinSizeRelativeToContainer: 3 / 5,
+      // startOverflow: 'overflow',
+      startOverflow: 'push',
+      // endOverflow: 'overflow',
+      endOverflow: 'push',
     });
+    //
+    // console.log('a', a);
+
+    // const result = placeFloatingOnBest(
+    //   createReferenceBoxRelativeToContainerFromDomRects(
+    //     containerRect,
+    //     referenceRect,
+    //   ),
+    //   createFloatingMinSizeRelativeToContainerFromDomRect(
+    //     containerRect,
+    //     minSize,
+    //   ),
+    //   [
+    //     // placeFloatingOnTopLeftOverflow,
+    //     // placeFloatingOnTopLeftShrink,
+    //     // placeFloatingOnTopLeftPush,
+    //
+    //     // placeFloating('top-left-push-overflow-push-overflow'),
+    //     // placeFloating('top-left-push-overflow-overflow-overflow'),
+    //     // placeFloating('top-left-overflow-overflow-push-overflow'),
+    //     // placeFloating('top-left-overflow-overflow-overflow-overflow'),
+    //     // placeFloating('top-left-shrink-overflow-push-overflow'),
+    //     // placeFloating('top-left-shrink-overflow-overflow-overflow'),
+    //
+    //     // placeFloating('top-left-push-push-push-push'),
+    //     // placeFloating('top-left-push-overflow-push-push'),
+    //     // placeFloating('top-left-push-shrink-push-push'),
+    //     // placeFloating('top-left-push-push-push-overflow'),
+    //     // placeFloating('top-left-push-overflow-push-overflow'),
+    //     // placeFloating('top-left-push-shrink-push-overflow'),
+    //
+    //     // placeFloating('top-right-push-push-push-push'),
+    //     // placeFloating('top-center-push-push-push-push'),
+    //     placeFloating('top-center-overflow-overflow-overflow-overflow'),
+    //
+    //     // placeFloating('top-left-shrink-overflow'),
+    //     // placeFloating('top-left-push-overflow'),
+    //     // placeFloating('top-left-push-shrink'),
+    //     // placeFloating('top-left-push-push'),
+    //   ],
+    // );
+    //
+    // // console.log(result);
+    //
+    // const maxSize = convertPlacedFloatingToCssMaxSize(result, containerRect);
+    //
+    // Object.assign(floating.style, {
+    //   position: 'fixed',
+    //   translate: convertPlacedFloatingToCssTranslate(result, containerRect).join(' '),
+    //   transformOrigin: convertPlacedFloatingToCssTransformOrigin(result).join(' '),
+    //   maxWidth: maxSize[0],
+    //   maxHeight: maxSize[1],
+    // });
+    //
+    // Object.assign(maxFloating.style, {
+    //   position: 'fixed',
+    //   translate: convertPlacedFloatingToCssTranslate(result, containerRect).join(' '),
+    //   transformOrigin: convertPlacedFloatingToCssTransformOrigin(result).join(' '),
+    //   width: maxSize[0],
+    //   height: maxSize[1],
+    // });
 
     // console.log(result);
   };
@@ -180,7 +239,7 @@ function debugFloatingArea() {
   const loop = () => {
     requestAnimationFrame(() => {
       update();
-      loop();
+      // loop();
     });
   };
 
@@ -192,10 +251,10 @@ export async function fsExplorerExample() {
 
   // debugGoogleDriveFS1();
   // debugGoogleDriveFS2();
-  // debugGoogleDriveFS3();
+  debugGoogleDriveFS3();
 
   // await debugWebDAV();
-  debugFloatingArea();
+  // debugFloatingArea();
 
 }
 

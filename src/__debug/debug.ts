@@ -1,5 +1,6 @@
 import { debugAnimations } from './animations/debug-animations';
 import { debugReactiveDOMCompiler } from './aot/debug-reactive-dom-compiler';
+import { debugAsyncStore } from './async-store/debug-async-store';
 import { debugAsyncTask } from './async-task/debug-async-task';
 import { debugAnimation } from './debug-animation';
 import { debugLiRXDOM } from './debug-lirx-dom';
@@ -24,10 +25,11 @@ export function debug(): void {
   // debugObjectProxy();
   // debugObservableProxy();
   // debugAnimation();
-  debugI18n();
+  // debugI18n();
   // debugLiRXCache();
   // debugStore();
   // debugSignals();
   // debugAsyncTask();
   // debugScope();
+  debugAsyncStore();
 }

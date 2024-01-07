@@ -69,15 +69,11 @@ export interface IPositionRelativeToContainer {
   readonly topRelativeToContainer: number;
 }
 
-export interface IPositionRelativeToFloating {
-  readonly leftRelativeToFloating: number;
-  readonly topRelativeToFloating: number;
-}
-
 export interface ISizeRelativeToContainer {
   readonly widthRelativeToContainer: number;
   readonly heightRelativeToContainer: number;
 }
+
 
 export interface IMinSizeRelativeToContainer {
   readonly minWidthRelativeToContainer: number;
@@ -89,34 +85,16 @@ export interface IMaxSizeRelativeToContainer {
   readonly maxHeightRelativeToContainer: number;
 }
 
-// export interface IAnchorRelativeToFloating {
-//   readonly anchorXRelativeToFloating: number;
-//   readonly anchorYRelativeToFloating: number;
-// }
-//
-// export interface IAnchorRelativeToReference {
-//   readonly anchorXRelativeToFloating: number;
-//   readonly anchorYRelativeToFloating: number;
-// }
-//
-// export interface IAnchorRelativeToContainer {
-//   readonly anchorXRelativeToContainer: number;
-//   readonly anchorYRelativeToContainer: number;
-// }
-
-export type Vec2 = readonly [
-  x: number,
-  y: number,
-];
-
 /*--*/
 
 export interface IReferenceBoxRelativeToContainer extends IPositionRelativeToContainer, ISizeRelativeToContainer {
 }
 
-export interface IFloatingMinSizeRelativeToContainer extends IMinSizeRelativeToContainer {
+export interface IFloatingSizeRelativeToContainer extends IMinSizeRelativeToContainer {
 
 }
+
+
 
 export function createReferenceBoxRelativeToContainerFromDomRects(
   container: Pick<DOMRect, 'left' | 'top' | 'width' | 'height'>,
@@ -133,7 +111,7 @@ export function createReferenceBoxRelativeToContainerFromDomRects(
 export function createFloatingMinSizeRelativeToContainerFromDomRect(
   container: Pick<DOMRect, 'width' | 'height'>,
   minSize: { readonly minWidth: number; readonly minHeight: number; },
-): IFloatingMinSizeRelativeToContainer {
+): IFloatingSizeRelativeToContainer {
   return {
     minWidthRelativeToContainer: minSize.minWidth / container.width,
     minHeightRelativeToContainer: minSize.minHeight / container.height,
@@ -158,473 +136,34 @@ export function createFloatingMinSizeRelativeToContainerFromDomRect(
 //   };
 // }
 
-// export interface IPlacedFloating extends //
-//   // anchor position relative to the floating element
-//   IPositionRelativeToFloating,
-//   // anchor position relative to the container
-//   IPositionRelativeToContainer,
-//   IMaxSizeRelativeToContainer
-// //
-// {
-// }
-
-export interface IRelativePlacedFloating {
-  readonly floating: Vec2;
-  readonly reference: Vec2;
-  readonly container: Vec2;
+export interface IPlacedFloating extends IMaxSizeRelativeToContainer {
+  // anchor position relative to the container
+  readonly anchorXRelativeToContainer: number;
+  readonly anchorYRelativeToContainer: number;
+  // anchor position relative to the floating element
+  readonly anchorXRelativeToFloating: number;
+  readonly anchorYRelativeToFloating: number;
 }
 
-export interface IRelativePlaceFloatingFunction {
+export interface IPlaceFloatingFunction {
   (
     reference: IReferenceBoxRelativeToContainer,
-    floating: IFloatingMinSizeRelativeToContainer,
-  ): IRelativePlacedFloating;
+    floating: IFloatingSizeRelativeToContainer,
+  ): IPlacedFloating;
 }
 
-// const TOP_LEFT_RELATIVE_TO_FLOATING: IPositionRelativeToFloating = {
-//   leftRelativeToFloating: 0,
-//   topRelativeToFloating: 1,
-// };
-//
-// export function placeFloatingOnTopLeftOverflow(
-//   reference: IReferenceBoxRelativeToContainer,
-// ): IPlacedFloating {
-//   return {
-//     ...TOP_LEFT_RELATIVE_TO_FLOATING,
-//     leftRelativeToContainer: reference.leftRelativeToContainer,
-//     topRelativeToContainer: reference.topRelativeToContainer,
-//     maxWidthRelativeToContainer: Number.POSITIVE_INFINITY,
-//     maxHeightRelativeToContainer: Number.POSITIVE_INFINITY,
-//   };
-// }
-//
-// export function placeFloatingOnTopLeftShrink(
-//   reference: IReferenceBoxRelativeToContainer,
-// ): IPlacedFloating {
-//   return {
-//     ...TOP_LEFT_RELATIVE_TO_FLOATING,
-//     leftRelativeToContainer: reference.leftRelativeToContainer,
-//     topRelativeToContainer: reference.topRelativeToContainer,
-//     maxWidthRelativeToContainer: Math.max(0, 1 - reference.leftRelativeToContainer),
-//     maxHeightRelativeToContainer: Math.max(0, reference.topRelativeToContainer),
-//   };
-// }
-//
-// export function placeFloatingOnTopLeftPush(
-//   reference: IReferenceBoxRelativeToContainer,
-//   floating: IFloatingMinSizeRelativeToContainer,
-// ): IPlacedFloating {
-//
-//   let leftRelativeToContainer: number;
-//   let maxWidthRelativeToContainer: number = Math.max(0, 1 - reference.leftRelativeToContainer);
-//
-//   if (maxWidthRelativeToContainer >= floating.minWidthRelativeToContainer) {
-//     leftRelativeToContainer = Math.max(0, reference.leftRelativeToContainer);
-//   } else {
-//     // not enough available width
-//     leftRelativeToContainer = Math.max(0, 1 - floating.minWidthRelativeToContainer);
-//     maxWidthRelativeToContainer = Math.min(1, floating.minWidthRelativeToContainer);
-//   }
-//
-//   return {
-//     ...TOP_LEFT_RELATIVE_TO_FLOATING,
-//     leftRelativeToContainer,
-//     topRelativeToContainer: reference.topRelativeToContainer,
-//     maxWidthRelativeToContainer,
-//     maxHeightRelativeToContainer: Number.POSITIVE_INFINITY,
-//   };
-// }
-
-export type IPlacementHorizontal = 'left' | 'center' | 'right';
-export type IPlacementVertical = 'top' | 'center' | 'bottom';
-
-export type IPlacementMain = 'left' | 'right' | 'top' | 'bottom';
-
-// export type IPlacementLeft = `left-${IPlacementVertical}`;
-// export type IPlacementRight = `right-${IPlacementVertical}`;
-// export type IPlacementTop = `top-${IPlacementHorizontal}`;
-// export type IPlacementBottom = `bottom-${IPlacementHorizontal}`;
-//
-// export type IPlacement = IPlacementLeft | IPlacementRight | IPlacementTop | IPlacementBottom;
-
-export type IOverflowPush = 'push';
-export type IOverflowOverflow = 'overflow';
-export type IOverflowShrink = 'shrink';
-
-export type IOverflowPushOverflow = IOverflowPush | IOverflowOverflow;
-export type IOverflowPushOverflowShrink = IOverflowPushOverflow | IOverflowShrink;
-
-// export type IOverflowVerticalHorizontal =  `${IOverflowBase}-${IOverflowBase}`;
-// export type IOverflowTopRightBottomLeft =  `${IOverflowBase}-${IOverflowBase}-${IOverflowBase}-${IOverflowBase}`;
-// export type IOverflow =  IOverflowBase | IOverflowVerticalHorizontal | IOverflowTopRightBottomLeft;
-
-// export type IPlacementWithOverflow = `${IPlacement}-${IOverflow}`;
-export type IPlacementWithOverflow =
-// | `top-left-${IOverflowPushOverflow}`
-// | `top-left-${IOverflowPushOverflow}-${IOverflowPushOverflow}`
-  | `top-left-${IOverflowPushOverflowShrink}-${IOverflowPushOverflowShrink}-${IOverflowPushOverflow}-${IOverflowPushOverflow}`
-  // | `top-right-${IOverflowPushOverflow}`
-  // | `top-right-${IOverflowPushOverflow}-${IOverflowPushOverflow}`
-  | `top-right-${IOverflowPushOverflowShrink}-${IOverflowPushOverflow}-${IOverflowPushOverflow}-${IOverflowPushOverflowShrink}`
-  | `top-center-${IOverflowPushOverflowShrink}-${IOverflowPushOverflow}-${IOverflowPushOverflow}-${IOverflowPushOverflowShrink}`
-  ;
-
-export function abc(
-  referencePositionRelativeToContainer: Vec2,
-  referenceSizeRelativeToContainer: Vec2,
-  floatingMinSizeSizeRelativeToContainer: Vec2,
-) {
-
-}
-
-// export interface IDefOptions {
-//   readonly anchorPositionRelativeToReference: Vec2;
-//   readonly anchorPositionRelativeToFloating: Vec2;
-//
-//   readonly topOverflow: IOverflowPushOverflowShrink;
-//   readonly rightOverflow: IOverflowPushOverflowShrink;
-//   readonly bottomOverflow: IOverflowPushOverflowShrink;
-//   readonly leftOverflow: IOverflowPushOverflowShrink;
-// }
-//
-// export function def(
-//   {
-//     anchorPositionRelativeToReference,
-//     anchorPositionRelativeToFloating,
-//   }: IDefOptions,
-//   // anchorPositionRelativeToContainer: Vec2,
-//   // referenceSizeRelativeToContainer: Vec2,
-//   // floatingMinSizeSizeRelativeToContainer: Vec2,
-// ) {
-//
-// }
-
-export interface IDefOptions {
-  readonly anchorPositionRelativeToFloating: Vec2;
-  readonly anchorPositionRelativeToContainer: Vec2;
-  readonly floatingMinSizeSizeRelativeToContainer: Vec2;
-
-  readonly leftOverflow: IOverflowPushOverflowShrink;
-  readonly rightOverflow: IOverflowPushOverflowShrink;
-  readonly topOverflow: IOverflowPushOverflowShrink;
-  readonly bottomOverflow: IOverflowPushOverflowShrink;
-}
-
-export function def(
-  {
-    anchorPositionRelativeToFloating,
-    anchorPositionRelativeToContainer,
-    floatingMinSizeSizeRelativeToContainer,
-    topOverflow,
-    rightOverflow,
-    bottomOverflow,
-    leftOverflow,
-  }: IDefOptions,
-  // anchorPositionRelativeToContainer: Vec2,
-  // referenceSizeRelativeToContainer: Vec2,
-  // floatingMinSizeSizeRelativeToContainer: Vec2,
-) {
-  let anchorXPositionRelativeToContainer: number;
-  let anchorYPositionRelativeToContainer: number;
-  let floatingMaxWidthRelativeToContainer: number;
-  let floatingMaxHeightRelativeToContainer: number;
-
-  if (leftOverflow === 'overflow') {
-    if (rightOverflow === 'overflow') {
-      floatingMaxWidthRelativeToContainer = Number.POSITIVE_INFINITY;
-      anchorXPositionRelativeToContainer = anchorPositionRelativeToContainer[0];
-    } else if (rightOverflow === 'shrink') {
-
-    }
-  }
-
-  console.log(
-    anchorXPositionRelativeToContainer,
-    floatingMaxWidthRelativeToContainer,
-  );
-
-}
-
-export function b(
-  anchorPositionRelativeToFloating: number,
-  [availableStart, availableEnd]: Vec2,
-): number {
-  return Math.min(
-    availableStart,
-    (
-      (anchorPositionRelativeToFloating === 1)
-      || !Number.isFinite(availableEnd)
-    )
-      ? Number.POSITIVE_INFINITY
-      : (availableEnd * (1 + anchorPositionRelativeToFloating)) / (1 - anchorPositionRelativeToFloating),
-  );
-}
-
-export function a(
-  anchorPositionRelativeToFloating: number,
-  [availableStart, availableEnd]: Vec2,
-): Vec2 {
-  return [
-    b(anchorPositionRelativeToFloating, [availableStart, availableEnd]),
-    b(-anchorPositionRelativeToFloating, [availableEnd, availableStart]),
-  ];
-}
-
-export interface IGhiOptions {
-  readonly anchorPositionRelativeToFloating: number;
-  readonly anchorPositionRelativeToContainer: number;
-  readonly floatingMinSizeRelativeToContainer: number;
-
-  readonly startOverflow: IOverflowPushOverflow;
-  readonly endOverflow: IOverflowPushOverflow;
-}
-
-// TODO continue here
-export function ghi(
-  {
-    anchorPositionRelativeToFloating,
-    anchorPositionRelativeToContainer,
-    floatingMinSizeRelativeToContainer,
-    startOverflow,
-    endOverflow,
-  }: IGhiOptions,
-) {
-  let floatingMaxSizeRelativeToContainer: number;
-
-  const startLimit: number = (startOverflow === 'overflow')
-    ? Number.NEGATIVE_INFINITY
-    : -1;
-  const endLimit: number = (endOverflow === 'overflow')
-    ? Number.POSITIVE_INFINITY
-    : 1;
-
-  const availableStart: number = anchorPositionRelativeToContainer - startLimit;
-  const availableEnd: number = endLimit - anchorPositionRelativeToContainer;
-
-  // relative to container with anchor as starting point
-  const [balancedAvailableStart, balancedAvailableEnd] = a(
-    anchorPositionRelativeToFloating,
-    [
-      availableStart,
-      availableEnd,
-    ],
-  );
-
-  console.log(balancedAvailableStart, balancedAvailableEnd);
-
-  if (startOverflow === 'overflow') {
-    if (endOverflow === 'overflow') {
-      floatingMaxSizeRelativeToContainer = Number.POSITIVE_INFINITY;
-    } else if (endOverflow === 'push') {
-
-    }
-  } else if (startOverflow === 'push') {
-
-    if (balancedAvailableStart + balancedAvailableEnd < floatingMinSizeRelativeToContainer) { // need to push
-
-    }
-
-    // anchorPositionRelativeToContainer = Math.min(
-    //   Math.max(
-    //     reference.leftRelativeToContainer + (reference.widthRelativeToContainer * leftRelativeToFloating),
-    //     floating.minWidthRelativeToContainer * leftRelativeToFloating,
-    //   ),
-    //   floating.minWidthRelativeToContainer * (leftRelativeToFloating - 1) + 1,
-    // );
-  }
-
-
-  console.log(
-    anchorPositionRelativeToContainer,
-    floatingMaxSizeRelativeToContainer,
-  );
-
-  // console.log(
-  //   anchorPositionRelativeToContainer,
-  //   floatingMaxSizeRelativeToContainer,
-  // );
-
-}
-
-export function placeFloating(
-  placement: IPlacementWithOverflow,
-): IPlaceFloatingFunction {
-
-  const [mainPlacement, crossPlacement, ...overflows] = placement.split('-') as [IPlacementMain, IPlacementHorizontal | IPlacementVertical, ...IOverflowBase[]];
-
-  let topOverflow: IOverflowPushOverflowShrink;
-  let rightOverflow: IOverflowPushOverflowShrink;
-  let bottomOverflow: IOverflowPushOverflowShrink;
-  let leftOverflow: IOverflowPushOverflowShrink;
-
-  if (overflows.length === 1) {
-    topOverflow = rightOverflow = bottomOverflow = leftOverflow = overflows[0];
-  } else if (overflows.length === 2) {
-    topOverflow = bottomOverflow = overflows[0];
-    rightOverflow = leftOverflow = overflows[1];
-  } else if (overflows.length === 4) {
-    topOverflow = overflows[0];
-    rightOverflow = overflows[1];
-    bottomOverflow = overflows[2];
-    leftOverflow = overflows[3];
-  } else {
-    throw new Error(`Invalid overflows`);
-  }
-
-  const invalidOverflow = (name: string): never => {
-    throw new Error(`Invalid overflow value in "${placement}" for ${name}`);
-  };
-
-  return (
-    reference: IReferenceBoxRelativeToContainer,
-    floating: IFloatingMinSizeRelativeToContainer,
-  ): IPlacedFloating => {
-    let leftRelativeToFloating!: number;
-    let topRelativeToFloating: number;
-    let leftRelativeToReference: number; // TODO
-    let topRelativeToReference: number;
-    let leftRelativeToContainer: number;
-    let topRelativeToContainer: number;
-    let maxWidthRelativeToContainer: number;
-    let maxHeightRelativeToContainer: number;
-
-    if (mainPlacement === 'top') {
-      topRelativeToFloating = 1;
-
-      if (crossPlacement === 'left') {
-        leftRelativeToFloating = 0;
-      }
-
-      if (crossPlacement === 'right') {
-        leftRelativeToFloating = 1;
-      }
-
-      if (crossPlacement === 'center') {
-        leftRelativeToFloating = 0.5;
-        // leftRelativeToFloating = -1;
-        // leftRelativeToFloating = 0;
-      }
-
-      // vertical
-      if (topOverflow === 'push') {
-        if (bottomOverflow === 'push') {
-          topRelativeToContainer = Math.min(Math.max(reference.topRelativeToContainer, floating.minHeightRelativeToContainer), 1);
-          maxHeightRelativeToContainer = topRelativeToContainer;
-        } else if (bottomOverflow === 'overflow') {
-          topRelativeToContainer = Math.max(reference.topRelativeToContainer, floating.minHeightRelativeToContainer);
-          maxHeightRelativeToContainer = Number.POSITIVE_INFINITY;
-        } else {
-          invalidOverflow('bottom');
-        }
-      } else if (topOverflow === 'overflow') {
-        if (bottomOverflow === 'push') {
-          topRelativeToContainer = Math.min(reference.topRelativeToContainer, 1);
-          maxHeightRelativeToContainer = Number.POSITIVE_INFINITY;
-        } else if (bottomOverflow === 'overflow') {
-          topRelativeToContainer = reference.topRelativeToContainer;
-          maxHeightRelativeToContainer = Number.POSITIVE_INFINITY;
-        } else {
-          invalidOverflow('bottom');
-        }
-      } else if (topOverflow === 'shrink') {
-        if (bottomOverflow === 'push') {
-          topRelativeToContainer = Math.min(reference.topRelativeToContainer, 1);
-          maxHeightRelativeToContainer = topRelativeToContainer;
-        } else if (bottomOverflow === 'overflow') {
-          topRelativeToContainer = reference.topRelativeToContainer;
-          maxHeightRelativeToContainer = topRelativeToContainer;
-        } else {
-          invalidOverflow('bottom');
-        }
-      } else {
-        invalidOverflow('top');
-      }
-
-      // horizontal
-      if (leftOverflow === 'push') {
-        if (rightOverflow === 'push') {
-          // left
-          // leftRelativeToContainer = Math.min(Math.max(reference.leftRelativeToContainer, 0), 1 - floating.minWidthRelativeToContainer);
-          // maxWidthRelativeToContainer = 1 - leftRelativeToContainer;
-
-          // right
-          // leftRelativeToContainer = Math.min(Math.max(reference.leftRelativeToContainer + reference.widthRelativeToContainer, floating.minWidthRelativeToContainer), 1);
-          // maxWidthRelativeToContainer = leftRelativeToContainer;
-
-          leftRelativeToContainer = Math.min(
-            Math.max(
-              reference.leftRelativeToContainer + (reference.widthRelativeToContainer * leftRelativeToFloating),
-              floating.minWidthRelativeToContainer * leftRelativeToFloating,
-            ),
-            floating.minWidthRelativeToContainer * (leftRelativeToFloating - 1) + 1,
-          );
-
-          const availableLeft: number = leftRelativeToContainer;
-          const availableRight: number = (1 - leftRelativeToContainer);
-
-          const virtualLeft: number = (leftRelativeToFloating === 1)
-            ? Number.POSITIVE_INFINITY
-            : (availableRight * leftRelativeToFloating) / (1 - leftRelativeToFloating);
-
-          const virtualRight: number = (leftRelativeToFloating === 0)
-            ? Number.POSITIVE_INFINITY
-            : (availableLeft * (1 - leftRelativeToFloating)) / leftRelativeToFloating;
-
-          console.log(virtualLeft, virtualRight);
-
-          maxWidthRelativeToContainer = Math.min(virtualLeft, availableLeft)
-            + Math.min(virtualRight, availableRight);
-
-        } else if (rightOverflow === 'overflow') {
-          leftRelativeToContainer = Math.max(reference.leftRelativeToContainer, 0);
-          maxWidthRelativeToContainer = Number.POSITIVE_INFINITY;
-        } else if (rightOverflow === 'shrink') {
-          leftRelativeToContainer = Math.min(Math.max(reference.leftRelativeToContainer, 0), 1);
-          maxWidthRelativeToContainer = 1 - leftRelativeToContainer;
-        } else {
-          invalidOverflow('right');
-        }
-      } else if (leftOverflow === 'overflow') {
-        if (rightOverflow === 'push') {
-          leftRelativeToContainer = Math.min(reference.leftRelativeToContainer, 1 - floating.minWidthRelativeToContainer);
-          maxWidthRelativeToContainer = 1 - leftRelativeToContainer;
-        } else if (rightOverflow === 'overflow') {
-          leftRelativeToContainer = reference.leftRelativeToContainer;
-          maxWidthRelativeToContainer = Number.POSITIVE_INFINITY;
-        } else if (rightOverflow === 'shrink') {
-          leftRelativeToContainer = Math.min(reference.leftRelativeToContainer, 1);
-          maxWidthRelativeToContainer = 1 - leftRelativeToContainer;
-        } else {
-          invalidOverflow('right');
-        }
-      } else {
-        invalidOverflow('left');
-      }
-    }
-
-    return {
-      leftRelativeToFloating,
-      topRelativeToFloating,
-      leftRelativeToContainer,
-      topRelativeToContainer,
-      maxWidthRelativeToContainer,
-      maxHeightRelativeToContainer,
-    };
+export function placeFloatingOnTopLeftOverflow(
+  reference: IReferenceBoxRelativeToContainer,
+): IPlacedFloating {
+  return {
+    anchorXRelativeToContainer: reference.leftRelativeToContainer,
+    anchorYRelativeToContainer: reference.topRelativeToContainer,
+    anchorXRelativeToFloating: 0,
+    anchorYRelativeToFloating: 1,
+    maxWidthRelativeToContainer: Number.POSITIVE_INFINITY,
+    maxHeightRelativeToContainer: Number.POSITIVE_INFINITY,
   };
 }
-
-// export function placeFloatingOnTopLeftPushShrink(
-//   reference: IReferenceBoxRelativeToContainer,
-// ): IPlacedFloating {
-//   return {
-//     anchorXRelativeToContainer: normalize(reference.leftRelativeToContainer),
-//     anchorYRelativeToContainer: reference.topRelativeToContainer,
-//     anchorXRelativeToFloating: 0,
-//     anchorYRelativeToFloating: 1,
-//     maxWidthRelativeToContainer: Number.POSITIVE_INFINITY,
-//     maxHeightRelativeToContainer: Number.POSITIVE_INFINITY,
-//   };
-// }
 
 // export function placeFloatingOnTopLeftShrink(
 //   reference: IReferenceBoxRelativeToContainer,
@@ -673,10 +212,10 @@ export function placeFloating(
 
 /*--*/
 
-// export interface IAvailableSizeRelativeToContainer {
-//   readonly availableXRelativeToContainer: number;
-//   readonly availableYRelativeToContainer: number;
-// }
+export interface IAvailableSizeRelativeToContainer {
+  readonly availableXRelativeToContainer: number;
+  readonly availableYRelativeToContainer: number;
+}
 
 // export function getPlacedFloatingAvailableSizeRelativeToContainer(
 //   placedFloating: IPlacedFloating,
@@ -695,45 +234,46 @@ export function placeFloating(
 
 /*--*/
 
-export function getPlacedFloatingScore(
-  placeFloating: Pick<IPlacedFloating, 'maxWidthRelativeToContainer' | 'maxHeightRelativeToContainer'>,
+export function getScoreFromAvailableSizeAndMinSize(
+  availableSize: IAvailableSizeRelativeToContainer,
   minSize: IMinSizeRelativeToContainer,
 ): number {
-  return normalize(placeFloating.maxWidthRelativeToContainer / minSize.minWidthRelativeToContainer)
-    * normalize(placeFloating.maxHeightRelativeToContainer / minSize.minHeightRelativeToContainer);
+  return normalize(availableSize.availableXRelativeToContainer / minSize.minWidthRelativeToContainer)
+    * normalize(availableSize.availableYRelativeToContainer / minSize.minHeightRelativeToContainer);
 }
 
 /*--*/
 
-export interface IPlacedFloatingOnBestResult extends IPlacedFloating {
+export interface IPlacedFloatingOnBestResult extends IPlacedFloating, IAvailableSizeRelativeToContainer {
   readonly score: number;
   readonly index: number;
 }
 
 export function placeFloatingOnBest(
   reference: IReferenceBoxRelativeToContainer,
-  floating: IFloatingMinSizeRelativeToContainer,
+  floating: IFloatingSizeRelativeToContainer,
   placeFloatingFunctions: readonly IPlaceFloatingFunction[],
 ): IPlacedFloatingOnBestResult {
   let bestPlacedFloating: IPlacedFloatingOnBestResult = {
-    leftRelativeToContainer: 0,
-    topRelativeToContainer: 0,
-    leftRelativeToFloating: 0,
-    topRelativeToFloating: 0,
-    maxWidthRelativeToContainer: 0,
-    maxHeightRelativeToContainer: 0,
-
+    anchorXRelativeToContainer: 0,
+    anchorYRelativeToContainer: 0,
+    anchorXRelativeToFloating: 0,
+    anchorYRelativeToFloating: 0,
+    availableXRelativeToContainer: 0,
+    availableYRelativeToContainer: 0,
     score: -1,
     index: -1,
   };
 
   for (let index = 0, length = placeFloatingFunctions.length; index < length; index++) {
     const placedFloating: IPlacedFloating = placeFloatingFunctions[index](reference, floating);
-    const score: number = getPlacedFloatingScore(placedFloating, floating);
+    const availableSize: IAvailableSizeRelativeToContainer = getPlacedFloatingAvailableSizeRelativeToContainer(placedFloating);
+    const score: number = getScoreFromAvailableSizeAndMinSize(availableSize, floating);
 
     if (score === 1) {
       return {
         ...placedFloating,
+        ...availableSize,
         score,
         index,
       };
@@ -741,6 +281,7 @@ export function placeFloatingOnBest(
       if (score > bestPlacedFloating.score) {
         bestPlacedFloating = {
           ...placedFloating,
+          ...availableSize,
           score,
           index,
         };
@@ -758,9 +299,8 @@ export function convertPlacedFloatingToCssTranslate(
   container: Pick<DOMRect, 'width' | 'height'>,
 ): [string, string] {
   return [
-    `calc(${placedFloating.leftRelativeToContainer * container.width}px - ${placedFloating.leftRelativeToFloating * 100}%)`,
-    // `${placedFloating.leftRelativeToContainer * container.width}px`,
-    `calc(${placedFloating.topRelativeToContainer * container.height}px - ${placedFloating.topRelativeToFloating * 100}%)`,
+    `calc(${placedFloating.anchorXRelativeToContainer * container.width}px - ${placedFloating.anchorXRelativeToFloating * 100}%)`,
+    `calc(${placedFloating.anchorYRelativeToContainer * container.height}px - ${placedFloating.anchorYRelativeToFloating * 100}%)`,
   ];
 }
 
@@ -768,22 +308,18 @@ export function convertPlacedFloatingToCssTransformOrigin(
   placedFloating: IPlacedFloating,
 ): [string, string] {
   return [
-    `${placedFloating.leftRelativeToFloating * 100}%`,
-    `${placedFloating.topRelativeToFloating * 100}%`,
+    `${placedFloating.anchorXRelativeToFloating * 100}%`,
+    `${placedFloating.anchorYRelativeToFloating * 100}%`,
   ];
 }
 
 export function convertPlacedFloatingToCssMaxSize(
-  maxSize: IMaxSizeRelativeToContainer,
+  availableSize: IAvailableSizeRelativeToContainer,
   container: Pick<DOMRect, 'width' | 'height'>,
 ): [string, string] {
   return [
-    Number.isFinite(maxSize.maxWidthRelativeToContainer)
-      ? `${maxSize.maxWidthRelativeToContainer * container.width}px`
-      : 'none',
-    Number.isFinite(maxSize.maxHeightRelativeToContainer)
-      ? `${maxSize.maxHeightRelativeToContainer * container.height}px`
-      : 'none',
+    `${availableSize.availableXRelativeToContainer * container.width}px`,
+    `${availableSize.availableYRelativeToContainer * container.height}px`,
   ];
 }
 

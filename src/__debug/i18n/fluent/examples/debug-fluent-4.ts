@@ -1,5 +1,5 @@
 import {
-  $log,
+  $log, computed,
   debounceMicrotaskObservable,
   fromPromiseFactory,
   interval,
@@ -12,6 +12,7 @@ import {
 } from '@lirx/core';
 import { ObservableDateTimeFormat } from '../../intl/date-time/observable/observable-date-time-format.class';
 import { LOCALES } from '../../intl/locale/locales.constants';
+import { NumberFormat } from '../../intl/number/number-format.class';
 import {
   createObservableTranslationsLoader,
   IIterableOfObservableTranslationsEntryModule,
@@ -124,6 +125,28 @@ function debugFluentTranslations4(): void {
   });
 
   timeElapsedTranslation$($log);
+}
+
+// RAW EXAMPLE
+function debugFluentTranslations5(): void {
+  const translations =  new Translations([
+    ['key.a', () => 'Hello world !'],
+  ]);
+
+  const a = signal(5);
+
+  const translated = computed(() => {
+    return translations.translate('key-to-translate', {
+      a: a(),
+    }, {
+      'numberFormat': new NumberFormat().format,
+    });
+  });
+  // translations.translate('key-to-translate', {
+  //
+  // }, {
+  //   'numberFormat': new NumberFormat().format,
+  // });
 }
 
 /*----*/
